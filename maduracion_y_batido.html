@@ -91,7 +91,7 @@
             line-height: 1.45;
         }
 
-        /* Selector de las 4 Etapas del Batido (Figura 10) */
+        /* Selector de las 4 Etapas del Batido */
         .stage-tabs {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -313,7 +313,7 @@
 <div class="app-container">
     <div class="top-bar">
         <a href="index.html" class="back-btn">⬅ Volver al Menú Principal</a>
-        <span class="badge">CECYBOOK SEMANA 15 • PÁGINAS 11 A 16 (FIGURAS 9, 10, 11 Y 14)</span>
+        <span class="badge">CECYBOOK SEMANA 15</span>
     </div>
 
     <header>
@@ -323,7 +323,7 @@
         </p>
     </header>
 
-    <!-- Selector de las 4 Etapas del Batido (Figura 10, Pág. 12) -->
+    <!-- Selector de las 4 Etapas del Batido -->
     <div class="stage-tabs">
         <button id="st-1" class="stage-btn active" onclick="setChurnProgress(12)">
             <strong>1️⃣ Inicio (0–25%)</strong>
@@ -346,7 +346,7 @@
     <div class="dashboard">
         <!-- Panel Izquierdo de Controles -->
         <div class="controls-panel">
-            <div class="panel-title">🌡️ 1. Maduración Física de la Crema (Figura 11)</div>
+            <div class="panel-title">🌡️ 1. Maduración Física de la Crema</div>
             <div class="temp-presets">
                 <button id="tbtn-cold" class="t-btn" onclick="setCreamTemp(4)">❄️ Muy Fría<br>(4 °C)</button>
                 <button id="tbtn-opt" class="t-btn active-opt" onclick="setCreamTemp(12)">✅ Equilibrada<br>(8–15 °C)</button>
@@ -421,7 +421,7 @@
         </div>
     </div>
 
-    <!-- Tarjetas Inferiores de Interpretación Tecnológica (Págs. 11 a 16) -->
+    <!-- Tarjetas Inferiores de Interpretación Tecnológica -->
     <div class="bottom-grid">
         <div class="info-card">
             <h3>👁️ ¿Qué se observa en esta etapa?</h3>
@@ -519,7 +519,7 @@ function updateUI() {
     const kTex = document.getElementById('kpi-tex');
     const alertBox = document.getElementById('maturation-alert');
 
-    // Evaluación de la Maduración Física según Figura 11 (Pág. 13)
+    // Evaluación de la Maduración Física
     if (creamTemp < 8) {
         kCryst.innerText = 'Exceso Sólida (Rígida)';
         kTime.innerText = '> 55 min (Muy lento)';
@@ -555,7 +555,7 @@ function updateUI() {
         `;
     }
 
-    // Textos de las 4 etapas de la Figura 10 (Pág. 12)
+    // Textos de las 4 etapas
     const hudS = document.getElementById('hud-stage');
     const hudP = document.getElementById('hud-phase');
     const obs = document.getElementById('obs-text');

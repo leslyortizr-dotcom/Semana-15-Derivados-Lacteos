@@ -224,7 +224,7 @@
 <div class="app-container">
     <div class="top-bar">
         <a href="index.html" class="back-btn">⬅ Volver al Menú Principal</a>
-        <span class="badge">CECYBOOK SEMANA 15 • PÁGINAS 26 A 29 (TABLAS 3 Y 4)</span>
+        <span class="badge">CECYBOOK SEMANA 15 </span>
     </div>
 
     <header>
@@ -236,11 +236,11 @@
 
     <div class="mode-tabs">
         <button id="m-defects" class="tab-btn active" onclick="switchMode('defects')">
-            <strong>🛠️ 1. Diagnóstico de Defectos de Proceso (Tabla 3)</strong>
+            <strong>🛠️ 1. Diagnóstico de Defectos de Proceso </strong>
             <span>Secuencia lógica: Dato observado ➔ Hipótesis / Causa ➔ Etapa ➔ Decisión</span>
         </button>
         <button id="m-micro" class="tab-btn" onclick="switchMode('micro')">
-            <strong>🦠 2. Auditoría Microbiológica NOM-243-SSA1-2010 (Tabla 4)</strong>
+            <strong>🦠 2. Auditoría Microbiológica NOM-243-SSA1-2010 </strong>
             <span>Dictamen sanitario para Crema, Mantequilla, Helados y Bases</span>
         </button>
     </div>
@@ -252,7 +252,7 @@
 let currentMode = 'defects';
 let selectedCase = 0;
 
-// Casos de la Tabla 3 (Pág. 27) y Salida Rápida (Pág. 30)
+// Casos y Salida Rápida
 const DEFECT_CASES = [
     {
         prod: 'CREMA',
@@ -319,7 +319,7 @@ const DEFECT_CASES = [
     }
 ];
 
-// Variables para el simulador microbiológico NOM-243 (Tabla 4, Págs. 28-29)
+// Variables para el simulador microbiológico NOM-243 
 let microProd = 'butter_cream'; // 'butter_cream', 'icecream', 'mix_base'
 let coliformes = 5;
 let staph = 20;
@@ -432,13 +432,13 @@ function renderDashboard() {
             </div>
 
             <div class="right-panel">
-                <div class="panel-title">📋 Dictamen Sanitario Oficial (NOM-243-SSA1-2010, Tabla 4)</div>
+                <div class="panel-title">📋 Dictamen Sanitario Oficial (NOM-243-SSA1-2010)</div>
                 <div id="micro-verdict" class="verdict-banner"></div>
                 <table class="norm-table" id="micro-table"></table>
                 <div class="step-box" style="border-left-color:#fcd34d;">
-                    <h4>💡 Nota Normativa Clave del CECYBOOK (Págs. 15, 28 y 29)</h4>
+                    <h4>💡 Nota Normativa Clave del CECYBOOK </h4>
                     • <strong>Una buena composición (ej. 82% de grasa en mantequilla) NO sustituye el cumplimiento sanitario:</strong> Si excede coliformes o presenta patógenos, el lote debe retenerse.<br>
-                    • <strong>Precisión normativa:</strong> La NOM-243-SSA1-2010 exige ausencia de <em>Listeria monocytogenes</em> en helados/sorbetes/bases, pero en su Tabla 5 para mantequilla no establece un límite específico para <em>Listeria</em> (no deben trasladarse ni inventarse límites entre productos distintos).
+                    • <strong>Precisión normativa:</strong> La NOM-243-SSA1-2010 exige ausencia de <em>Listeria monocytogenes</em> en helados/sorbetes/bases, para mantequilla no establece un límite específico para <em>Listeria</em> (no deben trasladarse ni inventarse límites entre productos distintos).
                 </div>
             </div>
         `;
@@ -473,7 +473,7 @@ function updateMicroVerdict() {
             <tr><td>Coliformes totales</td><td>${coliformes} UFC/g</td><td>&lt; 10 UFC/g o mL</td><td>${okCol ? '✅ Cumple' : '❌ Excede'}</td></tr>
             <tr><td>Staphylococcus aureus</td><td>${staph} UFC/g</td><td>&lt; 100 UFC/g o mL</td><td>${okSta ? '✅ Cumple' : '❌ Excede'}</td></tr>
             <tr><td>Salmonella spp.</td><td>${salmonella}</td><td>Ausente en 25 g o mL</td><td>${okSal ? '✅ Cumple' : '❌ Rechazo'}</td></tr>
-            <tr><td>Fosfatasa residual</td><td>${fosfatasa} UF/g</td><td>Máx. 4 UF/g (Tabla 3)</td><td>${okFos ? '✅ Cumple' : '❌ Excede'}</td></tr>
+            <tr><td>Fosfatasa residual</td><td>${fosfatasa} UF/g</td><td>Máx. 4 UF/g </td><td>${okFos ? '✅ Cumple' : '❌ Excede'}</td></tr>
         `;
     } else {
         let maxCol = microProd === 'icecream' ? 100 : 50;

@@ -282,7 +282,7 @@
 <div class="app-container">
     <div class="top-bar">
         <a href="index.html" class="back-btn">⬅ Volver al Menú Principal</a>
-        <span class="badge">CECYBOOK SEMANA 15 • PÁGINAS 14 Y 15 (FIGURAS 12 Y 13)</span>
+        <span class="badge">CECYBOOK SEMANA 15</span>
     </div>
 
     <header>
@@ -414,7 +414,7 @@ function renderControls() {
         `;
     } else if (currentOp === 2) {
         panel.innerHTML = `
-            <div class="panel-title">🛠️ 2. Amasado o Working (Figura 12.2)</div>
+            <div class="panel-title">🛠️ 2. Amasado o Working</div>
             <div class="ctrl-group">
                 <label><span>Intensidad de Amasado:</span><span class="val-tag" id="lbl-wk">${workIntensity}%</span></label>
                 <input type="range" min="10" max="100" step="5" value="${workIntensity}" oninput="workIntensity=parseInt(this.value); document.getElementById('lbl-wk').innerText=this.value+'%'; updateUI();">
@@ -424,7 +424,7 @@ function renderControls() {
         `;
     } else if (currentOp === 3) {
         panel.innerHTML = `
-            <div class="panel-title">🧂 3. Salado y Composición (Figura 12.3 & 13)</div>
+            <div class="panel-title">🧂 3. Salado y Composición</div>
             <div class="ctrl-group">
                 <label><span>Dosificación de Sal (NaCl):</span><span class="val-tag" id="lbl-salt">${saltLevel}%</span></label>
                 <input type="range" min="0.0" max="3.0" step="0.2" value="${saltLevel}" oninput="saltLevel=parseFloat(this.value); document.getElementById('lbl-salt').innerText=this.value+'%'; updateUI();">

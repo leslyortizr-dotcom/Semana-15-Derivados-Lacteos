@@ -330,7 +330,7 @@
 <div class="app-container">
     <div class="top-bar">
         <a href="index.html" class="back-btn">⬅ Volver al Menú Principal</a>
-        <span class="badge">CECYBOOK SEMANA 15 • PÁGINAS 17 A 26 (FIGURAS 15, 18, 20, 22 Y 23)</span>
+        <span class="badge">CECYBOOK SEMANA 15</span>
     </div>
 
     <header>
@@ -351,7 +351,7 @@
         </button>
         <button id="tab-3" class="m-btn" onclick="setTab(3)">
             <strong>3️⃣ Endurecimiento y Cadena de Frío</strong>
-            <span>Fluctuaciones térmicas y recristalización (Figura 23)</span>
+            <span>Fluctuaciones térmicas y recristalización</span>
         </button>
     </div>
 
@@ -377,7 +377,7 @@
 
     <div class="bottom-grid">
         <div class="info-card">
-            <h3>🧪 Función de los Ingredientes (Tabla 1)</h3>
+            <h3>🧪 Función de los Ingredientes </h3>
             <div>
                 • <strong>Grasa láctea:</strong> Aporta cremosidad y rodea las celdas de aire.<br>
                 • <strong>Azúcares:</strong> Endulzan y <em>disminuyen el punto de congelación</em> para que el helado no sea una piedra.<br>
@@ -386,7 +386,7 @@
             </div>
         </div>
         <div class="info-card" style="border-top-color: #f59e0b;">
-            <h3>⚖️ Interpretación del Overrun (Pág. 23)</h3>
+            <h3>⚖️ Interpretación del Overrun </h3>
             <div>
                 El <strong>overrun</strong> mide el aumento porcentual de volumen por incorporación de aire (típico <b>60–100%</b>).<br>
                 • <strong>Muy bajo (25%):</strong> Helado pesado, denso y frío en boca.<br>
@@ -394,7 +394,7 @@
             </div>
         </div>
         <div class="info-card" style="border-top-color: #10b981;">
-            <h3>❄️ Endurecimiento y Recristalización (Pág. 25–26)</h3>
+            <h3>❄️ Endurecimiento y Recristalización </h3>
             <div>
                 Al salir del congelador dinámico (<b>-4 a -6 °C</b>), el helado se lleva al túnel de endurecimiento (<b>-25 a -40 °C</b>) y se conserva a <b>≤ -18 °C</b>. Si sube a -10 °C y vuelve a congelarse, ocurre <strong>recristalización</strong>: los cristales superan los 50 µm y dan textura áspera/helada.
             </div>
@@ -412,9 +412,9 @@ let activeTab = 1;
 let stabilizerLevel = 80; // 10% a 100%
 let agingHours = 12;      // 0 h (sin madurar) a 24 h
 
-// Variables Modo 2 (Balanza de Overrun - Ejemplo Pág. 23)
+// Variables Modo 2 (Balanza de Overrun)
 let mixMass = 1100;       // g en 1.0 L
-let iceMass = 610;        // g en 1.0 L (Ejemplo exacto del documento = 80.3%)
+let iceMass = 610;        // g en 1.0 L (Ejemplo exacto = 80.3%)
 
 // Variables Modo 3 (Cadena de Frío y Fluctuaciones Térmicas)
 let storageTemp = -18;
@@ -460,7 +460,7 @@ function renderControls() {
         panel.innerHTML = `
             <div class="panel-title">🔬 1. Formulación y Maduración del Mix</div>
             <div class="ctrl-group">
-                <label><span>Tiempo de Maduración a 4 °C (Figura 17):</span><span class="val-tag" id="lbl-age">${agingHours} h</span></label>
+                <label><span>Tiempo de Maduración a 4 °C :</span><span class="val-tag" id="lbl-age">${agingHours} h</span></label>
                 <input type="range" min="0" max="24" step="2" value="${agingHours}" oninput="agingHours=parseInt(this.value); document.getElementById('lbl-age').innerText=this.value+' h'; updateUI();">
                 <div class="scale-notes"><span>0 h (Sin madurar)</span><span>4–24 h (Hidratación/Cristalización)</span></div>
             </div>
@@ -484,7 +484,7 @@ function renderControls() {
     } 
     else if (activeTab === 2) {
         panel.innerHTML = `
-            <div class="panel-title">⚖️ 2. Calculadora de Overrun (Figura 20)</div>
+            <div class="panel-title">⚖️ 2. Calculadora de Overrun </div>
             <div class="ctrl-group">
                 <label><span>Masa de 1.0 L de Mix Líquido:</span><span class="val-tag" id="lbl-mmix">${mixMass} g</span></label>
                 <input type="range" min="1050" max="1150" step="10" value="${mixMass}" oninput="mixMass=parseInt(this.value); document.getElementById('lbl-mmix').innerText=this.value+' g'; updateUI();">
@@ -503,7 +503,7 @@ function renderControls() {
     } 
     else if (activeTab === 3) {
         panel.innerHTML = `
-            <div class="panel-title">❄️ 3. Cadena de Frío y Recristalización (Figura 23)</div>
+            <div class="panel-title">❄️ 3. Cadena de Frío y Recristalización </div>
             <div class="ctrl-group">
                 <label><span>Temperatura de Cámara:</span><span class="val-tag" id="lbl-stemp">${storageTemp} °C</span></label>
                 <input type="range" min="-24" max="-6" step="2" value="${storageTemp}" oninput="storageTemp=parseInt(this.value); document.getElementById('lbl-stemp').innerText=this.value+' °C'; updateUI();">
