@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio Virtual: Crema, Mantequilla y Helado - Semana 15</title>
+    <style>
+        :root {
+            --bg: #0b1120;
+            --panel: #1e293b;
+            --card: #0f172a;
+            --border: #334155;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --accent: #38bdf8;
+            --gold: #fcd34d;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 1080px;
+            width: 100%;
+            background: var(--panel);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        h1 { margin: 0 0 8px 0; color: var(--gold); font-size: 25px; }
+        p.subtitle { color: var(--muted); margin: 0; font-size: 14px; line-height: 1.45; }
+        .grid-sims {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(295px, 1fr));
+            gap: 16px;
+            margin-bottom: 10px;
+        }
+        .sim-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .sim-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+        .sim-card h3 { margin: 0 0 8px 0; color: var(--accent); font-size: 15.5px; line-height: 1.35; }
+        .sim-card p { color: var(--muted); font-size: 12.5px; line-height: 1.45; margin: 0 0 16px 0; }
+        .sim-btn {
+            background: #0284c7;
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            padding: 9px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .sim-btn:hover { background: #0369a1; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <span class="badge">CECYBOOK SEMANA 15 • CONTENIDOS 7.4 Y 7.5</span>
+        <h1>🍦 Laboratorio Virtual: Crema, Mantequilla y Helados</h1>
+        <p class="subtitle">CECyTE Guanajuato • Unidad 7: Procesos de transformación para la obtención de derivados de la leche</p>
+    </header>
+
+    <div class="grid-sims">
+        <!-- 1 -->
+        <div class="sim-card">
+            <div>
+                <h3>Una Misma Grasa, Tres Destinos Tecnológicos SEMANA 15</h3>
+                <p>Comparador microscópico de la grasa láctea: emulsión O/W concentrada en crema, inversión de fase a W/O en mantequilla y sistema multifásico en helado.</p>
+            </div>
+            <a href="tres_destinos_grasa.html" class="sim-btn">Abrir Simulador ➔</a>
+        </div>
+
+        <!-- 2 -->
+        <div class="sim-card">
+            <div>
+                <h3>La Membrana MFGM y Separación Centrífuga SEMANA 15</h3>
+                <p>Anatomía interactiva de las 5 capas de la membrana del glóbulo graso (MFGM), Ley de Stokes y comparación entre centrifugación, gravedad y membranas.</p>
+            </div>
+            <a href="mfgm_separacion.html" class="sim-btn">Abrir Simulador ➔</a>
+        </div>
+
+        <!-- 3 -->
+        <div class="sim-card">
+            <div>
+                <h3>Laboratorio de Maduración Física y Batido de Mantequilla (Churning) SEMANA 15</h3>
+                <p>Efecto de la temperatura de la crema sobre la proporción grasa sólida/líquida y recorrido por las 4 etapas del batido hasta la separación de buttermilk.</p>
+            </div>
+            <a href="maduracion_y_batido.html" class="sim-btn">Abrir Simulador ➔</a>
+        </div>
+
+        <!-- 4 -->
+        <div class="sim-card">
+            <div>
+                <h3>Amasado (Working), Salado y Control de Composición SEMANA 15</h3>
+                <p>Lavado con agua fría (8–15 °C), intensidad de amasado para prevenir bolsas de agua ("llorado"), dosificación de sal y norma Codex CXS 279-1971 (80/16).</p>
+            </div>
+            <a href="amasado_y_salado.html" class="sim-btn">Abrir Simulador ➔</a>
+        </div>
+
+        <!-- 5 -->
+        <div class="sim-card">
+            <div>
+                <h3>Microestructura del Helado, Overrun y Cadena de Frío SEMANA 15</h3>
+                <p>Balanza interactiva para cálculo de overrun por masas (1.0 L), función de estabilizantes y simulación de recristalización por choque térmico.</p>
+            </div>
+            <a href="helado_overrun_frio.html" class="sim-btn">Abrir Simulador ➔</a>
+        </div>
+
+        <!-- 6 -->
+        <div class="sim-card">
+            <div>
+                <h3>Diagnóstico de Defectos e Inocuidad NOM-243 SEMANA 15</h3>
+                <p>Análisis de casos (Dato ➔ Causa ➔ Etapa ➔ Decisión) y simulador de dictamen sanitario bajo los límites microbiológicos de la NOM-243-SSA1-2010.</p>
+            </div>
+            <a href="diagnostico_y_norma.html" class="sim-btn">Abrir Simulador ➔</a>
+        </div>
+
+        <!-- 7 -->
+        <div class="sim-card">
+            <div>
+                <h3>Entrenador Autocalificable: Ordena el Proceso de Mantequilla SEMANA 15</h3>
+                <p>Actividad interactiva oficial ("Ejercitando mi habilidad", Claves A–H) bajo la lógica: Materia prima ➔ Acondicionamiento ➔ Transformación ➔ Estabilización.</p>
+            </div>
+            <a href="ordenar_mantequilla.html" class="sim-btn">Iniciar Reto ➔</a>
+        </div>
+
+        <!-- 8 -->
+        <div class="sim-card" style="grid-column: 1 / -1; background: #111827;">
+            <div>
+                <h3 style="color:#fcd34d;">🗺️ Plano Interactivo de Distribución de Planta (Crema, Mantequilla y Helado) SEMANA 15</h3>
+                <p>Distribución arquitectónica de 8 áreas operativas y laboratorio CIP, flujos de tubería para las 3 líneas lácteas, puntos críticos (PCC) y zonificación sanitaria BPM.</p>
+            </div>
+            <a href="planta_derivados_areas.html" class="sim-btn" style="background:#059669;">Explorar Plano Industrial ➔</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

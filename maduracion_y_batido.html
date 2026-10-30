@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio de Maduración Física y Batido de Mantequilla - Semana 15</title>
+    <style>
+        :root {
+            --bg: #0b1120;
+            --panel: #1e293b;
+            --card: #0f172a;
+            --border: #334155;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --accent: #38bdf8;
+            --gold: #fcd34d;
+            --ok: #10b981;
+            --warn: #f59e0b;
+            --err: #ef4444;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 18px;
+            display: flex;
+            justify-content: center;
+        }
+        .app-container {
+            max-width: 1220px;
+            width: 100%;
+            background: var(--panel);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.65);
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #334155;
+            color: #f8fafc;
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            border: 1px solid #475569;
+            transition: 0.2s;
+        }
+        .back-btn:hover {
+            background: #475569;
+            border-color: var(--accent);
+        }
+        .badge {
+            background: rgba(252, 211, 77, 0.15);
+            color: var(--gold);
+            border: 1px solid var(--gold);
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        header {
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+            margin-bottom: 18px;
+        }
+        h1 {
+            margin: 0 0 6px 0;
+            color: var(--gold);
+            font-size: 24px;
+        }
+        .subtitle {
+            color: var(--muted);
+            margin: 0 auto;
+            max-width: 900px;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+        /* Selector de las 4 Etapas del Batido (Figura 10) */
+        .stage-tabs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        @media (max-width: 850px) {
+            .stage-tabs { grid-template-columns: repeat(2, 1fr); }
+        }
+        .stage-btn {
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 10px;
+            color: var(--text);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .stage-btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+        .stage-btn strong {
+            display: block;
+            font-size: 14.5px;
+            margin-bottom: 3px;
+            color: var(--gold);
+        }
+        .stage-btn span {
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+        .stage-btn.active {
+            background: rgba(234, 179, 8, 0.18);
+            border-color: var(--gold);
+            box-shadow: 0 4px 15px rgba(234, 179, 8, 0.25);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 375px 1fr;
+            gap: 18px;
+        }
+        @media (max-width: 950px) {
+            .dashboard { grid-template-columns: 1fr; }
+        }
+
+        .controls-panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .panel-title {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--accent);
+            border-bottom: 1px solid #1e293b;
+            padding-bottom: 6px;
+        }
+
+        .temp-presets {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+        .t-btn {
+            background: #1e293b;
+            border: 1px solid var(--border);
+            color: #cbd5e1;
+            padding: 8px 6px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+        }
+        .t-btn:hover { border-color: var(--accent); }
+        .t-btn.active-cold { background: rgba(56, 189, 248, 0.2); border-color: #38bdf8; color: #7dd3fc; }
+        .t-btn.active-opt { background: rgba(16, 185, 129, 0.2); border-color: #10b981; color: #6ee7b7; }
+        .t-btn.active-warm { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #fca5a5; }
+
+        .ctrl-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .ctrl-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .val-tag { color: var(--gold); font-weight: 700; }
+        input[type="range"] { width: 100%; cursor: pointer; accent-color: var(--gold); }
+        .scale-notes { display: flex; justify-content: space-between; font-size: 11px; color: #64748b; }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .kpi-card {
+            background: #1e293b;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px;
+            text-align: center;
+        }
+        .kpi-card small {
+            display: block;
+            font-size: 10.5px;
+            color: var(--muted);
+            margin-bottom: 2px;
+        }
+        .kpi-card strong {
+            font-size: 14px;
+            color: var(--gold);
+        }
+
+        .status-box {
+            background: #1e293b;
+            border-left: 4px solid var(--ok);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            line-height: 1.45;
+        }
+        .status-box h4 {
+            margin: 0 0 4px 0;
+            font-size: 13px;
+            color: var(--gold);
+        }
+
+        /* Área Visual de la Mantequillera */
+        .visual-area {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .canvas-card {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 3px solid var(--border);
+            background: #070d19;
+        }
+        canvas#churnCanvas {
+            display: block;
+            width: 100%;
+            height: 410px;
+        }
+        .hud-bar {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .hud-pill {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid #475569;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .legend-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
+            background: var(--card);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 12px;
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; color: #cbd5e1; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+
+        .bottom-grid {
+            margin-top: 16px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+        @media (max-width: 900px) {
+            .bottom-grid { grid-template-columns: 1fr; }
+        }
+        .info-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-top: 3px solid var(--accent);
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+        .info-card h3 {
+            margin: 0 0 6px 0;
+            font-size: 14.5px;
+            color: var(--gold);
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="top-bar">
+        <a href="index.html" class="back-btn">⬅ Volver al Menú Principal</a>
+        <span class="badge">CECYBOOK SEMANA 15 • PÁGINAS 11 A 16 (FIGURAS 9, 10, 11 Y 14)</span>
+    </div>
+
+    <header>
+        <h1>🧈 Laboratorio de Maduración Física y Batido de Mantequilla (Churning)</h1>
+        <p class="subtitle">
+            <strong>Ahora sí queremos romper la emulsión:</strong> Experimenta cómo el estado de cristalización de la grasa (maduración física) y la energía mecánica del batido transforman una crema fluida (O/W) en gránulos de mantequilla y suero de mantequilla (<em>buttermilk</em>).
+        </p>
+    </header>
+
+    <!-- Selector de las 4 Etapas del Batido (Figura 10, Pág. 12) -->
+    <div class="stage-tabs">
+        <button id="st-1" class="stage-btn active" onclick="setChurnProgress(12)">
+            <strong>1️⃣ Inicio (0–25%)</strong>
+            <span>Crema fluida y espumosa (O/W)</span>
+        </button>
+        <button id="st-2" class="stage-btn" onclick="setChurnProgress(42)">
+            <strong>2️⃣ Transición (26–55%)</strong>
+            <span>Ruptura MFGM y coalescencia parcial</span>
+        </button>
+        <button id="st-3" class="stage-btn" onclick="setChurnProgress(72)">
+            <strong>3️⃣ Ruptura (56–85%)</strong>
+            <span>Gránulos + separación de buttermilk</span>
+        </button>
+        <button id="st-4" class="stage-btn" onclick="setChurnProgress(100)">
+            <strong>4️⃣ Final (86–100%)</strong>
+            <span>Inversión W/O: Masa grasa trabajable</span>
+        </button>
+    </div>
+
+    <div class="dashboard">
+        <!-- Panel Izquierdo de Controles -->
+        <div class="controls-panel">
+            <div class="panel-title">🌡️ 1. Maduración Física de la Crema (Figura 11)</div>
+            <div class="temp-presets">
+                <button id="tbtn-cold" class="t-btn" onclick="setCreamTemp(4)">❄️ Muy Fría<br>(4 °C)</button>
+                <button id="tbtn-opt" class="t-btn active-opt" onclick="setCreamTemp(12)">✅ Equilibrada<br>(8–15 °C)</button>
+                <button id="tbtn-warm" class="t-btn" onclick="setCreamTemp(20)">☀️ Muy Tibia<br>(20 °C)</button>
+            </div>
+
+            <div class="ctrl-group">
+                <label>
+                    <span>Temperatura de la Crema al Batir:</span>
+                    <span class="val-tag" id="lbl-temp">12 °C</span>
+                </label>
+                <input type="range" id="slider-temp" min="4" max="22" step="1" value="12" oninput="setCreamTemp(parseInt(this.value))">
+                <div class="scale-notes">
+                    <span>4°C (Muy rígida)</span>
+                    <span>8–15°C (Ideal Industrial)</span>
+                    <span>22°C (Muy líquida)</span>
+                </div>
+            </div>
+
+            <div class="panel-title" style="margin-top:4px;">⚙️ 2. Progreso del Batido (Churning)</div>
+            <div class="ctrl-group">
+                <label>
+                    <span>Avance en la Mantequillera:</span>
+                    <span class="val-tag" id="lbl-prog">12%</span>
+                </label>
+                <input type="range" id="slider-prog" min="0" max="100" step="2" value="12" oninput="setChurnProgress(parseInt(this.value))">
+                <div class="scale-notes">
+                    <span>Inicio</span>
+                    <span>Transición</span>
+                    <span>Ruptura</span>
+                    <span>Masa W/O</span>
+                </div>
+            </div>
+
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <small>Proporción Sólida/Líquida</small>
+                    <strong id="kpi-cryst">Equilibrada</strong>
+                </div>
+                <div class="kpi-card">
+                    <small>Tiempo Estimado Batido</small>
+                    <strong id="kpi-time">25–35 min</strong>
+                </div>
+                <div class="kpi-card">
+                    <small>Pérdida en Buttermilk</small>
+                    <strong id="kpi-loss" style="color:#10b981;">Baja (&lt; 0.5%)</strong>
+                </div>
+                <div class="kpi-card">
+                    <small>Consistencia de Masa</small>
+                    <strong id="kpi-tex">Plástica Firme</strong>
+                </div>
+            </div>
+
+            <div class="status-box" id="maturation-alert"></div>
+        </div>
+
+        <!-- Lienzo Interactivo -->
+        <div class="visual-area">
+            <div class="canvas-card">
+                <div class="hud-bar">
+                    <div class="hud-pill" id="hud-stage">Etapa 1: Inicio (Emulsión O/W Estable)</div>
+                    <div class="hud-pill" id="hud-phase" style="color:#fcd34d;">Fase Continua: Agua (Plasma)</div>
+                </div>
+                <canvas id="churnCanvas" width="760" height="410"></canvas>
+            </div>
+            <div class="legend-strip">
+                <div class="legend-item"><span class="dot" style="background:#facc15; border:2px solid #ea580c;"></span> Glóbulo Graso (Con cristales internos)</div>
+                <div class="legend-item"><span class="dot" style="background:#fef08a;"></span> Cristales de Grasa Sólida</div>
+                <div class="legend-item"><span class="dot" style="background:rgba(255,255,255,0.75); border:1px dashed #94a3b8;"></span> Aire Incorporado</div>
+                <div class="legend-item"><span class="dot" style="background:#38bdf8;"></span> Suero de Mantequilla (Buttermilk) / Gotas H₂O</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjetas Inferiores de Interpretación Tecnológica (Págs. 11 a 16) -->
+    <div class="bottom-grid">
+        <div class="info-card">
+            <h3>👁️ ¿Qué se observa en esta etapa?</h3>
+            <div id="obs-text"></div>
+        </div>
+        <div class="info-card" style="border-top-color: #f59e0b;">
+            <h3>🔬 Interpretación Tecnológica</h3>
+            <div id="interp-text"></div>
+        </div>
+        <div class="info-card" style="border-top-color: #10b981;">
+            <h3>📋 Parámetros y Norma (Codex / NOM-243)</h3>
+            <div>
+                • <strong>Crema de entrada:</strong> 35–42% grasa, pasteurizada (ref. Tetra Pak: 85 °C / 15 s para inactivar lipasas) y madurada físicamente.<br>
+                • <strong>Composición final:</strong> Mínimo <b>80% grasa butírica</b>, máximo <b>16% agua</b> y máx. 2% SNG (Codex CXS 279-1971 / NMX-F-729 / NOM-243).
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('churnCanvas');
+const ctx = canvas.getContext('2d');
+
+let creamTemp = 12;     // 4 a 22 °C
+let churnProg = 12;     // 0 a 100 %
+let bladeAngle = 0;
+
+let globules = [];
+let airBubbles = [];
+let waterDrops = [];
+
+function initParticles() {
+    globules = [];
+    for (let i = 0; i < 38; i++) {
+        globules.push({
+            x: 50 + Math.random() * (canvas.width - 100),
+            y: 65 + Math.random() * (canvas.height - 110),
+            vx: (Math.random() - 0.5) * 2.4,
+            vy: (Math.random() - 0.5) * 2.4,
+            r: 14 + Math.random() * 5,
+            clusterId: i % 6
+        });
+    }
+
+    airBubbles = [];
+    for (let i = 0; i < 14; i++) {
+        airBubbles.push({
+            x: 60 + Math.random() * (canvas.width - 120),
+            y: 70 + Math.random() * (canvas.height - 120),
+            vx: (Math.random() - 0.5) * 1.8,
+            vy: (Math.random() - 0.5) * 1.8,
+            r: 16 + Math.random() * 7
+        });
+    }
+
+    waterDrops = [];
+    for (let i = 0; i < 35; i++) {
+        waterDrops.push({
+            x: 50 + Math.random() * (canvas.width - 100),
+            y: 65 + Math.random() * (canvas.height - 100),
+            r: 4 + Math.random() * 4.5
+        });
+    }
+}
+
+function setCreamTemp(t) {
+    creamTemp = t;
+    document.getElementById('slider-temp').value = t;
+    document.getElementById('lbl-temp').innerText = t + ' °C';
+
+    document.getElementById('tbtn-cold').className = 't-btn' + (t < 8 ? ' active-cold' : '');
+    document.getElementById('tbtn-opt').className = 't-btn' + (t >= 8 && t <= 15 ? ' active-opt' : '');
+    document.getElementById('tbtn-warm').className = 't-btn' + (t > 15 ? ' active-warm' : '');
+
+    updateUI();
+}
+
+function setChurnProgress(p) {
+    churnProg = p;
+    document.getElementById('slider-prog').value = p;
+    document.getElementById('lbl-prog').innerText = p + '%';
+
+    const stIdx = p <= 25 ? 1 : (p <= 55 ? 2 : (p <= 85 ? 3 : 4));
+    [1, 2, 3, 4].forEach(i => {
+        document.getElementById('st-' + i).classList.toggle('active', i === stIdx);
+    });
+
+    updateUI();
+}
+
+function updateUI() {
+    const kCryst = document.getElementById('kpi-cryst');
+    const kTime = document.getElementById('kpi-time');
+    const kLoss = document.getElementById('kpi-loss');
+    const kTex = document.getElementById('kpi-tex');
+    const alertBox = document.getElementById('maturation-alert');
+
+    // Evaluación de la Maduración Física según Figura 11 (Pág. 13)
+    if (creamTemp < 8) {
+        kCryst.innerText = 'Exceso Sólida (Rígida)';
+        kTime.innerText = '> 55 min (Muy lento)';
+        kLoss.innerText = 'Media (0.8%)';
+        kLoss.style.color = '#f59e0b';
+        kTex.innerText = 'Dura / Quebradiza';
+        alertBox.style.borderLeftColor = '#38bdf8';
+        alertBox.innerHTML = `
+            <h4>❄️ Crema Excesivamente Fría (< 8 °C)</h4>
+            <b>Efecto en el batido:</b> Los glóbulos tienen demasiada grasa cristalizada (rígidos y con menor deformabilidad). Cuesta mucho trabajo que se unan, provocando un <b>batido muy lento y una mantequilla quebradiza</b>.
+        `;
+    } else if (creamTemp > 15) {
+        kCryst.innerText = 'Exceso Grasa Líquida';
+        kTime.innerText = '12 min (Descontrolado)';
+        kLoss.innerText = 'Alta (> 2.5% Merma)';
+        kLoss.style.color = '#ef4444';
+        kTex.innerText = 'Blanda / Untuosa';
+        alertBox.style.borderLeftColor = '#ef4444';
+        alertBox.innerHTML = `
+            <h4>☀️ Crema Demasiado Tibia (> 15 °C)</h4>
+            <b>Efecto en el batido:</b> Mayor fracción de grasa líquida y glóbulos demasiado deformables. Provoca una <b>coalescencia descontrolada, masa muy blanda y altas pérdidas de grasa en el buttermilk</b>.
+        `;
+    } else {
+        kCryst.innerText = 'Equilibrada (Sól/Líq)';
+        kTime.innerText = '20–40 min (Óptimo)';
+        kLoss.innerText = 'Mínima (< 0.4%)';
+        kLoss.style.color = '#10b981';
+        kTex.innerText = 'Plástica y Firme';
+        alertBox.style.borderLeftColor = '#10b981';
+        alertBox.innerHTML = `
+            <h4>✅ Condición Equilibrada (8–15 °C)</h4>
+            <b>Efecto en el batido:</b> Equilibrio óptimo entre cristales de grasa sólida y grasa líquida libre. Produce una <b>coalescencia parcial controlada, gránulos bien definidos y excelente drenado de buttermilk</b>.
+        `;
+    }
+
+    // Textos de las 4 etapas de la Figura 10 (Pág. 12)
+    const hudS = document.getElementById('hud-stage');
+    const hudP = document.getElementById('hud-phase');
+    const obs = document.getElementById('obs-text');
+    const interp = document.getElementById('interp-text');
+
+    if (churnProg <= 25) {
+        hudS.innerText = 'Etapa 1: Inicio — Crema fluida y espumosa';
+        hudP.innerText = 'Fase Continua: Agua (Emulsión O/W)';
+        obs.innerHTML = `• Crema fluida y espumosa.<br>• Aumento de volumen por incorporación de burbujas de aire.<br>• Los glóbulos de grasa (1–10 µm) siguen separados.`;
+        interp.innerHTML = `<strong>Aún domina la emulsión grasa-en-agua (O/W):</strong> La agitación incorpora aire y los glóbulos grasos comienzan a chocar contra las interfaces de aire, pero la membrana MFGM aún los mantiene individuales.`;
+    } else if (churnProg <= 55) {
+        hudS.innerText = 'Etapa 2: Transición — Coalescencia parcial';
+        hudP.innerText = 'Fase Continua: En desestabilización...';
+        obs.innerHTML = `• Pérdida gradual de fluidez y colapso de la espuma.<br>• Aparición de pequeños agregados microscópicos de grasa.<br>• Cambio de una textura lisa a una apariencia granular fina.`;
+        interp.innerHTML = `<strong>Comienza la coalescencia parcial:</strong> Las colisiones repetidas rompen parcialmente la membrana MFGM; la grasa líquida actúa como cemento uniendo los glóbulos parcialmente cristalizados.`;
+    } else if (churnProg <= 85) {
+        hudS.innerText = 'Etapa 3: Ruptura — Gránulos y separación de buttermilk';
+        hudP.innerText = '¡Inversión de Fases Alcanzada!';
+        obs.innerHTML = `• Se distinguen claramente <strong>gránulos amarillentos de mantequilla</strong>.<br>• Separación evidente de una fase líquida blanquecina: el <strong>suero de mantequilla (buttermilk)</strong>.`;
+        interp.innerHTML = `<strong>Ocurrió la inversión de fases:</strong> La estructura deja de comportarse como crema; los gránulos grasos se separan de la fase acuosa (<em>buttermilk</em>), la cual está lista para drenarse.`;
+    } else {
+        hudS.innerText = 'Etapa 4: Final — Masa de mantequilla trabajable (W/O)';
+        hudP.innerText = 'Fase Continua: Matriz Grasa (W/O)';
+        obs.innerHTML = `• Drenado del suero de mantequilla.<br>• Los gránulos se agrupan formando una <strong>masa de mantequilla homogénea y plástica</strong> con mínima presencia de suero libre.`;
+        interp.innerHTML = `<strong>Emulsión Agua-en-Grasa (W/O) consolidada:</strong> La grasa constituye ahora la fase continua que encierra pequeñas gotas acuosas. Lista para lavado, amasado (<em>working</em>) y salado.`;
+    }
+}
+
+function animateChurning() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Cuántos cristales sólidos dibujar dentro de cada glóbulo según la temperatura (4°C = muchos, 20°C = casi ninguno)
+    let crystalCount = creamTemp < 8 ? 5 : (creamTemp <= 15 ? 3 : 1);
+    let agitateSpeed = 1.6 - (churnProg / 140);
+
+    if (churnProg <= 85) {
+        // Fondo: Fase acuosa (en Etapa 3 se ve más clara como buttermilk separado)
+        ctx.fillStyle = churnProg <= 55 ? '#082f49' : '#0c4a6e';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Dibujar aspas del batidor mecánico girando en el centro
+        bladeAngle += 0.05;
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height / 2 + 10);
+        ctx.rotate(bladeAngle);
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.moveTo(-140, 0); ctx.lineTo(140, 0);
+        ctx.moveTo(0, -140); ctx.lineTo(0, 140);
+        ctx.stroke();
+        ctx.restore();
+
+        // 1. Burbujas de aire en Etapa 1 y 2
+        if (churnProg <= 55) {
+            let numAir = churnProg <= 25 ? airBubbles.length : Math.floor(airBubbles.length / 2);
+            for (let i = 0; i < numAir; i++) {
+                let b = airBubbles[i];
+                b.x += b.vx;
+                b.y += b.vy;
+                if (b.x < 30 || b.x > canvas.width - 30) b.vx *= -1;
+                if (b.y < 55 || b.y > canvas.height - 30) b.vy *= -1;
+
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
+                ctx.fill();
+                ctx.setLineDash([4, 3]);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+        }
+
+        // Centros de agrupación para formar los gránulos de mantequilla en Etapa 2 y 3
+        const clusterCenters = [
+            { x: 170, y: 150 }, { x: 380, y: 140 }, { x: 590, y: 155 },
+            { x: 200, y: 300 }, { x: 400, y: 295 }, { x: 580, y: 290 }
+        ];
+
+        globules.forEach(g => {
+            if (churnProg > 25) {
+                // Fuerza de atracción hacia los gránulos (coalescencia)
+                let target = clusterCenters[g.clusterId];
+                let pull = (churnProg - 25) * 0.0012;
+                g.vx += (target.x - g.x) * pull;
+                g.vy += (target.y - g.y) * pull;
+                g.vx *= 0.91;
+                g.vy *= 0.91;
+            }
+
+            g.x += g.vx * agitateSpeed;
+            g.y += g.vy * agitateSpeed;
+
+            if (g.x < 30 || g.x > canvas.width - 30) g.vx *= -1;
+            if (g.y < 55 || g.y > canvas.height - 30) g.vy *= -1;
+
+            let rad = g.r * (1 + (churnProg / 100) * 0.55);
+
+            // Cuerpo del glóbulo / gránulo graso
+            ctx.beginPath();
+            if (creamTemp > 15) {
+                // Si está muy tibia, los glóbulos se deforman/aplastan
+                ctx.ellipse(g.x, g.y, rad * 1.25, rad * 0.8, 0.2, 0, Math.PI * 2);
+            } else {
+                ctx.arc(g.x, g.y, rad, 0, Math.PI * 2);
+            }
+            ctx.fillStyle = '#facc15';
+            ctx.fill();
+
+            // Membrana MFGM (intacta en Etapa 1, rota/punteada en Etapa 2, ausente en Etapa 3)
+            if (churnProg <= 25) {
+                ctx.lineWidth = 2.5;
+                ctx.strokeStyle = '#ea580c';
+                ctx.stroke();
+            } else if (churnProg <= 55) {
+                ctx.setLineDash([4, 4]);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#ea580c';
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Cristales internos de grasa sólida según temperatura de maduración
+            ctx.fillStyle = '#fef9c3';
+            for (let c = 0; c < crystalCount; c++) {
+                let ang = (c * Math.PI * 2) / crystalCount;
+                ctx.fillRect(g.x + Math.cos(ang) * (rad * 0.4) - 3, g.y + Math.sin(ang) * (rad * 0.4) - 2, 6, 3);
+            }
+        });
+
+        // Etiqueta flotante del Buttermilk separado en Etapa 3 (Ruptura)
+        if (churnProg > 55) {
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.roundRect(canvas.width / 2 - 175, canvas.height - 48, 350, 34, 8);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#7dd3fc';
+            ctx.font = 'bold 12.5px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('💧 Fase Acuosa Separada: Suero de Mantequilla (Buttermilk)', canvas.width / 2, canvas.height - 26);
+        }
+    } else {
+        // ETAPA 4 FINAL: Masa de mantequilla continua (Emulsión Invertida W/O)
+        let grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        grad.addColorStop(0, creamTemp < 8 ? '#fde047' : '#eab308');
+        grad.addColorStop(1, '#ca8a04');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Si estaba muy fría (<8°C), dibujar líneas de fractura (textura quebradiza)
+        if (creamTemp < 8) {
+            ctx.strokeStyle = 'rgba(120, 53, 15, 0.35)';
+            ctx.lineWidth = 2.5;
+            for (let f = 1; f <= 5; f++) {
+                ctx.beginPath();
+                ctx.moveTo(f * 130, 60);
+                ctx.lineTo(f * 130 + 35, 220);
+                ctx.lineTo(f * 130 - 15, 390);
+                ctx.stroke();
+            }
+        }
+
+        // Red de cristales de grasa en la matriz continua
+        ctx.strokeStyle = 'rgba(254, 249, 195, 0.4)';
+        ctx.lineWidth = 2;
+        for (let i = 0; i < crystalCount * 10; i++) {
+            let cx = (i * 61) % canvas.width;
+            let cy = 55 + ((i * 47) % (canvas.height - 70));
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + 18, cy + 8);
+            ctx.stroke();
+        }
+
+        // Pequeñas gotas de agua dispersas en la matriz grasa continua
+        waterDrops.forEach(w => {
+            ctx.beginPath();
+            ctx.arc(w.x, w.y, creamTemp > 15 ? w.r * 1.6 : w.r, 0, Math.PI * 2);
+            ctx.fillStyle = '#38bdf8';
+            ctx.fill();
+            ctx.strokeStyle = '#0284c7';
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+        });
+    }
+
+    requestAnimationFrame(animateChurning);
+}
+
+initParticles();
+setCreamTemp(12);
+setChurnProgress(12);
+animateChurning();
+</script>
+
+</body>
+</html>

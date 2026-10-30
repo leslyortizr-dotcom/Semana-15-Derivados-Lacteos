@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrenador Autocalificable: Ordena el Proceso de Mantequilla - Semana 15</title>
+    <style>
+        :root {
+            --bg: #0b1120;
+            --panel: #1e293b;
+            --card: #0f172a;
+            --border: #334155;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --accent: #38bdf8;
+            --gold: #fcd34d;
+            --ok: #10b981;
+            --warn: #f59e0b;
+            --err: #ef4444;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 18px;
+            display: flex;
+            justify-content: center;
+        }
+        .app-container {
+            max-width: 1120px;
+            width: 100%;
+            background: var(--panel);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.65);
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #334155;
+            color: #f8fafc;
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            border: 1px solid #475569;
+            transition: 0.2s;
+        }
+        .back-btn:hover {
+            background: #475569;
+            border-color: var(--accent);
+        }
+        .badge {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid var(--ok);
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        header {
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+            margin-bottom: 18px;
+        }
+        h1 {
+            margin: 0 0 6px 0;
+            color: var(--gold);
+            font-size: 24px;
+        }
+        .subtitle {
+            color: var(--muted);
+            margin: 0 auto;
+            max-width: 860px;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+        /* Guía Lógica de 4 Bloques Tecnológicos */
+        .logic-chain {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        @media (max-width: 800px) {
+            .logic-chain { grid-template-columns: repeat(2, 1fr); }
+        }
+        .logic-pill {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-top: 3px solid var(--accent);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+        }
+        .logic-pill strong {
+            display: block;
+            font-size: 13px;
+            color: var(--gold);
+            margin-bottom: 2px;
+        }
+        .logic-pill span {
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: var(--card);
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .score-display {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-action {
+            border: none;
+            padding: 9px 15px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-check { background: var(--ok); color: #052e16; }
+        .btn-check:hover { background: #059669; color: white; }
+        .btn-shuffle { background: #0284c7; color: white; }
+        .btn-shuffle:hover { background: #0369a1; }
+        .btn-solve { background: #475569; color: #f8fafc; }
+        .btn-solve:hover { background: #64748b; }
+
+        /* Lista Ordenable */
+        .steps-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .step-item {
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: grid;
+            grid-template-columns: 42px 44px 1fr auto;
+            align-items: center;
+            gap: 12px;
+            cursor: grab;
+            transition: transform 0.15s, border-color 0.2s, background 0.2s;
+        }
+        .step-item:active { cursor: grabbing; }
+        .step-item.dragging {
+            opacity: 0.55;
+            border-color: var(--gold);
+            transform: scale(0.99);
+        }
+        .step-item.correct {
+            border-color: var(--ok);
+            background: rgba(16, 185, 129, 0.1);
+        }
+        .step-item.wrong {
+            border-color: var(--err);
+            background: rgba(239, 68, 68, 0.1);
+        }
+        @media (max-width: 680px) {
+            .step-item {
+                grid-template-columns: 34px 38px 1fr;
+            }
+            .move-controls {
+                grid-column: 1 / -1;
+                justify-content: flex-end;
+            }
+        }
+
+        .pos-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: #1e293b;
+            border: 1px solid #475569;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--muted);
+        }
+        .key-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(56, 189, 248, 0.15);
+            border: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 15px;
+            color: var(--accent);
+        }
+        .step-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .step-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #f1f5f9;
+            line-height: 1.35;
+        }
+        .step-feedback {
+            font-size: 12px;
+            line-height: 1.4;
+            display: none;
+            padding-top: 4px;
+        }
+        .move-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .phase-tag {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: #1e293b;
+            color: #cbd5e1;
+            border: 1px solid #334155;
+            margin-right: 4px;
+            white-space: nowrap;
+        }
+        .arrow-btn {
+            background: #1e293b;
+            border: 1px solid #475569;
+            color: #f8fafc;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.15s;
+        }
+        .arrow-btn:hover:not(:disabled) {
+            background: var(--accent);
+            color: #0f172a;
+            border-color: var(--accent);
+        }
+        .arrow-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .summary-banner {
+            margin-top: 16px;
+            padding: 15px;
+            border-radius: 12px;
+            background: var(--card);
+            border-left: 5px solid var(--gold);
+            font-size: 13.5px;
+            line-height: 1.5;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="top-bar">
+        <a href="index.html" class="back-btn">⬅ Volver al Menú Principal</a>
+        <span class="badge">CECYBOOK SEMANA 15 • PÁGINA 32 (EJERCITANDO MI HABILIDAD)</span>
+    </div>
+
+    <header>
+        <h1>🧩 Entrenador Autocalificable: Ordena el Proceso de Mantequilla</h1>
+        <p class="subtitle">
+            <strong>No memorices letras:</strong> Ordena los 8 pasos oficiales (Claves A–H) aplicando la secuencia lógica de ingeniería de alimentos: <em>Materia prima ➔ Acondicionamiento ➔ Transformación ➔ Estabilización</em>.
+        </p>
+    </header>
+
+    <!-- Bloques de Lógica Tecnológica -->
+    <div class="logic-chain">
+        <div class="logic-pill">
+            <strong>1. Materia Prima (Pasos 1–2)</strong>
+            <span>Recepción, descremado y estandarización (35–42% grasa)</span>
+        </div>
+        <div class="logic-pill" style="border-top-color: #f59e0b;">
+            <strong>2. Acondicionamiento (Pasos 3–4)</strong>
+            <span>Pasteurización (85 °C/15 s) y maduración física en frío</span>
+        </div>
+        <div class="logic-pill" style="border-top-color: #eab308;">
+            <strong>3. Transformación (Pasos 5–6)</strong>
+            <span>Batido (inversión O/W a W/O), drenado de suero y lavado</span>
+        </div>
+        <div class="logic-pill" style="border-top-color: #10b981;">
+            <strong>4. Estabilización (Pasos 7–8)</strong>
+            <span>Amasado (working), salado (1–2%) y envasado en frío</span>
+        </div>
+    </div>
+
+    <div class="action-bar">
+        <div class="score-display" id="score-text">Arrastra las tarjetas o usa las flechas (↑ / ↓) para ordenar los pasos del 1° al 8°.</div>
+        <div class="btn-group">
+            <button class="btn-action btn-check" onclick="evaluateOrder()">✅ Verificar Orden</button>
+            <button class="btn-action btn-shuffle" onclick="shuffleSteps()">🔀 Revolver de Nuevo</button>
+            <button class="btn-action btn-solve" onclick="showSolution()">💡 Mostrar Orden Correcto</button>
+        </div>
+    </div>
+
+    <div class="steps-list" id="steps-container"></div>
+
+    <div class="summary-banner" id="summary-banner"></div>
+</div>
+
+<script>
+// Los 8 pasos oficiales de la página 32 del CECYBOOK Semana 15
+const CORRECT_STEPS = [
+    {
+        order: 1,
+        key: 'C',
+        phase: '1. Materia Prima',
+        text: 'Recibir y evaluar la leche o crema base.',
+        rationale: 'Todo proceso lácteo inicia verificando calidad fisicoquímica (acidez, densidad, grasa) e inocuidad de la materia prima en recepción (2–4 °C).'
+    },
+    {
+        order: 2,
+        key: 'E',
+        phase: '1. Materia Prima',
+        text: 'Separar la crema y estandarizar su contenido de grasa según el producto objetivo.',
+        rationale: 'Mediante centrifugación se concentra la fracción grasa y se estandariza típicamente entre 35 y 42% m/m para alimentar la línea de mantequilla.'
+    },
+    {
+        order: 3,
+        key: 'F',
+        phase: '2. Acondicionamiento',
+        text: 'Pasteurizar la crema mediante el proceso establecido y enfriar.',
+        rationale: 'La crema estandarizada se pasteuriza (ej. 85 °C por 15 s) para eliminar patógenos e inactivar enzimas lipolíticas que causarían rancidez.'
+    },
+    {
+        order: 4,
+        key: 'G',
+        phase: '2. Acondicionamiento',
+        text: 'Madurar físicamente la crema en frío para desarrollar la fracción sólida de grasa requerida.',
+        rationale: 'Antes de batir, el reposo en frío permite cristalizar parcialmente los triglicéridos. Sin este equilibrio sólido/líquido el batido falla.'
+    },
+    {
+        order: 5,
+        key: 'A',
+        keyColor: '#fcd34d',
+        phase: '3. Transformación',
+        text: 'Batir la crema hasta observar formación de gránulos y separación del suero de mantequilla.',
+        rationale: 'La energía mecánica rompe la membrana MFGM, une los glóbulos por coalescencia e invierte la emulsión de O/W a W/O (8–15 °C).'
+    },
+    {
+        order: 6,
+        key: 'H',
+        phase: '3. Transformación',
+        text: 'Drenar el suero de mantequilla y efectuar lavado si forma parte del procedimiento.',
+        rationale: 'Una vez formados los gránulos amarillentos, se separa el buttermilk y se lava con agua fría (8–15 °C) para remover lactosa y solubles residuales.'
+    },
+    {
+        order: 7,
+        key: 'D',
+        phase: '4. Estabilización',
+        text: 'Amasar para distribuir humedad y lograr textura uniforme; salar si corresponde.',
+        rationale: 'El amasado (working) une los gránulos en una masa plástica, microdistribuye el agua (≤ 16%, evitando el "llorado") e incorpora 1–2% de sal.'
+    },
+    {
+        order: 8,
+        key: 'B',
+        phase: '4. Estabilización',
+        text: 'Envasar y mantener el producto bajo las condiciones de conservación establecidas.',
+        rationale: 'El bloque plástico con ≥ 80% de grasa se moldea, envasa higiénicamente y se almacena en refrigeración protegida de la luz y el oxígeno.'
+    }
+];
+
+let currentList = [];
+let draggedIdx = null;
+
+function shuffleSteps() {
+    currentList = [...CORRECT_STEPS];
+    // Mezclar garantizando que no quede ordenado de inicio
+    for (let i = currentList.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [currentList[i], currentList[j]] = [currentList[j], currentList[i]];
+    }
+    document.getElementById('score-text').innerHTML = 'Arrastra las tarjetas o usa las flechas (↑ / ↓) para ordenar los pasos del 1° al 8°.';
+    document.getElementById('summary-banner').style.display = 'none';
+    renderList(false);
+}
+
+function moveItem(index, direction) {
+    const targetIdx = index + direction;
+    if (targetIdx < 0 || targetIdx >= currentList.length) return;
+    const temp = currentList[index];
+    currentList[index] = currentList[targetIdx];
+    currentList[targetIdx] = temp;
+    renderList(false);
+}
+
+function renderList(showValidation) {
+    const container = document.getElementById('steps-container');
+    container.innerHTML = '';
+
+    currentList.forEach((item, idx) => {
+        const pos = idx + 1;
+        const isRight = item.order === pos;
+
+        const row = document.createElement('div');
+        row.className = 'step-item' + (showValidation ? (isRight ? ' correct' : ' wrong') : '');
+        row.draggable = true;
+
+        row.addEventListener('dragstart', () => {
+            draggedIdx = idx;
+            row.classList.add('dragging');
+        });
+        row.addEventListener('dragend', () => {
+            row.classList.remove('dragging');
+        });
+        row.addEventListener('dragover', (e) => e.preventDefault());
+        row.addEventListener('drop', () => {
+            if (draggedIdx === null || draggedIdx === idx) return;
+            const moved = currentList.splice(draggedIdx, 1)[0];
+            currentList.splice(idx, 0, moved);
+            draggedIdx = null;
+            renderList(false);
+        });
+
+        let feedbackHtml = '';
+        if (showValidation) {
+            if (isRight) {
+                feedbackHtml = `<div class="step-feedback" style="display:block; color:#34d399;">✅ <strong>¡Posición ${pos}° Correcta! (${item.phase}):</strong> ${item.rationale}</div>`;
+            } else {
+                feedbackHtml = `<div class="step-feedback" style="display:block; color:#fca5a5;">❌ <strong>Desviación de secuencia:</strong> La clave <b>${item.key}</b> pertenece a la etapa de <em>${item.phase}</em>. ${item.rationale}</div>`;
+            }
+        }
+
+        row.innerHTML = `
+            <div class="pos-badge">${pos}°</div>
+            <div class="key-badge">${item.key}</div>
+            <div class="step-content">
+                <div class="step-text">${item.text}</div>
+                ${feedbackHtml}
+            </div>
+            <div class="move-controls">
+                <span class="phase-tag">${item.phase}</span>
+                <button class="arrow-btn" onclick="moveItem(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} title="Subir paso">↑</button>
+                <button class="arrow-btn" onclick="moveItem(${idx}, 1)" ${idx === currentList.length - 1 ? 'disabled' : ''} title="Bajar paso">↓</button>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+}
+
+function evaluateOrder() {
+    let hits = 0;
+    currentList.forEach((item, idx) => {
+        if (item.order === idx + 1) hits++;
+    });
+
+    renderList(true);
+
+    const scoreEl = document.getElementById('score-text');
+    const banner = document.getElementById('summary-banner');
+    banner.style.display = 'block';
+
+    if (hits === 8) {
+        scoreEl.innerHTML = `🏆 ¡Excelente! 8 / 8 pasos en el orden tecnológico correcto (C ➔ E ➔ F ➔ G ➔ A ➔ H ➔ D ➔ B).`;
+        scoreEl.style.color = '#34d399';
+        banner.style.borderLeftColor = '#10b981';
+        banner.innerHTML = `
+            <strong>🎉 ¡Dominio Completo de la Línea de Mantequilla!</strong><br>
+            Has ordenado con precisión las 4 etapas: <b>1) Materia prima (C, E)</b> obteniendo crema al 35–42% de grasa; <b>2) Acondicionamiento (F, G)</b> pasteurizando y madurando físicamente en frío; <b>3) Transformación (A, H)</b> batiendo para invertir la emulsión (O/W a W/O) y drenando el buttermilk; y <b>4) Estabilización (D, B)</b> mediante el amasado (working), salado y envasado.
+        `;
+    } else {
+        scoreEl.innerHTML = `📊 Resultado: ${hits} de 8 pasos en la posición correcta. Revisa las pistas técnicas en rojo.`;
+        scoreEl.style.color = '#fcd34d';
+        banner.style.borderLeftColor = '#f59e0b';
+        banner.innerHTML = `
+            <strong>💡 Tip de Ingeniería de Procesos:</strong> Recuerda que no puedes <b>batir (A)</b> sin antes haber <b>pasteurizado (F)</b> y <b>madurado físicamente en frío (G)</b> la crema, ni puedes <b>amasar (D)</b> sin haber <b>drenado primero el suero de mantequilla (H)</b>.
+        `;
+    }
+}
+
+function showSolution() {
+    currentList = [...CORRECT_STEPS];
+    evaluateOrder();
+}
+
+shuffleSteps();
+</script>
+
+</body>
+</html>

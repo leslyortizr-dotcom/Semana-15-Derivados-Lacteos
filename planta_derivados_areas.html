@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Industrial: Planta de Crema, Mantequilla y Helado - Semana 15</title>
+    <style>
+        :root {
+            --bg: #0b1120;
+            --panel: #1e293b;
+            --card: #0f172a;
+            --border: #334155;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --accent: #38bdf8;
+            --gold: #fcd34d;
+            --ok: #10b981;
+            --warn: #f59e0b;
+            --err: #ef4444;
+            --purple: #a855f7;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 18px;
+            display: flex;
+            justify-content: center;
+        }
+        .app-container {
+            max-width: 1260px;
+            width: 100%;
+            background: var(--panel);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.65);
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #334155;
+            color: #f8fafc;
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            border: 1px solid #475569;
+            transition: 0.2s;
+        }
+        .back-btn:hover { background: #475569; border-color: var(--accent); }
+        .badge {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid var(--ok);
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        header {
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+        }
+        h1 { margin: 0 0 6px 0; color: var(--gold); font-size: 24px; }
+        .subtitle { color: var(--muted); margin: 0 auto; max-width: 920px; font-size: 14px; line-height: 1.45; }
+
+        /* Barra de Filtros de Flujo */
+        .flow-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .route-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .route-btn {
+            background: #1e293b;
+            border: 1px solid #475569;
+            color: #e2e8f0;
+            padding: 8px 13px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .route-btn:hover { border-color: var(--accent); }
+        .route-btn.active-all { background: #0284c7; border-color: var(--accent); color: white; }
+        .route-btn.active-cream { background: #d97706; border-color: var(--gold); color: white; }
+        .route-btn.active-butter { background: #ca8a04; border-color: #fde047; color: #0f172a; }
+        .route-btn.active-ice { background: #7e22ce; border-color: #c084fc; color: white; }
+
+        .zone-legend {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            flex-wrap: wrap;
+        }
+        .z-item { display: flex; align-items: center; gap: 5px; color: #cbd5e1; }
+        .z-box { width: 13px; height: 13px; border-radius: 3px; display: inline-block; }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 1fr 390px;
+            gap: 18px;
+        }
+        @media (max-width: 1024px) {
+            .layout-grid { grid-template-columns: 1fr; }
+        }
+
+        .canvas-container {
+            background: #070d19;
+            border: 3px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+        canvas#plantCanvas {
+            display: block;
+            width: 100%;
+            height: 520px;
+            cursor: pointer;
+        }
+        .canvas-hint {
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            padding: 8px 14px;
+            font-size: 12px;
+            color: var(--muted);
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* Panel Inspector Derecho */
+        .inspector-panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .area-header {
+            border-bottom: 1px solid #1e293b;
+            padding-bottom: 10px;
+        }
+        .area-zone-tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 6px;
+            margin-bottom: 5px;
+        }
+        .area-header h2 {
+            margin: 0;
+            font-size: 18px;
+            color: var(--gold);
+        }
+        .info-section {
+            background: #1e293b;
+            border-left: 4px solid var(--accent);
+            border-radius: 8px;
+            padding: 11px 12px;
+            font-size: 12.5px;
+            line-height: 1.45;
+        }
+        .info-section h4 {
+            margin: 0 0 4px 0;
+            font-size: 13px;
+            color: var(--gold);
+        }
+        .param-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .param-card {
+            background: #1e293b;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 10px;
+        }
+        .param-card small {
+            display: block;
+            font-size: 10.5px;
+            color: var(--muted);
+        }
+        .param-card strong {
+            font-size: 12.5px;
+            color: #f8fafc;
+        }
+
+        .area-quick-btns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-top: 4px;
+        }
+        .q-btn {
+            background: #1e293b;
+            border: 1px solid var(--border);
+            color: #cbd5e1;
+            padding: 6px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .q-btn.active {
+            background: var(--accent);
+            color: #0f172a;
+            border-color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="top-bar">
+        <a href="index.html" class="back-btn">⬅ Volver al Menú Principal</a>
+        <span class="badge">CECYBOOK SEMANA 15 • LAYOUT INDUSTRIAL MULTIPRODUCTO</span>
+    </div>
+
+    <header>
+        <h1>🗺️ Plano Interactivo de Distribución de Planta (Crema, Mantequilla y Helado)</h1>
+        <p class="subtitle">
+            <strong>Una misma recepción láctea, tres líneas de proceso:</strong> Haz clic sobre cualquiera de las salas operativas del plano o filtra por ruta tecnológica para explorar equipos, parámetros críticos, flujos de tubería y zonificación sanitaria BPM.
+        </p>
+    </header>
+
+    <div class="flow-toolbar">
+        <div class="route-group">
+            <button id="r-all" class="route-btn active-all" onclick="setRouteFilter('all')">🔄 Ver las 3 Rutas</button>
+            <button id="r-cream" class="route-btn" onclick="setRouteFilter('cream')">🥣 Ruta 1: Crema</button>
+            <button id="r-butter" class="route-btn" onclick="setRouteFilter('butter')">🧈 Ruta 2: Mantequilla</button>
+            <button id="r-ice" class="route-btn" onclick="setRouteFilter('ice')">🍨 Ruta 3: Helado</button>
+        </div>
+
+        <div class="zone-legend">
+            <div class="z-item"><span class="z-box" style="background:rgba(245, 158, 11, 0.25); border:1.5px solid #f59e0b;"></span> Zona Gris (Recepción/Servicios)</div>
+            <div class="z-item"><span class="z-box" style="background:rgba(56, 189, 248, 0.2); border:1.5px solid #38bdf8;"></span> Zona Blanca (Proceso Húmedo)</div>
+            <div class="z-item"><span class="z-box" style="background:rgba(16, 185, 129, 0.22); border:1.5px solid #10b981;"></span> Zona Alta Higiene (Post-Pasteurización)</div>
+            <div class="z-item"><span class="z-box" style="background:rgba(168, 85, 247, 0.22); border:1.5px solid #a855f7;"></span> Cadena de Frío / Congelación</div>
+        </div>
+    </div>
+
+    <div class="layout-grid">
+        <!-- Plano Arquitectónico en Canvas -->
+        <div class="canvas-container">
+            <canvas id="plantCanvas" width="800" height="520"></canvas>
+            <div class="canvas-hint">
+                <span>💡 <strong>Interactivo:</strong> Haz clic directo en cualquier sala del plano para inspeccionar equipos y controles PCC.</span>
+                <span>Flujo unidireccional sin cruces sanitarios</span>
+            </div>
+        </div>
+
+        <!-- Panel Inspector de Área -->
+        <div class="inspector-panel">
+            <div class="area-quick-btns" id="quick-btns"></div>
+            <div id="inspector-content"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('plantCanvas');
+const ctx = canvas.getContext('2d');
+
+let activeRoute = 'all'; // 'all', 'cream', 'butter', 'ice'
+let selectedAreaId = 1;
+let animTick = 0;
+
+// Definición de las salas operativas con texto compacto (tempCanvas) para evitar empalmes en el lienzo
+const PLANT_AREAS = [
+    {
+        id: 1,
+        code: 'ÁREA 1',
+        name: 'Recepción, Filtración y Enfriamiento',
+        short: 'Recepción Leche',
+        x: 25, y: 30, w: 230, h: 135,
+        zone: 'Zona Gris / Recepción',
+        zoneColor: '#f59e0b',
+        routes: ['cream', 'butter', 'ice'],
+        equip: 'Filtro sanitario en línea, Clarificador centrífugo, Tanques isotérmicos (2–4 °C).',
+        tempCanvas: 'Leche cruda: 2 a 4 °C',
+        temp: '2 – 4 °C (Refrigeración)',
+        pcc: 'Acidez titulable, densidad, antibióticos e inocuidad inicial.',
+        process: 'Se recibe la leche cruda, se filtra/clarifica para eliminar partículas finas y se almacena refrigerada antes de pasar a descremado (Figura 8, Pasos 1–3).',
+        norm: 'Materia prima común para las tres líneas (Clave C en secuencia de mantequilla).'
+    },
+    {
+        id: 2,
+        code: 'ÁREA 2',
+        name: 'Separación Centrífuga y Estandarización',
+        short: 'Centrífuga / Estand.',
+        x: 285, y: 30, w: 245, h: 135,
+        zone: 'Zona Blanca / Proceso Primario',
+        zoneColor: '#38bdf8',
+        routes: ['cream', 'butter', 'ice'],
+        equip: 'Descremadora centrífuga de discos, Tanques de estandarización automática en línea.',
+        tempCanvas: 'Separación: 50–55 °C',
+        temp: '50 – 55 °C (Descremado)',
+        pcc: '% Grasa: Ligera (10–18%), Mesa (20–30%), Para batir / Mantequilla (35–42%).',
+        process: 'La fuerza centrífuga envía los glóbulos grasos (menos densos, con MFGM intacta) al centro como crema y desplaza la leche descremada (≤ 0.5% grasa) a la periferia (Figuras 3, 5 y 8).',
+        norm: 'NMX-F-731-COFOCALEC-2017 y NOM-155-SCFI-2012.'
+    },
+    {
+        id: 3,
+        code: 'ÁREA 3',
+        name: 'Pasteurización HTST, Homogeneización y Crema',
+        short: 'Pasteuriz. / Crema',
+        x: 560, y: 30, w: 215, h: 135,
+        zone: 'Zona Alta Higiene (PCC Térmico)',
+        zoneColor: '#10b981',
+        routes: ['cream', 'butter', 'ice'],
+        equip: 'Pasteurizador de placas HTST, Homogeneizador de alta presión, Envasadora de crema.',
+        tempCanvas: 'HTST: 85–95 °C / 15–30 s',
+        temp: '85–95 °C / 15–30 s (Enf. 2–6 °C)',
+        pcc: 'Fosfatasa residual ≤ 4 UF/g (NOM-243) y presión de homogeneización.',
+        process: 'Inactiva patógenos y lipasas. En crema para batir se evita sobre-homogeneizar para no perder capacidad de batido. Desde aquí la crema pasteurizada se envasa o se envía a Mantequilla / Helados (Figuras 6 y 8).',
+        norm: 'NOM-243-SSA1-2010: Coliformes < 10 UFC/g, S. aureus < 100 UFC/g, Salmonella ausente.'
+    },
+    {
+        id: 4,
+        code: 'ÁREA 4',
+        name: 'Maduración Física y Batido (Churning)',
+        short: 'Batido Mantequilla',
+        x: 25, y: 200, w: 230, h: 140,
+        zone: 'Zona Alta Higiene (Línea Mantequilla)',
+        zoneColor: '#10b981',
+        routes: ['butter'],
+        equip: 'Tanques de maduración física en frío y Mantequillera rotatoria / continua (Churn).',
+        tempCanvas: 'Batido: 8–15 °C (20–40 min)',
+        temp: 'Batido: 8 – 15 °C (20–40 min)',
+        pcc: 'Proporción grasa sólida/líquida y pérdidas de grasa en buttermilk.',
+        process: 'La crema (35–42% grasa) reposa en frío para cristalizar parcialmente la grasa. Luego el batido mecánico rompe la MFGM e invierte la emulsión de O/W a W/O, formando gránulos y separando el buttermilk (Figuras 9, 10, 11 y 14).',
+        norm: 'Si se bate muy tibia (>16 °C) da masa blanda; muy fría (<6 °C) da textura quebradiza.'
+    },
+    {
+        id: 5,
+        code: 'ÁREA 5',
+        name: 'Lavado, Amasado (Working), Salado y Moldeo',
+        short: 'Amasado y Salado',
+        x: 285, y: 200, w: 245, h: 140,
+        zone: 'Zona Alta Higiene (Estabilización W/O)',
+        zoneColor: '#10b981',
+        routes: ['butter'],
+        equip: 'Drenador de suero, Tornillos sinfín de amasado (Working), Dosificador de sal fina y Moldeadora.',
+        tempCanvas: 'Agua lavado: 8 a 15 °C',
+        temp: 'Agua lavado: 8 – 15 °C',
+        pcc: 'Microdistribución de agua (evitar "llorado") y dosificación de sal (1–2%).',
+        process: 'Se drena el buttermilk, se lavan los gránulos con agua fría (8–15 °C) y se amasa (working) para unir la masa y dispersar el agua en microgotas uniformes. Se incorpora 1–2% de sal fina y se envasa (Figura 12).',
+        norm: 'Codex CXS 279-1971 / NMX-F-729: Mín. 80% grasa, máx. 16% agua, máx. 2% SNG.'
+    },
+    {
+        id: 6,
+        code: 'ÁREA 6',
+        name: 'Formulación, Pasteurización y Homogeneización del Mix',
+        short: 'Mix de Helado',
+        x: 560, y: 200, w: 215, h: 140,
+        zone: 'Zona Blanca / Preparación Mix',
+        zoneColor: '#38bdf8',
+        routes: ['ice'],
+        equip: 'Tanque mezclador, Intercambiador de placas HTST (80–85 °C/15–30 s), Homogeneizador 2 etapas.',
+        tempCanvas: 'Past: 80–85°C | Hom: 70°C',
+        temp: 'Past: 80–85 °C | Homog: 65–75 °C',
+        pcc: 'Presión homogeneización: 10–25 MPa (100–250 bar) para glóbulos de 0.2–2 µm.',
+        process: 'Se integran crema/leche, SNG, azúcares (bajan punto de congelación), estabilizantes (viscosidad) y emulsionantes. Se pasteuriza y homogeneiza en caliente para afinar la emulsión (Tabla 1 y Figura 16).',
+        norm: 'NOM-243 para bases de helado: Coliformes < 50 UFC/g, Mesófilos ≤ 100,000 UFC/g.'
+    },
+    {
+        id: 7,
+        code: 'ÁREA 7',
+        name: 'Maduración del Mix y Congelación Dinámica (Overrun)',
+        short: 'Freezer y Overrun',
+        x: 285, y: 370, w: 245, h: 125,
+        zone: 'Zona Alta Higiene / Frío Dinámico',
+        zoneColor: '#a855f7',
+        routes: ['ice'],
+        equip: 'Tanques de maduración (2–5 °C) y Congelador continuo con cuchillas raspadoras (100–300 rpm).',
+        tempCanvas: 'Mad: 2–5 °C | Salida: -5 °C',
+        temp: 'Maduración: 2–5 °C (4–24 h) | Salida: -4 a -6 °C',
+        pcc: 'Overrun (60–100% aire) y cristales de hielo pequeños (< 50 µm).',
+        process: 'En la maduración (4–24 h) se hidratan proteínas/gomas y cristaliza parcialmente la grasa. En el freezer se inyecta aire (overrun) mientras se raspa hielo fino y la grasa coalescida rodea las burbujas (Figuras 17–20).',
+        norm: 'Fórmula Overrun por masa (1.0 L): [(M_mix - M_helado) / M_helado] × 100.'
+    },
+    {
+        id: 8,
+        code: 'ÁREA 8',
+        name: 'Túnel de Endurecimiento y Cámaras de Cadena de Frío',
+        short: 'Túnel y Cámaras Frías',
+        x: 25, y: 370, w: 230, h: 125,
+        zone: 'Cadena de Frío y Despacho Final',
+        zoneColor: '#a855f7',
+        routes: ['cream', 'butter', 'ice'],
+        equip: 'Túnel de endurecimiento rápido (-25 a -40 °C), Cámara de congelación (≤ -18 °C) y Cámara de refrigeración (2–6 °C).',
+        tempCanvas: 'Túnel: -30°C | Cám: ≤ -18°C',
+        temp: 'Túnel: -25 a -40 °C | Conservación: ≤ -18 °C (Helado) y 2–6 °C (Crema/Mant.)',
+        pcc: 'Estabilidad térmica estricta para impedir recristalización de hielo (> 50 µm).',
+        process: 'El helado semiblando (-5 °C) se endurece en 15–60 min a -25/-40 °C y se almacena a ≤ -18 °C. Crema y mantequilla se conservan a 2–6 °C listas para distribución (Figuras 22 y 23).',
+        norm: 'NOM-243 Helados: Coliformes < 100 UFC/g, Mesófilos ≤ 200,000 UFC/g, Listeria y Salmonella ausentes en 25 g.'
+    },
+    {
+        id: 9,
+        code: 'LAB / CIP',
+        name: 'Laboratorio de Control de Calidad y Central CIP',
+        short: 'Lab Calidad / CIP',
+        x: 560, y: 370, w: 215, h: 125,
+        zone: 'Zona de Soporte y Auditoría Sanitaria',
+        zoneColor: '#f59e0b',
+        routes: ['cream', 'butter', 'ice'],
+        equip: 'Balanza analítica de overrun, butirómetros Gerber, incubadoras microbiológicas y central CIP.',
+        tempCanvas: '20 °C (Lab Climatizado)',
+        temp: '20 °C (Laboratorio Climatizado)',
+        pcc: 'Liberación de lotes bajo lógica: Dato observado ➔ Causa ➔ Etapa ➔ Decisión.',
+        process: 'Audita fosfatasa residual, % de grasa, humedad en mantequilla (≤ 16%), overrun en helado y microbiología NOM-243 antes de liberar cualquier lote (Tablas 3 y 4).',
+        norm: 'Garantiza que ningún lote con desviación sanitaria salga al mercado aunque cumpla en grasa.'
+    }
+];
+
+const PIPELINES = [
+    { from: 1, to: 2, route: 'cream', color: '#38bdf8' },
+    { from: 2, to: 3, route: 'cream', color: '#fcd34d' },
+    { from: 3, to: 8, route: 'cream', color: '#38bdf8' },
+    { from: 1, to: 2, route: 'butter', color: '#38bdf8' },
+    { from: 2, to: 3, route: 'butter', color: '#fde047' },
+    { from: 3, to: 4, route: 'butter', color: '#eab308' },
+    { from: 4, to: 5, route: 'butter', color: '#eab308' },
+    { from: 5, to: 8, route: 'butter', color: '#facc15' },
+    { from: 1, to: 2, route: 'ice', color: '#38bdf8' },
+    { from: 2, to: 3, route: 'ice', color: '#c084fc' },
+    { from: 3, to: 6, route: 'ice', color: '#c084fc' },
+    { from: 6, to: 7, route: 'ice', color: '#a855f7' },
+    { from: 7, to: 8, route: 'ice', color: '#38bdf8' }
+];
+
+function setRouteFilter(route) {
+    activeRoute = route;
+    document.getElementById('r-all').className = 'route-btn' + (route === 'all' ? ' active-all' : '');
+    document.getElementById('r-cream').className = 'route-btn' + (route === 'cream' ? ' active-cream' : '');
+    document.getElementById('r-butter').className = 'route-btn' + (route === 'butter' ? ' active-butter' : '');
+    document.getElementById('r-ice').className = 'route-btn' + (route === 'ice' ? ' active-ice' : '');
+}
+
+function selectArea(id) {
+    selectedAreaId = id;
+    renderInspector();
+}
+
+function renderInspector() {
+    const area = PLANT_AREAS.find(a => a.id === selectedAreaId);
+    const qContainer = document.getElementById('quick-btns');
+
+    qContainer.innerHTML = PLANT_AREAS.map(a => `
+        <button class="q-btn ${a.id === selectedAreaId ? 'active' : ''}" onclick="selectArea(${a.id})">
+            ${a.id === 9 ? 'Lab / CIP' : 'Área ' + a.id}
+        </button>
+    `).join('');
+
+    const content = document.getElementById('inspector-content');
+    content.innerHTML = `
+        <div class="area-header">
+            <span class="area-zone-tag" style="background:${area.zoneColor}25; color:${area.zoneColor}; border:1px solid ${area.zoneColor};">
+                ${area.zone}
+            </span>
+            <h2>${area.code}: ${area.name}</h2>
+        </div>
+
+        <div class="param-grid">
+            <div class="param-card">
+                <small>🌡️ Condición Térmica</small>
+                <strong style="color:#fcd34d;">${area.temp}</strong>
+            </div>
+            <div class="param-card">
+                <small>🎯 Punto Crítico (PCC)</small>
+                <strong style="color:#38bdf8;">Control en Línea</strong>
+            </div>
+        </div>
+
+        <div class="info-section" style="border-left-color:#38bdf8;">
+            <h4>⚙️ Equipos Principales</h4>
+            ${area.equip}
+        </div>
+
+        <div class="info-section" style="border-left-color:#f59e0b;">
+            <h4>🔬 Operación Tecnológica (Semana 15)</h4>
+            ${area.process}
+        </div>
+
+        <div class="info-section" style="border-left-color:#10b981;">
+            <h4>📋 Variable de Control y Normatividad</h4>
+            <strong>Variable clave:</strong> ${area.pcc}<br>
+            <strong>Criterio:</strong> ${area.norm}
+        </div>
+    `;
+}
+
+canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const mx = (e.clientX - rect.left) * scaleX;
+    const my = (e.clientY - rect.top) * scaleY;
+
+    for (const area of PLANT_AREAS) {
+        if (mx >= area.x && mx <= area.x + area.w && my >= area.y && my <= area.y + area.h) {
+            selectArea(area.id);
+            break;
+        }
+    }
+});
+
+function getCenter(areaId) {
+    const a = PLANT_AREAS.find(x => x.id === areaId);
+    return { x: a.x + a.w / 2, y: a.y + a.h / 2 };
+}
+
+function drawPlant() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    animTick += 0.025;
+
+    // Cuadrícula arquitectónica de fondo
+    ctx.strokeStyle = 'rgba(51, 65, 85, 0.32)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < canvas.width; x += 25) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for (let y = 0; y < canvas.height; y += 25) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+
+    // 1. Dibujar Tuberías de Proceso entre Áreas
+    PIPELINES.forEach((pipe, idx) => {
+        if (activeRoute !== 'all' && pipe.route !== activeRoute) return;
+
+        const p1 = getCenter(pipe.from);
+        const p2 = getCenter(pipe.to);
+
+        ctx.save();
+        ctx.strokeStyle = pipe.color;
+        ctx.lineWidth = 4;
+        ctx.globalAlpha = 0.65;
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+
+        // Partículas animadas de flujo en la tubería
+        let t = (animTick + idx * 0.25) % 1;
+        let fx = p1.x + (p2.x - p1.x) * t;
+        let fy = p1.y + (p2.y - p1.y) * t;
+
+        ctx.globalAlpha = 1.0;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(fx, fy, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    });
+
+    // 2. Dibujar las Salas / Áreas Operativas con recorte de seguridad (clip)
+    PLANT_AREAS.forEach(area => {
+        const isSelected = area.id === selectedAreaId;
+        const isRouteActive = activeRoute === 'all' || area.routes.includes(activeRoute) || area.id === 9;
+
+        ctx.save();
+        ctx.globalAlpha = isRouteActive ? 1.0 : 0.28;
+
+        // Fondo de la sala y región de recorte para impedir desbordes de texto
+        ctx.beginPath();
+        ctx.roundRect(area.x, area.y, area.w, area.h, 10);
+        ctx.fillStyle = isSelected ? '#1e293b' : '#0f172a';
+        ctx.fill();
+        ctx.clip();
+
+        // Franja superior de color de zona
+        ctx.fillStyle = area.zoneColor;
+        ctx.fillRect(area.x, area.y, area.w, 24);
+
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 11.5px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(area.code + ' • ' + area.short, area.x + 10, area.y + 16);
+
+        // Nombre compacto y Temperatura concisa dentro de la sala
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillText(area.name.substring(0, 27) + (area.name.length > 27 ? '...' : ''), area.x + 10, area.y + 46);
+
+        ctx.fillStyle = '#fcd34d';
+        ctx.font = '11.5px sans-serif';
+        ctx.fillText('🌡️ ' + area.tempCanvas, area.x + 10, area.y + 67);
+
+        // Iconos de las líneas que pasan por esa sala
+        let badgeX = area.x + 10;
+        if (area.routes.includes('cream')) {
+            drawMiniTag(badgeX, area.y + area.h - 26, 'Crema', '#d97706');
+            badgeX += 52;
+        }
+        if (area.routes.includes('butter')) {
+            drawMiniTag(badgeX, area.y + area.h - 26, 'Mantequilla', '#ca8a04');
+            badgeX += 76;
+        }
+        if (area.routes.includes('ice')) {
+            drawMiniTag(badgeX, area.y + area.h - 26, 'Helado', '#7e22ce');
+        }
+
+        ctx.restore();
+
+        // Dibujar el borde de la tarjeta encima del clip para que se vea nítido
+        ctx.save();
+        ctx.globalAlpha = isRouteActive ? 1.0 : 0.28;
+        ctx.strokeStyle = isSelected ? '#fcd34d' : area.zoneColor;
+        ctx.lineWidth = isSelected ? 3.5 : 2;
+        ctx.beginPath();
+        ctx.roundRect(area.x, area.y, area.w, area.h, 10);
+        ctx.stroke();
+        ctx.restore();
+    });
+
+    requestAnimationFrame(drawPlant);
+}
+
+function drawMiniTag(x, y, text, bg) {
+    ctx.fillStyle = bg;
+    ctx.beginPath();
+    ctx.roundRect(x, y, text.length * 6.2 + 10, 18, 4);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText(text, x + 5, y + 12.5);
+}
+
+renderInspector();
+drawPlant();
+</script>
+
+</body>
+</html>
