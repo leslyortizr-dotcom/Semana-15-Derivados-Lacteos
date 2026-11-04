@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Planta virtual de lácteos | Recorrido guiado y flujos por línea</title>
+<style>
+:root{
+  --navy:#18384f;--blue:#287da5;--pale:#edf5f8;--line:#d3e2e9;--ink:#203d50;--muted:#627b8b;
+  --green:#4c9879;--gold:#e9ca79;
+  --c-crema:#d97706;--c-mant:#15803d;--c-helado:#0284c7;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#eef4f7;color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial}
+header{background:linear-gradient(110deg,#18384f,#286e91);color:white;padding:20px clamp(16px,4vw,40px);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+header h1{margin:0 0 4px;font-size:clamp(22px,3vw,30px)}
+header p{margin:0;color:#dcecf4;font-size:14px}
+.back-link{background:rgba(255,255,255,.14);color:#fff;text-decoration:none;padding:8px 14px;border-radius:9px;font-weight:700;font-size:13px;border:1px solid rgba(255,255,255,.28);transition:.2s}
+.back-link:hover{background:rgba(255,255,255,.25)}
+
+main{max-width:1280px;margin:auto;padding:18px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(340px,.9fr);gap:16px}
+.panel{background:white;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 5px 18px #193e5510}
+.head{padding:13px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.head h2{margin:0;font-size:17px}
+.pill{font-size:12px;background:#e8f3f7;color:#28617e;padding:4px 10px;border-radius:30px;font-weight:700}
+
+/* Leyenda y Controles de Caudal en el Mapa */
+.flow-bar{padding:10px 16px;background:#f8fbfd;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.legend-group{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:12.5px;font-weight:700}
+.leg-item{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;background:#fff;border:1px solid var(--line)}
+.leg-dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+.toggle-all-btn{font-size:12px;padding:5px 11px;border-radius:8px;border:1px solid #b5cedb;background:#fff;color:var(--ink);font-weight:700;cursor:pointer;transition:.2s}
+.toggle-all-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+.select{padding:16px;border-bottom:1px solid var(--line);background:#fafcfd}
+.select label{font-weight:700;display:block;margin-bottom:7px;font-size:13.5px}
+select{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;font:inherit;font-weight:600;color:var(--ink);background:white;cursor:pointer}
+
+.map{padding:12px;background:#f2f7fa}
+.plant{width:100%;height:auto;display:block}
+.plant .room{fill:#f9fbfd;stroke:#b9ced9;stroke-width:2}
+
+/* Tuberías Base y Animación de Flujo Continuo */
+.pipe-casing{fill:none;stroke:#dce7ed;stroke-width:11;stroke-linecap:round;stroke-linejoin:round}
+.pipe-core{fill:none;stroke-width:5.5;stroke-linecap:round;stroke-linejoin:round;opacity:.15;transition:opacity .3s,stroke-width .3s}
+.pipe-flow{fill:none;stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:10 12;animation:flowMove 1.1s linear infinite;opacity:0;transition:opacity .3s}
+.pipe-flow.fast{animation-duration:.65s}
+
+.route-active .pipe-core{opacity:.38}
+.route-active .pipe-flow{opacity:.95}
+.segment-hot.pipe-core{opacity:.85 !important;stroke-width:7px}
+.segment-hot.pipe-flow{opacity:1 !important;stroke-width:5.5px;stroke-dasharray:8 10;filter:drop-shadow(0 0 4px rgba(0,0,0,.2))}
+
+@keyframes flowMove{
+  to{stroke-dashoffset:-44}
+}
+
+/* Salas / Áreas de Proceso */
+.plant .zone{fill:#e7f0f4;stroke:#789eb1;stroke-width:2;transition:all .25s}
+.plant .zone.in-route{fill:#ffffff;stroke:#47778f;stroke-width:2.2}
+.plant .zone.dimmed{opacity:.38;fill:#e2e8ec}
+.plant .zone.hot{fill:#fff3cd !important;stroke:#c28a17 !important;stroke-width:3.2 !important;filter:drop-shadow(0 3px 8px rgba(217,119,6,.32))}
+.plant .zone.done{fill:#eaf7ef;stroke:#4b9878}
+.plant text{font:700 12px system-ui;fill:#1e3f52;pointer-events:none}
+.plant .sub{font:600 10px system-ui;fill:#486575}
+.plant .bypass-tag{font:700 9.5px system-ui;fill:#627b8b}
+
+.note{padding:10px 14px;background:#fff8e5;color:#6b5a2f;font-size:12px;border-top:1px solid #f2e4bd;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.right{display:flex;flex-direction:column;gap:16px}
+.progress{padding:14px 17px}
+.progressrow{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:8px;font-weight:600}
+.bar{height:9px;background:#e5edf1;border-radius:99px;overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:var(--blue);transition:width .3s}
+
+.lesson{padding:18px}
+.lesson .eyebrow{color:var(--blue);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.lesson h2{margin:5px 0 8px;font-size:22px}
+.lesson p{margin:8px 0}
+.equipment{margin:12px 0;padding:11px 13px;border-radius:10px;background:#f1f7f9;border-left:4px solid var(--blue)}
+.equipment strong{display:block;font-size:11.5px;color:var(--muted);text-transform:uppercase;margin-bottom:3px}
+.route-note{margin-top:10px;padding:9px 12px;border-radius:8px;font-size:12.5px;font-weight:600;background:#f8fafc;border:1px solid var(--line)}
+
+.question{border-top:1px solid var(--line);padding:15px 18px;background:#fcfdfe}
+.question h3{font-size:15px;margin:0 0 10px}
+.choices{display:grid;gap:8px}
+.choice{background:white;border:1px solid var(--line);padding:10px 12px;border-radius:10px;text-align:left;cursor:pointer;color:var(--ink);font:inherit;transition:.15s}
+.choice:hover:not(:disabled){background:#f1f8fb;border-color:#94bdd0}
+.choice.correct{border-color:#4b9878;background:#eaf7ef;font-weight:600}
+.choice.wrong{border-color:#c76d63;background:#fff0ed}
+.feedback{min-height:44px;margin-top:10px;padding:10px 12px;border-radius:9px;background:#f3f7f9;color:var(--muted);font-size:13px}
+.feedback.good{background:#eaf7ef;color:#286344;border:1px solid #b7e1c9}
+.feedback.bad{background:#fff0ed;color:#91473f;border:1px solid #f1c4be}
+
+.nav{display:flex;justify-content:space-between;gap:10px;padding:14px 18px;border-top:1px solid var(--line);background:#fff}
+button.action{padding:9px 14px;border:1px solid #c6dce6;border-radius:9px;background:#edf6fa;color:#225c79;font-weight:700;cursor:pointer;transition:.2s}
+button.primary{background:#236d94;color:#fff;border-color:#236d94}
+button.primary:hover:not(:disabled){background:#1b5778}
+button:disabled{opacity:.45;cursor:not-allowed}
+
+.summary{padding:18px}
+.summary h2{font-size:20px;margin:6px 0 8px}
+.summary li{margin:5px 0}
+.badge{display:inline-block;padding:4px 9px;border-radius:20px;background:#eaf7ef;color:#286344;font-size:12px;font-weight:700}
+
+@media(max-width:900px){main{grid-template-columns:1fr}.right{display:flex}}
+@media(max-width:520px){main{padding:9px}.head{align-items:flex-start}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Planta virtual de productos lácteos</h1>
+    <p>Recorrido guiado con flujo continuo · Observa cómo cada línea sigue su propia tubería hacia envasado sin cruzarse.</p>
+  </div>
+  <a href="index.html" class="back-link">⬅ Volver al Menú</a>
+</header>
+
+<main>
+<section class="panel">
+  <div class="head">
+    <h2>Mapa de flujo e ingeniería de planta</h2>
+    <span class="pill" id="mapTag">Ruta seleccionada: Crema</span>
+  </div>
+
+  <!-- Barra de Leyenda de Caudales por Color -->
+  <div class="flow-bar">
+    <div class="legend-group">
+      <span class="leg-item"><span class="leg-dot" style="background:var(--c-crema)"></span> Caudal Crema (Directo a Envasado)</span>
+      <span class="leg-item"><span class="leg-dot" style="background:var(--c-mant)"></span> Caudal Mantequilla (Vía Batido/Amasado)</span>
+      <span class="leg-item"><span class="leg-dot" style="background:var(--c-helado)"></span> Caudal Helado (Vía Mix/Congelación)</span>
+    </div>
+    <button type="button" class="toggle-all-btn" id="toggleAllFlows">👁️ Ver los 3 caudales a la vez</button>
+  </div>
+
+  <div class="map">
+    <svg class="plant" viewBox="0 0 720 490" aria-label="Esquema de planta láctea con tuberías independientes">
+      <rect class="room" x="10" y="10" width="700" height="470" rx="14"/>
+
+      <!-- ==================== SISTEMA DE TUBERÍAS POR LÍNEA ==================== -->
+      <!-- 1. RUTA CREMA (Ámbar #d97706): 0 -> 1 -> 2 -> 3 -> Baja directo por colector derecho a 6 (Envasado) y 7 (Calidad) SIN pasar por Mantequilla ni Helado -->
+      <g id="pipes-crema" class="route-group">
+        <!-- Casing fondo -->
+        <path class="pipe-casing" d="M 155 68 H 190 M 320 68 H 355 M 500 68 H 535 M 675 80 H 692 V 300 H 175 V 325 M 325 360 H 375"/>
+        <!-- Tramos individuales Crema -->
+        <path class="pipe-core" stroke="var(--c-crema)" data-seg="crema-0" d="M 155 68 H 190"/>
+        <path class="pipe-flow" stroke="#fff3c4" data-seg="crema-0" d="M 155 68 H 190"/>
+
+        <path class="pipe-core" stroke="var(--c-crema)" data-seg="crema-1" d="M 320 68 H 355"/>
+        <path class="pipe-flow" stroke="#fff3c4" data-seg="crema-1" d="M 320 68 H 355"/>
+
+        <path class="pipe-core" stroke="var(--c-crema)" data-seg="crema-2" d="M 500 68 H 535"/>
+        <path class="pipe-flow" stroke="#fff3c4" data-seg="crema-2" d="M 500 68 H 535"/>
+
+        <!-- Bypass directo de 4. Crema hasta 7. Envasado sin tocar 5 ni 6 -->
+        <path class="pipe-core" stroke="var(--c-crema)" data-seg="crema-3" d="M 675 80 H 692 V 300 H 175 V 325"/>
+        <path class="pipe-flow fast" stroke="#fff3c4" data-seg="crema-3" d="M 675 80 H 692 V 300 H 175 V 325"/>
+
+        <path class="pipe-core" stroke="var(--c-crema)" data-seg="crema-4" d="M 325 360 H 375"/>
+        <path class="pipe-flow" stroke="#fff3c4" data-seg="crema-4" d="M 325 360 H 375"/>
+      </g>
+
+      <!-- 2. RUTA MANTEQUILLA (Verde #15803d): 0 -> 1 -> 2 -> 3 -> 4 (Mantequilla) -> Baja directo a 6 (Envasado) y 7 (Calidad) SIN tocar Helado -->
+      <g id="pipes-mantequilla" class="route-group">
+        <path class="pipe-casing" d="M 155 82 H 190 M 320 82 H 355 M 500 82 H 535 M 605 125 V 150 H 175 V 180 M 145 270 V 325 M 325 375 H 375"/>
+        
+        <path class="pipe-core" stroke="var(--c-mant)" data-seg="mant-0" d="M 155 82 H 190"/>
+        <path class="pipe-flow" stroke="#bbf7d0" data-seg="mant-0" d="M 155 82 H 190"/>
+
+        <path class="pipe-core" stroke="var(--c-mant)" data-seg="mant-1" d="M 320 82 H 355"/>
+        <path class="pipe-flow" stroke="#bbf7d0" data-seg="mant-1" d="M 320 82 H 355"/>
+
+        <path class="pipe-core" stroke="var(--c-mant)" data-seg="mant-2" d="M 500 82 H 535"/>
+        <path class="pipe-flow" stroke="#bbf7d0" data-seg="mant-2" d="M 500 82 H 535"/>
+
+        <!-- De Crema (3) a Mantequilla (4) -->
+        <path class="pipe-core" stroke="var(--c-mant)" data-seg="mant-3" d="M 605 125 V 150 H 175 V 180"/>
+        <path class="pipe-flow fast" stroke="#bbf7d0" data-seg="mant-3" d="M 605 125 V 150 H 175 V 180"/>
+
+        <!-- De Mantequilla (4) directo a Envasado (6) -->
+        <path class="pipe-core" stroke="var(--c-mant)" data-seg="mant-4" d="M 145 270 V 325"/>
+        <path class="pipe-flow" stroke="#bbf7d0" data-seg="mant-4" d="M 145 270 V 325"/>
+
+        <path class="pipe-core" stroke="var(--c-mant)" data-seg="mant-5" d="M 325 375 H 375"/>
+        <path class="pipe-flow" stroke="#bbf7d0" data-seg="mant-5" d="M 325 375 H 375"/>
+      </g>
+
+      <!-- 3. RUTA HELADO (Azul #0284c7): 0 -> 1 -> 2 -> Baja directo a 5 (Helado) -> Baja a 6 (Envasado) y 7 (Calidad) SIN pasar por Mantequilla -->
+      <g id="pipes-helado" class="route-group">
+        <path class="pipe-casing" d="M 155 96 H 190 M 320 96 H 355 M 445 125 V 180 M 525 270 V 288 H 245 V 325 M 325 390 H 375"/>
+
+        <path class="pipe-core" stroke="var(--c-helado)" data-seg="hel-0" d="M 155 96 H 190"/>
+        <path class="pipe-flow" stroke="#bae6fd" data-seg="hel-0" d="M 155 96 H 190"/>
+
+        <path class="pipe-core" stroke="var(--c-helado)" data-seg="hel-1" d="M 320 96 H 355"/>
+        <path class="pipe-flow" stroke="#bae6fd" data-seg="hel-1" d="M 320 96 H 355"/>
+
+        <!-- De Tratamiento/Homogeneización (2) directo a Helado (5) -->
+        <path class="pipe-core" stroke="var(--c-helado)" data-seg="hel-2" d="M 445 125 V 180"/>
+        <path class="pipe-flow fast" stroke="#bae6fd" data-seg="hel-2" d="M 445 125 V 180"/>
+
+        <!-- De Helado (5) directo a Envasado (6) sin tocar Mantequilla -->
+        <path class="pipe-core" stroke="var(--c-helado)" data-seg="hel-4" d="M 525 270 V 288 H 245 V 325"/>
+        <path class="pipe-flow fast" stroke="#bae6fd" data-seg="hel-4" d="M 525 270 V 288 H 245 V 325"/>
+
+        <path class="pipe-core" stroke="var(--c-helado)" data-seg="hel-5" d="M 325 390 H 375"/>
+        <path class="pipe-flow" stroke="#bae6fd" data-seg="hel-5" d="M 325 390 H 375"/>
+      </g>
+
+      <!-- Etiquetas de tuberías dedicadas -->
+      <text class="bypass-tag" x="684" y="294" text-anchor="end">Línea directa Crema ➔ Envasado</text>
+      <text class="bypass-tag" x="136" y="302" text-anchor="end">Mantequilla ➔</text>
+      <text class="bypass-tag" x="495" y="283" text-anchor="end">Línea Helado ➔ Envasado</text>
+
+      <!-- ==================== SALAS / ZONAS DE LA PLANTA ==================== -->
+      <g id="mapNodes">
+        <!-- 0: Recepción -->
+        <g data-key="0">
+          <rect class="zone" x="25" y="35" width="130" height="90" rx="9"/>
+          <text x="90" y="55" text-anchor="middle">1. Recepción</text>
+          <rect x="58" y="66" width="64" height="34" rx="6" fill="#c9e0e9" stroke="#47778f"/>
+          <text class="sub" x="90" y="114" text-anchor="middle">Leche / Insumos</text>
+        </g>
+
+        <!-- 1: Separación / Mezclado -->
+        <g data-key="1">
+          <rect class="zone" x="190" y="35" width="130" height="90" rx="9"/>
+          <text x="255" y="55" text-anchor="middle">2. Separación / Mix</text>
+          <path d="M233 68h44l-6 30h-32z" fill="#c9e0e9" stroke="#47778f"/>
+          <text class="sub" x="255" y="114" text-anchor="middle">Descremadora / Mezcla</text>
+        </g>
+
+        <!-- 2: Tratamiento Térmico -->
+        <g data-key="2">
+          <rect class="zone" x="355" y="35" width="145" height="90" rx="9"/>
+          <text x="427" y="55" text-anchor="middle">3. Tratamiento</text>
+          <rect x="379" y="68" width="96" height="30" rx="5" fill="#c9e0e9" stroke="#47778f"/>
+          <text class="sub" x="427" y="114" text-anchor="middle">Pasteuriz. / Homog.</text>
+        </g>
+
+        <!-- 3: Crema -->
+        <g data-key="3">
+          <rect class="zone" x="535" y="35" width="140" height="90" rx="9"/>
+          <text x="605" y="55" text-anchor="middle">4. Crema</text>
+          <rect x="570" y="68" width="70" height="30" rx="6" fill="#fde68a" stroke="#b45309"/>
+          <text class="sub" x="605" y="114" text-anchor="middle">Estandarización</text>
+        </g>
+
+        <!-- 4: Mantequilla (Exclusiva ruta mantequilla) -->
+        <g data-key="4">
+          <rect class="zone" x="25" y="180" width="300" height="90" rx="9"/>
+          <text x="175" y="200" text-anchor="middle">5. Línea Exclusiva Mantequilla</text>
+          <rect x="65" y="212" width="78" height="30" rx="6" fill="#fde68a" stroke="#b45309"/>
+          <rect x="195" y="212" width="85" height="30" rx="6" fill="#bbf7d0" stroke="#15803d"/>
+          <text class="sub" x="104" y="256" text-anchor="middle">Batidora (Churn)</text>
+          <text class="sub" x="237" y="256" text-anchor="middle">Drenado y Amasado</text>
+        </g>
+
+        <!-- 5: Helado (Exclusiva ruta helado) -->
+        <g data-key="5">
+          <rect class="zone" x="375" y="180" width="300" height="90" rx="9"/>
+          <text x="525" y="200" text-anchor="middle">6. Línea Exclusiva Helado</text>
+          <rect x="405" y="212" width="72" height="30" rx="6" fill="#bae6fd" stroke="#0284c7"/>
+          <rect x="500" y="212" width="75" height="30" rx="6" fill="#d7f0e4" stroke="#4c8b70"/>
+          <rect x="595" y="212" width="58" height="30" rx="6" fill="#c7d2fe" stroke="#4338ca"/>
+          <text class="sub" x="441" y="256" text-anchor="middle">Maduración</text>
+          <text class="sub" x="537" y="256" text-anchor="middle">Freezer (Overrun)</text>
+          <text class="sub" x="624" y="256" text-anchor="middle">Túnel Frío</text>
+        </g>
+
+        <!-- 6: Envasado -->
+        <g data-key="6">
+          <rect class="zone" x="25" y="325" width="300" height="105" rx="9"/>
+          <text x="175" y="347" text-anchor="middle">7. Envasado y Conservación</text>
+          <rect x="70" y="360" width="70" height="34" rx="5" fill="#c9e0e9" stroke="#47778f"/>
+          <rect x="195" y="360" width="70" height="34" rx="5" fill="#c9e0e9" stroke="#47778f"/>
+          <text class="sub" x="105" y="410" text-anchor="middle">Dosificado / Moldeo</text>
+          <text class="sub" x="230" y="410" text-anchor="middle">Sellado y Frío</text>
+        </g>
+
+        <!-- 7: Calidad -->
+        <g data-key="7">
+          <rect class="zone" x="375" y="325" width="300" height="105" rx="9"/>
+          <text x="525" y="347" text-anchor="middle">8. Control de Calidad y Liberación</text>
+          <rect x="425" y="360" width="75" height="34" rx="5" fill="#c9e0e9" stroke="#47778f"/>
+          <rect x="545" y="360" width="75" height="34" rx="5" fill="#c9e0e9" stroke="#47778f"/>
+          <text class="sub" x="462" y="410" text-anchor="middle">Fisicoquímico / NOM</text>
+          <text class="sub" x="582" y="410" text-anchor="middle">Liberación Lote</text>
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="note">
+    <span><strong>Nota de flujo:</strong> Las salas atenuadas no participan en el producto elegido (ej. la crema va directo de Estandarización a Envasado sin pasar por Mantequilla ni Helado).</span>
+    <span>Flujo continuo animado</span>
+  </div>
+
+  <div class="progress">
+    <div class="progressrow">
+      <span id="progressText">Selecciona un producto y pulsa Comenzar</span>
+      <span id="percent">0 %</span>
+    </div>
+    <div class="bar"><span id="bar"></span></div>
+  </div>
+</section>
+
+<div class="right">
+  <section class="panel">
+    <div class="head">
+      <h2 id="lessonTitle">Elige una línea para comenzar</h2>
+      <span class="pill" id="productPill">Recorrido guiado</span>
+    </div>
+
+    <div class="select">
+      <label for="product">Producto que vas a elaborar (cambia el caudal activo en el mapa):</label>
+      <select id="product">
+        <option value="crema">🥣 Crema (Flujo Ámbar · Directo a Envasado)</option>
+        <option value="mantequilla">🧈 Mantequilla (Flujo Verde · Vía Batido y Amasado)</option>
+        <option value="helado">🍨 Helado (Flujo Azul · Vía Mix, Freezer y Túnel)</option>
+      </select>
+    </div>
+
+    <div class="lesson" id="lesson">
+      <p>Selecciona el producto arriba para ver su ruta exclusiva de tuberías en el mapa y pulsa <strong>“Comenzar recorrido”</strong>.</p>
+    </div>
+
+    <div class="question" id="question" hidden>
+      <h3 id="qTitle">Comprueba lo aprendido</h3>
+      <div class="choices" id="choices"></div>
+      <div class="feedback" id="feedback">Elige una respuesta.</div>
+    </div>
+
+    <div class="nav">
+      <button class="action" id="prev" disabled>← Anterior</button>
+      <button class="action primary" id="start">Comenzar recorrido</button>
+      <button class="action primary" id="next" disabled>Siguiente →</button>
+    </div>
+  </section>
+
+  <section class="panel" id="summaryPanel" hidden>
+    <div class="summary">
+      <span class="badge">Recorrido completado</span>
+      <h2 id="summaryTitle">¡Buen trabajo!</h2>
+      <p id="summaryText"></p>
+      <h3>Resumen de la ruta recorrida</h3>
+      <ol id="summaryList"></ol>
+      <button class="action primary" id="restart">Repetir recorrido</button>
+    </div>
+  </section>
+</div>
+</main>
+
+<script>
+const content = {
+  crema: {
+    color: "var(--c-crema)",
+    name: "Crema",
+    activeZones: [0, 1, 2, 3, 6, 7],
+    bypassNote: "Observa la tubería ámbar: el caudal de Crema sale del Área 4 y viaja por el colector derecho directo al Área 7 (Envasado), sin entrar a las salas de Mantequilla (5) ni de Helado (6).",
+    title: "Elaboración de crema",
+    intro: "Acompaña el procesamiento de la leche hasta obtener crema estandarizada y envasada.",
+    steps: [
+      {
+        zone: 0, seg: null,
+        title: "Recepción y acondicionamiento de leche",
+        body: "La leche cruda se recibe en frío, se inspecciona, muestrea y filtra antes de ingresar a la línea.",
+        equipment: "Tanque de recepción, filtro sanitario, bomba y puntos de muestreo",
+        question: "¿Por qué se revisa la leche antes de iniciar el proceso?",
+        options: ["Para verificar su calidad y aptitud de procesamiento", "Para darle color artificial al producto", "Para sustituir la pasteurización"],
+        correct: 0,
+        feedback: "La inspección de materia prima permite determinar su aptitud fisicoquímica y microbiológica."
+      },
+      {
+        zone: 1, seg: "crema-0",
+        title: "Separación centrífuga",
+        body: "El caudal pasa de Recepción a la descremadora, que separa la fracción rica en grasa (crema) de la leche descremada.",
+        equipment: "Descremadora centrífuga de discos y tanques de balance",
+        question: "¿Qué principio físico permite separar la crema de la leche descremada?",
+        options: ["Fermentación espontánea", "Diferencia de densidad acelerada por fuerza centrífuga", "Congelación del agua libre"],
+        correct: 1,
+        feedback: "Los glóbulos de grasa tienen menor densidad que la fase acuosa y se separan por centrifugación."
+      },
+      {
+        zone: 2, seg: "crema-1",
+        title: "Tratamiento térmico de la crema",
+        body: "La crema separada avanza al pasteurizador (ej. 85 °C / 15 s) para eliminar patógenos e inactivar lipasas.",
+        equipment: "Intercambiador de calor (pasteurizador), sensores y enfriamiento",
+        question: "¿Qué variables críticas deben controlarse en el tratamiento térmico?",
+        options: ["Solo el color externo del equipo", "Tiempo y temperatura de pasteurización", "Únicamente el tamaño de la caja"],
+        correct: 1,
+        feedback: "El binomio tiempo-temperatura garantiza la inocuidad y la inactivación enzimática."
+      },
+      {
+        zone: 3, seg: "crema-2",
+        title: "Estandarización y acondicionamiento",
+        body: "En los tanques de crema se ajusta el porcentaje de grasa según la denominación (ligera, mesa o para batir).",
+        equipment: "Tanque de estandarización; homogeneizador según el tipo de crema",
+        question: "¿Qué busca la operación de estandarización?",
+        options: ["Ajustar el contenido de grasa a una especificación definida", "Eliminar el etiquetado del envase", "Transformar la crema en helado duro"],
+        correct: 0,
+        feedback: "Estandarizar asegura que el porcentaje de grasa cumpla con la categoría comercial."
+      },
+      {
+        zone: 6, seg: "crema-3",
+        title: "Envasado directo y conservación en frío",
+        body: "Observa el mapa: desde el tanque de Crema (Área 4), la tubería ámbar lleva el producto directo a Envasado (Área 7) sin pasar por Mantequilla ni Helado.",
+        equipment: "Colector directo a llenadora aséptica/higiénica, selladora y cámara de refrigeración (2–6 °C)",
+        question: "¿Por qué la línea de crema va directo de Estandarización a Envasado?",
+        options: ["Porque ya es una emulsión O/W lista y no requiere batido de mantequilla ni congelación de helado", "Porque no necesita envase", "Porque debe congelarse a -30 °C"],
+        correct: 0,
+        feedback: "La crema pasteurizada y estandarizada pasa directamente a envasado higiénico y refrigeración."
+      },
+      {
+        zone: 7, seg: "crema-4",
+        title: "Control de calidad y liberación del lote",
+        body: "Finalmente se verifica % de grasa, acidez, fosfatasa residual y microbiología (NOM-243-SSA1-2010) antes de liberar.",
+        equipment: "Laboratorio de control de calidad y registros de trazabilidad",
+        question: "¿Qué confirma la prueba de fosfatasa residual negativa (≤ 4 UF/g)?",
+        options: ["Que la pasteurización fue efectiva", "Que el envase no tiene etiqueta", "Que la crema tiene 90% de sal"],
+        correct: 0,
+        feedback: "La inactivación de la fosfatasa alcalina confirma que el tratamiento térmico fue eficaz."
+      }
+    ],
+    end: "Has recorrido la línea exclusiva de Crema: observaste cómo el caudal ámbar pasó directo del tanque de crema al área de envasado sin cruzar por mantequilla ni helado."
+  },
+
+  mantequilla: {
+    color: "var(--c-mant)",
+    name: "Mantequilla",
+    activeZones: [0, 1, 2, 3, 4, 6, 7],
+    bypassNote: "Observa la tubería verde: la crema madurada entra al Área 5 (Mantequilla) para el batido y amasado, y de ahí baja directo a Envasado (7) sin pasar por el área de Helado (6).",
+    title: "Elaboración de mantequilla",
+    intro: "Sigue la transformación de crema en mantequilla mediante la inversión de fases (O/W a W/O).",
+    steps: [
+      {
+        zone: 0, seg: null,
+        title: "Recepción de leche cruda",
+        body: "La materia prima se inspecciona, filtra y mantiene refrigerada antes de separar la crema.",
+        equipment: "Tanque de recepción, filtro en línea y sistema de muestreo",
+        question: "¿Cuál es una función clave del muestreo en recepción?",
+        options: ["Evaluar la aptitud fisicoquímica e higiénica de la leche", "Formar los gránulos de mantequilla en la pipa", "Incorporar aire al helado"],
+        correct: 0,
+        feedback: "El muestreo inicial asegura que solo leche apta ingrese a la línea de separación."
+      },
+      {
+        zone: 1, seg: "mant-0",
+        title: "Obtención de crema en descremadora",
+        body: "La centrífuga separa una crema rica en grasa (35–42%) que alimentará la línea de mantequilla.",
+        equipment: "Descremadora centrífuga de discos",
+        question: "¿Qué corriente de salida de la centrífuga se envía a mantequilla?",
+        options: ["La fracción concentrada en grasa láctea (crema)", "Únicamente el agua de enjuague", "El aire comprimido"],
+        correct: 0,
+        feedback: "La mantequilla requiere crema con 35–42% de grasa como materia prima."
+      },
+      {
+        zone: 2, seg: "mant-1",
+        title: "Pasteurización de la crema",
+        body: "La crema se pasteuriza (ej. 85 °C / 15 s) para destruir patógenos e inactivar lipasas que causarían rancidez.",
+        equipment: "Pasteurizador de placas y sección de enfriamiento",
+        question: "¿Por qué es indispensable pasteurizar la crema antes de hacer mantequilla?",
+        options: ["Por inocuidad sanitaria y para inactivar enzimas lipolíticas", "Para evitar lavarse las manos", "Para sustituir el amasado"],
+        correct: 0,
+        feedback: "La pasteurización protege la inocuidad y evita defectos de rancidez enzimática."
+      },
+      {
+        zone: 3, seg: "mant-2",
+        title: "Acondicionamiento y maduración física en frío",
+        body: "En los tanques de crema se realiza la maduración física en frío para cristalizar parcialmente la grasa antes del batido.",
+        equipment: "Tanques encamisados de maduración física",
+        question: "¿Qué se logra con la maduración física en frío de la crema?",
+        options: ["Alcanzar el equilibrio entre grasa sólida cristalizada y grasa líquida", "Hervir la crema a 120 °C", "Eliminar toda la grasa"],
+        correct: 0,
+        feedback: "Sin una proporción adecuada de cristales sólidos y grasa líquida, el batido posterior falla."
+      },
+      {
+        zone: 4, seg: "mant-3",
+        title: "Batido (Churning), drenado de mazada y amasado (Working)",
+        body: "La tubería verde lleva la crema al Área 5: el batido (8–15 °C) rompe la membrana MFGM e invierte la emulsión a W/O; luego se drena el suero de mantequilla (mazada/buttermilk) y se amasa para dispersar el agua (≤ 16%).",
+        equipment: "Mantequillera (churn), drenador de suero y tornillo de amasado (working)",
+        question: "¿Qué ocurre durante el batido y drenado en el área de mantequilla?",
+        options: ["Se invierte la emulsión a W/O formando gránulos grasos y se separa la mazada (buttermilk)", "Se congela el helado a -30 °C", "Se evapora toda el agua a 200 °C"],
+        correct: 0,
+        feedback: "El batido une los glóbulos grasos, separa el buttermilk y el amasado da una masa plástica sin 'llorado'."
+      },
+      {
+        zone: 6, seg: "mant-4",
+        title: "Moldeado y envasado directo",
+        body: "Observa la tubería verde vertical: la mantequilla amasada baja directo del Área 5 al Área 7 (Envasado) sin pasar por la sala de Helado.",
+        equipment: "Moldeadora/dosificadora, envolvedora con barrera a la luz y cámara fría",
+        question: "¿Por qué el empaque de mantequilla debe proteger contra la luz y el oxígeno?",
+        options: ["Para prevenir la oxidación de la grasa y el sabor rancio", "Para que el bloque se derrita rápido", "Para aumentar la humedad al 50%"],
+        correct: 0,
+        feedback: "Al tener ≥ 80% de grasa, la mantequilla es sensible a la fotooxidación y requiere barrera protectora."
+      },
+      {
+        zone: 7, seg: "mant-5",
+        title: "Verificación de composición y norma (Codex / NOM-243)",
+        body: "El lote terminado se analiza verificando mín. 80% grasa, máx. 16% humedad y cumplimiento microbiológico (< 10 UFC/g coliformes).",
+        equipment: "Laboratorio de calidad y registros de liberación",
+        question: "Si una mantequilla cumple con 82% de grasa pero excede el límite de coliformes de la NOM-243, ¿qué procede?",
+        options: ["Retener el lote; una buena composición no sustituye el cumplimiento sanitario", "Liberarlo porque tiene buena grasa", "Ignorar el análisis"],
+        correct: 0,
+        feedback: "Calidad fisicoquímica e inocuidad microbiológica son obligatorias de forma conjunta."
+      }
+    ],
+    end: "¡Completaste la línea de Mantequilla! Observaste cómo el flujo verde entró al área de batido/amasado y bajó directo a envasado sin tocar la línea de helado."
+  },
+
+  helado: {
+    color: "var(--c-helado)",
+    name: "Helado",
+    activeZones: [0, 1, 2, 5, 6, 7],
+    bypassNote: "Observa la tubería azul: el mix pasteurizado y homogeneizado pasa del Área 3 directo al Área 6 (Helado: Maduración, Freezer y Túnel) y de ahí va a Envasado (7), sin pasar por Mantequilla (5).",
+    title: "Elaboración de helado",
+    intro: "Explora cómo se formula el mix, se congela dinámicamente incorporando aire (overrun) y se endurece.",
+    steps: [
+      {
+        zone: 0, seg: null,
+        title: "Recepción de leche, crema e ingredientes",
+        body: "Se reciben y verifican la leche, crema, azúcares, sólidos no grasos (SNG), estabilizantes y emulsionantes.",
+        equipment: "Área de recepción, básculas y control de insumos",
+        question: "¿Qué es indispensable verificar al recibir los ingredientes del helado?",
+        options: ["Identidad, especificaciones de calidad, temperatura y trazabilidad", "Solo el color del camión", "Que no tengan fecha de caducidad"],
+        correct: 0,
+        feedback: "El control desde la recepción evita defectos de formulación y riesgos sanitarios."
+      },
+      {
+        zone: 1, seg: "hel-0",
+        title: "Formulación y mezclado del mix",
+        body: "En el área de mezclado se integran los ingredientes líquidos y sólidos en orden para formar un mix homogéneo.",
+        equipment: "Tanque mezclador encamisado, básculas y agitación",
+        question: "¿Qué riesgo ocurre si se formula el mix con un exceso de Sólidos No Grasos (lactosa)?",
+        options: ["Precipitación de cristales de lactosa que dan textura 'arenosa'", "El helado se convierte en mantequilla", "Sube la temperatura a 100 °C"],
+        correct: 0,
+        feedback: "Un exceso de lactosa puede cristalizar en frío generando el defecto de helado arenoso."
+      },
+      {
+        zone: 2, seg: "hel-1",
+        title: "Pasteurización y homogeneización del mix",
+        body: "El mix se pasteuriza (ej. 80–85 °C / 15–30 s) y se homogeneiza en caliente (10–25 MPa) para reducir los glóbulos grasos a 0.2–2 µm.",
+        equipment: "Pasteurizador HTST y homogeneizador de alta presión",
+        question: "¿Cuál es el objetivo de homogeneizar el mix en caliente?",
+        options: ["Dividir finamente los glóbulos de grasa para formar una emulsión uniforme y estable", "Congelar el helado en bloques", "Quitar todos los azúcares"],
+        correct: 0,
+        feedback: "La homogeneización afina el tamaño del glóbulo graso y mejora la textura del helado."
+      },
+      {
+        zone: 5, seg: "hel-2",
+        title: "Maduración del mix y congelación dinámica (Overrun)",
+        body: "Observa la tubería azul: el mix baja directo del Área 3 al Área 6 (Helado). Ahí madura a 2–5 °C (4–24 h) y entra al congelador continuo donde se inyecta aire (overrun) y las cuchillas raspan cristales finos (< 50 µm).",
+        equipment: "Tanques de maduración (4 °C) y congelador continuo (freezer) con cuchillas raspadoras",
+        question: "¿Qué mide el porcentaje de overrun en el helado?",
+        options: ["El aumento de volumen por incorporación de aire respecto al volumen o masa del mix", "La cantidad de sal añadida", "La temperatura de la caldera"],
+        correct: 0,
+        feedback: "El overrun cuantifica la expansión de volumen debida al aire incorporado durante la congelación dinámica."
+      },
+      {
+        zone: 6, seg: "hel-4",
+        title: "Dosificado, endurecimiento rápido y cadena de frío",
+        body: "Desde el Área 6 de Helado, la tubería azul conduce el producto semiblando (-5 °C) al envasado y al túnel de endurecimiento (-25 a -40 °C), conservándolo después a ≤ -18 °C.",
+        equipment: "Llenadora, túnel de endurecimiento rápido y cámara a ≤ -18 °C",
+        question: "¿Qué defecto aparece si el endurecimiento es lento o hay fluctuaciones de temperatura en la cámara?",
+        options: ["Recristalización y formación de cristales grandes de hielo (> 50 µm, textura áspera)", "Inversión a mantequilla salada", "Tostado del envase"],
+        correct: 0,
+        feedback: "Los choques térmicos funden los microcristales y al recongelarse forman cristales grandes perceptibles en boca."
+      },
+      {
+        zone: 7, seg: "hel-5",
+        title: "Auditoría microbiológica NOM-243 y liberación",
+        body: "Se verifica el peso por litro (control de overrun) y el cumplimiento sanitario de la NOM-243-SSA1-2010 (ausencia de Listeria monocytogenes y Salmonella en 25 g).",
+        equipment: "Laboratorio de control microbiológico y balanza de overrun",
+        question: "¿Qué patógeno psicrótrofo exige vigilar como 'Ausente en 25 g' la NOM-243 específicamente en helados?",
+        options: ["Listeria monocytogenes (además de Salmonella spp.)", "Levaduras de panadería", "Bacterias termófilas de 90 °C"],
+        correct: 0,
+        feedback: "La NOM-243-SSA1-2010 exige ausencia de Listeria monocytogenes y Salmonella spp. en 25 g de helado."
+      }
+    ],
+    end: "¡Completaste la línea de Helado! Viste cómo el caudal azul pasó de Pasteurización/Homogeneización directo a la sala de Helado y luego a Envasado sin tocar Mantequilla."
+  }
+};
+
+let product = "crema", step = -1, answered = false, correctCount = 0, showAllFlows = false;
+const $ = s => document.querySelector(s);
+
+function updateMapVisuals() {
+  const data = content[product];
+  $("#mapTag").textContent = step >= 0
+    ? `${data.name} · Paso ${step + 1} de ${data.steps.length}`
+    : `Ruta seleccionada: ${data.name}`;
+
+  // 1. Activar el grupo de tuberías del producto actual (o los 3 si el botón "Ver los 3 caudales" está activo)
+  ["crema", "mantequilla", "helado"].forEach(p => {
+    const grp = document.getElementById("pipes-" + p);
+    if (grp) {
+      grp.classList.toggle("route-active", showAllFlows || p === product);
+    }
+  });
+
+  // 2. Resaltar el tramo de tubería específico del paso actual
+  document.querySelectorAll("[data-seg]").forEach(el => el.classList.remove("segment-hot"));
+  if (step >= 0 && step < data.steps.length) {
+    const activeSeg = data.steps[step].seg;
+    if (activeSeg) {
+      document.querySelectorAll(`[data-seg="${activeSeg}"]`).forEach(el => el.classList.add("segment-hot"));
+    }
+  }
+
+  // 3. Iluminar las zonas que sí pertenecen a la ruta y atenuar las que NO participan (ej. Mantequilla/Helado cuando estás en Crema)
+  const currentZone = (step >= 0 && step < data.steps.length) ? data.steps[step].zone : -1;
+  const visitedZones = step > 0 ? data.steps.slice(0, step).map(s => s.zone) : [];
+
+  document.querySelectorAll("#mapNodes > g").forEach(g => {
+    const key = Number(g.dataset.key);
+    const rect = g.querySelector(".zone");
+    const inRoute = data.activeZones.includes(key);
+
+    rect.classList.toggle("in-route", inRoute);
+    rect.classList.toggle("dimmed", !inRoute && !showAllFlows);
+    rect.classList.toggle("hot", key === currentZone);
+    rect.classList.toggle("done", key !== currentZone && visitedZones.includes(key));
+  });
+}
+
+function begin() {
+  product = $("#product").value;
+  step = 0;
+  answered = false;
+  correctCount = 0;
+  $("#summaryPanel").hidden = true;
+  $("#question").hidden = false;
+  $("#start").disabled = true;
+  $("#next").disabled = true;
+  $("#prev").disabled = true;
+  render();
+}
+
+function render() {
+  const data = content[product];
+  updateMapVisuals();
+
+  if (step < 0) {
+    $("#lessonTitle").textContent = "Elige una línea para comenzar";
+    $("#productPill").textContent = data.title;
+    $("#lesson").innerHTML = `
+      <p>${data.intro}</p>
+      <div class="route-note" style="border-left:4px solid ${data.color}">${data.bypassNote}</div>
+      <p style="margin-top:10px">Pulsa <strong>“Comenzar recorrido”</strong> para avanzar etapa por etapa.</p>
+    `;
+    return;
+  }
+
+  if (step >= data.steps.length) {
+    finish();
+    return;
+  }
+
+  const s = data.steps[step];
+  $("#lessonTitle").textContent = s.title;
+  $("#productPill").textContent = data.title;
+  $("#lesson").innerHTML = `
+    <div class="eyebrow">Paso ${step + 1} de ${data.steps.length} · Línea de ${data.name}</div>
+    <h2>${s.title}</h2>
+    <p>${s.body}</p>
+    <div class="equipment"><strong>Equipos / Área activa</strong>${s.equipment}</div>
+    <div class="route-note" style="border-left:4px solid ${data.color}">${data.bypassNote}</div>
+  `;
+
+  $("#progressText").textContent = `Etapa ${step + 1} de ${data.steps.length}`;
+  let percent = Math.round((step / data.steps.length) * 100);
+  $("#percent").textContent = percent + " %";
+  $("#bar").style.width = percent + "%";
+
+  $("#qTitle").textContent = s.question;
+  $("#choices").innerHTML = s.options
+    .map((o, i) => `<button class="choice" data-choice="${i}">${String.fromCharCode(65 + i)}. ${o}</button>`)
+    .join("");
+  $("#feedback").className = "feedback";
+  $("#feedback").textContent = "Selecciona una respuesta para habilitar el avance al siguiente equipo.";
+  answered = false;
+  $("#next").disabled = true;
+  $("#prev").disabled = step === 0;
+  $("#next").textContent = step === data.steps.length - 1 ? "Finalizar recorrido →" : "Siguiente etapa →";
+
+  document.querySelectorAll(".choice").forEach(b =>
+    b.addEventListener("click", () => answer(Number(b.dataset.choice)))
+  );
+}
+
+function answer(i) {
+  if (answered) return;
+  answered = true;
+  const s = content[product].steps[step], good = i === s.correct;
+  if (good) correctCount++;
+  document.querySelectorAll(".choice").forEach((b, j) => {
+    b.disabled = true;
+    if (j === s.correct) b.classList.add("correct");
+    if (j === i && !good) b.classList.add("wrong");
+  });
+  $("#feedback").className = "feedback " + (good ? "good" : "bad");
+  $("#feedback").textContent = (good ? "¡Correcto! " : "Respuesta incorrecta. ") + s.feedback;
+  $("#next").disabled = false;
+}
+
+function finish() {
+  const data = content[product];
+  $("#question").hidden = true;
+  $("#summaryPanel").hidden = false;
+  $("#summaryTitle").textContent = data.title + " · Recorrido finalizado";
+  $("#summaryText").textContent = `Respondiste correctamente ${correctCount} de ${data.steps.length} preguntas en el primer intento. ${data.end}`;
+  $("#summaryList").innerHTML = data.steps.map(s => `<li>${s.title}</li>`).join("");
+  $("#progressText").textContent = "Recorrido completado";
+  $("#percent").textContent = "100 %";
+  $("#bar").style.width = "100%";
+  step = -1;
+  updateMapVisuals();
+  $("#start").disabled = false;
+  $("#start").textContent = "Nuevo recorrido";
+  $("#next").disabled = true;
+  $("#prev").disabled = true;
+}
+
+$("#start").addEventListener("click", begin);
+$("#next").addEventListener("click", () => { if (answered) { step++; render(); } });
+$("#prev").addEventListener("click", () => { if (step > 0) { step--; render(); } });
+$("#restart").addEventListener("click", begin);
+
+$("#product").addEventListener("change", () => {
+  product = $("#product").value;
+  step = -1;
+  $("#question").hidden = true;
+  $("#summaryPanel").hidden = true;
+  $("#start").disabled = false;
+  $("#start").textContent = "Comenzar recorrido";
+  $("#next").disabled = true;
+  $("#prev").disabled = true;
+  $("#progressText").textContent = "Listo para iniciar";
+  $("#percent").textContent = "0 %";
+  $("#bar").style.width = "0%";
+  render();
+});
+
+$("#toggleAllFlows").addEventListener("click", (e) => {
+  showAllFlows = !showAllFlows;
+  e.currentTarget.classList.toggle("active", showAllFlows);
+  e.currentTarget.textContent = showAllFlows ? "👁️ Mostrando los 3 caudales" : "👁️ Ver los 3 caudales a la vez";
+  updateMapVisuals();
+});
+
+// Inicializar vista previa con la ruta de Crema activa
+render();
+</script>
+</body>
+</html>
