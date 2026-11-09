@@ -1,912 +1,589 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Membrana MFGM y Separación de Crema - Semana 15</title>
-    <style>
-        :root {
-            --bg: #0b1120;
-            --panel: #1e293b;
-            --card: #0f172a;
-            --border: #334155;
-            --text: #f8fafc;
-            --muted: #94a3b8;
-            --accent: #38bdf8;
-            --gold: #fcd34d;
-            --ok: #10b981;
-            --warn: #f59e0b;
-            --err: #ef4444;
-        }
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 18px;
-            display: flex;
-            justify-content: center;
-        }
-        .app-container {
-            max-width: 1220px;
-            width: 100%;
-            background: var(--panel);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid var(--border);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.65);
-        }
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #334155;
-            color: #f8fafc;
-            text-decoration: none;
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 13px;
-            border: 1px solid #475569;
-            transition: 0.2s;
-        }
-        .back-btn:hover {
-            background: #475569;
-            border-color: var(--accent);
-        }
-        .badge {
-            background: rgba(56, 189, 248, 0.15);
-            color: var(--accent);
-            border: 1px solid var(--accent);
-            padding: 5px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 700;
-        }
-        header {
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 16px;
-            margin-bottom: 18px;
-        }
-        h1 {
-            margin: 0 0 6px 0;
-            color: var(--gold);
-            font-size: 24px;
-        }
-        .subtitle {
-            color: var(--muted);
-            margin: 0 auto;
-            max-width: 900px;
-            font-size: 14px;
-            line-height: 1.45;
-        }
-
-        /* Selector Principal de Modo */
-        .main-tabs {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 18px;
-        }
-        @media (max-width: 820px) {
-            .main-tabs { grid-template-columns: 1fr; }
-        }
-        .mode-btn {
-            background: var(--card);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 12px;
-            color: var(--text);
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
-        }
-        .mode-btn strong {
-            display: block;
-            font-size: 14.5px;
-            margin-bottom: 3px;
-            color: var(--gold);
-        }
-        .mode-btn span {
-            font-size: 12px;
-            color: var(--muted);
-        }
-        .mode-btn:hover { border-color: var(--accent); transform: translateY(-2px); }
-        .mode-btn.active {
-            background: rgba(2, 132, 199, 0.2);
-            border-color: var(--accent);
-            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.25);
-        }
-
-        .dashboard {
-            display: grid;
-            grid-template-columns: 380px 1fr;
-            gap: 18px;
-        }
-        @media (max-width: 950px) {
-            .dashboard { grid-template-columns: 1fr; }
-        }
-
-        .controls-panel {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .panel-title {
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--accent);
-            border-bottom: 1px solid #1e293b;
-            padding-bottom: 6px;
-        }
-
-        /* Botones de Capas de la MFGM */
-        .layer-list {
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
-        }
-        .layer-btn {
-            background: #1e293b;
-            border: 1px solid var(--border);
-            color: #e2e8f0;
-            padding: 9px 12px;
-            border-radius: 8px;
-            font-size: 12.5px;
-            font-weight: 600;
-            text-align: left;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: 0.2s;
-        }
-        .layer-btn:hover { border-color: var(--accent); }
-        .layer-btn.active {
-            background: #0284c7;
-            border-color: var(--accent);
-            color: white;
-        }
-        .layer-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .ctrl-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .ctrl-group label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            font-weight: 600;
-        }
-        .val-tag { color: var(--gold); font-weight: 700; }
-        input[type="range"] { width: 100%; cursor: pointer; accent-color: var(--accent); }
-        .scale-notes { display: flex; justify-content: space-between; font-size: 11px; color: #64748b; }
-
-        .detail-box {
-            background: #1e293b;
-            border-left: 4px solid var(--gold);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 12.5px;
-            line-height: 1.5;
-        }
-        .detail-box h4 {
-            margin: 0 0 5px 0;
-            color: var(--gold);
-            font-size: 13.5px;
-        }
-
-        .stokes-box {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin: 6px 0;
-            font-family: 'Cambria Math', Georgia, serif;
-            font-size: 14px;
-            background: #0f172a;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #334155;
-        }
-        .fraction { display: inline-flex; flex-direction: column; align-items: center; text-align: center; }
-        .fraction-top { border-bottom: 1.5px solid #94a3b8; padding: 0 6px 2px 6px; color: #38bdf8; }
-        .fraction-bottom { padding-top: 2px; color: #34d399; }
-
-        .visual-area {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .canvas-card {
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 3px solid var(--border);
-            background: #070d19;
-        }
-        canvas#mfgmCanvas {
-            display: block;
-            width: 100%;
-            height: 420px;
-        }
-        .legend-strip {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 14px;
-            justify-content: center;
-            background: var(--card);
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            font-size: 12px;
-        }
-        .legend-item { display: flex; align-items: center; gap: 6px; color: #cbd5e1; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-
-        .bottom-grid {
-            margin-top: 16px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
-        }
-        @media (max-width: 900px) {
-            .bottom-grid { grid-template-columns: 1fr; }
-        }
-        .info-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-top: 3px solid var(--accent);
-            border-radius: 10px;
-            padding: 14px;
-            font-size: 13px;
-            line-height: 1.45;
-        }
-        .info-card h3 {
-            margin: 0 0 6px 0;
-            font-size: 14.5px;
-            color: var(--gold);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Membrana del Glóbulo Graso y Separación de Crema · Semana 15</title>
+<style>
+:root{
+  --navy:#12306b; --navy-2:#1d4196; --ink:#0f1b33; --text:#22304a; --muted:#64748b;
+  --bg:#eef2f8; --card:#ffffff; --line:#dbe3ef; --soft:#f6f8fc;
+  --orange:#f05a28; --magenta:#d61f5c; --ok:#16a34a; --warn:#d97706; --bad:#dc2626;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--text);padding:18px;line-height:1.45}
+.app{max-width:1200px;margin:0 auto;background:var(--card);border-radius:18px;box-shadow:0 12px 34px rgba(15,27,51,.10);overflow:hidden}
+.topbar{height:6px;background:linear-gradient(90deg,var(--orange),var(--magenta))}
+header{padding:16px 24px 6px}
+.back{display:inline-flex;align-items:center;gap:6px;background:#334155;color:#f8fafc;text-decoration:none;padding:8px 14px;border-radius:8px;font-weight:600;font-size:13px;border:1px solid #475569;margin-bottom:12px}
+.back:hover{background:#1e293b}
+.title-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+h1{margin:0;color:var(--navy);font-size:26px;letter-spacing:-.3px}
+.subtitle{color:var(--muted);font-size:14px;margin-top:2px;max-width:820px}
+.week-tag{background:var(--navy);color:#fff;font-weight:700;font-size:12px;padding:6px 12px;border-radius:999px;white-space:nowrap}
+.week-tag b{color:#ffb38f}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 24px 0}
+@media (max-width:860px){.tabs{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:480px){.tabs{grid-template-columns:1fr}}
+.tab{border:2px solid var(--line);background:#fff;border-radius:12px;padding:10px 14px;text-align:left;cursor:pointer;font:inherit;color:var(--muted)}
+.tab b{display:block;font-size:15px;color:inherit}
+.tab small{font-size:12.5px}
+.tab.on{border-color:var(--navy);background:#eef3ff;color:var(--navy)}
+.pane{display:none;padding:12px 24px 18px}
+.pane.show{display:block}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.presets .lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-right:4px}
+.chip{border:1.5px solid var(--line);background:#fff;color:var(--text);padding:6px 11px;border-radius:999px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.chip:hover{border-color:var(--navy-2)}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.lab{display:grid;grid-template-columns:300px 1fr;gap:16px}
+@media (max-width:960px){.lab{grid-template-columns:1fr}}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.card h3{margin:0 0 8px;font-size:14.5px;color:var(--navy)}
+.ctl{margin-bottom:11px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;align-items:baseline;font-weight:600;font-size:13px;margin-bottom:3px;gap:8px}
+.ctl label .val{font-weight:800;font-size:16px;color:var(--navy);white-space:nowrap}
+.ctl input[type=range]{width:100%;cursor:pointer;accent-color:var(--navy)}
+.scale{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted)}
+.seg{display:flex;background:#e6ecf5;border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;padding:7px 4px;border-radius:8px;font-weight:600;font-size:12px;color:#475569;cursor:pointer;font-family:inherit;line-height:1.2}
+.seg button.on{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.comp{display:flex;flex-direction:column;gap:6px}
+.cb{display:flex;gap:8px;align-items:center;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:7px 10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--text);text-align:left}
+.cb:hover{border-color:var(--navy-2)}
+.cb.on{border-color:var(--navy);background:#eef3ff;color:var(--navy)}
+.cb i{width:12px;height:12px;border-radius:50%;flex:0 0 auto}
+.view{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.view>b{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--navy);padding:7px 10px;border-bottom:1px solid var(--line);background:var(--soft)}
+canvas{display:block;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;font-size:11.5px;background:var(--soft);padding:7px 10px;border-radius:10px;border:1px solid var(--line)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.lg{width:11px;height:11px;border-radius:50%;display:inline-block}
+.box{padding:12px 14px;border-radius:12px;background:var(--soft);border-left:5px solid var(--navy);font-size:13.5px}
+.box h3{margin:0 0 6px;font-size:15px;color:var(--navy)}
+.box p{margin:5px 0}
+.book{font-size:12.5px;color:#475569;margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:700px){.kpis{grid-template-columns:1fr 1fr}}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 10px;text-align:center}
+.kpi small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.kpi b{font-size:17px;color:var(--navy)}
+.kpi.bad b{color:var(--bad)} .kpi.good b{color:var(--ok)}
+.stokes{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 12px;text-align:center;font-family:"Cambria Math",Georgia,serif;font-size:17px;color:var(--navy)}
+.stokes .fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center}
+.stokes .fr span:first-child{border-bottom:1.5px solid var(--navy);padding:0 6px}
+.stokes small{display:block;font-family:"Segoe UI",sans-serif;font-size:11.5px;color:var(--muted);margin-top:4px}
+.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit}
+.btn-accent{background:linear-gradient(90deg,var(--orange),var(--magenta));color:#fff}
+.btn-ghost{background:#fff;border:1.5px solid var(--line);color:var(--text)}
+.btn-primary{background:var(--navy);color:#fff}
+.row-btn{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.next{display:flex;justify-content:flex-end;margin-top:12px}
+.counter{display:flex;gap:8px;flex-wrap:wrap}
+.counter div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:12.5px}
+.counter b{color:var(--navy);font-size:15px}
+table.bal{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:10px;overflow:hidden}
+table.bal th{background:var(--navy);color:#fff;text-align:left;padding:7px 9px;font-size:12px}
+table.bal td{padding:6px 9px;border-bottom:1px solid var(--line)}
+table.bal tr.tot td{font-weight:800;background:#eef3ff}
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin-top:6px}
+.checks label{display:flex;gap:8px;align-items:center;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:7px 10px;font-size:13px;cursor:pointer}
+.checks label.right{border-color:var(--ok);background:#f0fdf4}
+.checks label.wrong{border-color:var(--bad);background:#fef2f2}
+.checks label.miss{border-color:#f59e0b;background:#fffbeb}
+.verdict{margin-top:8px;padding:9px 11px;border-radius:10px;font-size:13px}
+.verdict.good{background:#f0fdf4;border:1px solid #bbf7d0;color:#14532d}
+.verdict.bad{background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d}
+.verdict.mid{background:#fffbeb;border:1px solid #fde68a;color:#78350f}
+details.teacher{margin:0 24px 22px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:#fbfcfe;font-size:13.5px}
+details.teacher summary{cursor:pointer;font-weight:700;color:var(--navy)}
+details.teacher li{margin:3px 0}
+footer{padding:0 24px 18px;font-size:11.5px;color:var(--muted)}
+</style>
 </head>
 <body>
-
-<div class="app-container">
-    <div class="top-bar">
-        <a href="index.html" class="back-btn">⬅ Volver al Menú Principal</a>
-        <span class="badge">CECYBOOK SEMANA 15</span>
+<div class="app">
+  <div class="topbar"></div>
+  <header>
+    <a class="back" href="index.html">⬅ Volver al Menú Principal</a>
+    <div class="title-row">
+      <div>
+        <h1>🧬 El glóbulo de grasa y la separación de la crema</h1>
+        <div class="subtitle">La grasa no está desnuda: cada glóbulo tiene una membrana que lo mantiene disperso. Explórala, rómpela y después separa la grasa con gravedad, centrífuga o membranas. Obtener crema no es producir grasa nueva: es redistribuirla.</div>
+      </div>
+      <div class="week-tag">Semana 15 · <b>pp. 5–10, Figuras 3–8</b></div>
     </div>
+  </header>
 
-    <header>
-        <h1>🧬 La Membrana del Glóbulo Graso (MFGM) y Separación de Crema</h1>
-        <p class="subtitle">
-            <strong>La grasa no está desnuda en la leche:</strong> Cada glóbulo (1–10 µm) posee una frontera microscópica compleja (MFGM) que evita su coalescencia espontánea y permite concentrarla por centrifugación, gravedad o membranas.
-        </p>
-    </header>
+  <div class="tabs">
+    <button class="tab on" data-t="ana"><b>1 · La membrana</b><small>Del vaso de leche a la MFGM</small></button>
+    <button class="tab" data-t="bar"><b>2 · La barrera</b><small>¿Por qué no se unen solos?</small></button>
+    <button class="tab" data-t="sep"><b>3 · Separar la grasa</b><small>Ley de Stokes en acción</small></button>
+    <button class="tab" data-t="bal"><b>4 · Balance y estandarización</b><small>No se crea grasa: se reparte</small></button>
+  </div>
 
-    <!-- Pestañas de los 3 Modos del Simulador -->
-    <div class="main-tabs">
-        <button id="mode-1" class="mode-btn active" onclick="setMode(1)">
-            <strong>1️⃣ ¿Qué es la MFGM? (Anatomía)</strong>
-            <span>Explora las 5 capas del glóbulo graso (Figura 4)</span>
-        </button>
-        <button id="mode-2" class="mode-btn" onclick="setMode(2)">
-            <strong>2️⃣ Función Barrera: Con vs. Sin MFGM</strong>
-            <span>¿Por qué la leche fresca no se une sola?</span>
-        </button>
-        <button id="mode-3" class="mode-btn" onclick="setMode(3)">
-            <strong>3️⃣ Los 3 Métodos de Separación</strong>
-            <span>Centrifugación, Gravedad y Membranas (Figura 5)</span>
-        </button>
+  <!-- ===================== 1 · ANATOMÍA ===================== -->
+  <div class="pane show" data-p="ana">
+    <div class="lab">
+      <div class="col">
+        <div class="card">
+          <h3>🔍 Acercamiento</h3>
+          <div class="seg" data-k="zoom"><button data-v="0">Vaso</button><button data-v="1">Glóbulos</button><button data-v="2" class="on">Membrana</button></div>
+        </div>
+        <div class="card">
+          <h3>🧩 Componentes (toca uno)</h3>
+          <div class="comp" id="comp"></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="view"><b><span id="zt"></span><span id="zs" style="color:var(--muted)"></span></b><canvas id="c1"></canvas></div>
+        <div class="box" id="exp1"></div>
+      </div>
     </div>
+    <div class="next"><button class="btn btn-primary" data-go="bar">Probar la barrera ➜</button></div>
+  </div>
 
-    <div class="dashboard">
-        <!-- Panel Izquierdo de Controles y Explicación -->
-        <div class="controls-panel">
-            <div class="panel-title" id="ctrl-header">🔬 Componentes de la MFGM</div>
-            <div id="dynamic-controls"></div>
-            <div class="detail-box" id="detail-box"></div>
+  <!-- ===================== 2 · BARRERA ===================== -->
+  <div class="pane" data-p="bar">
+    <div class="lab">
+      <div class="col">
+        <div class="card">
+          <h3>🛡️ Estado de los glóbulos</h3>
+          <div class="seg" data-k="mstate" style="flex-direction:column"><button data-v="intacta" class="on">✅ Membrana intacta (leche fresca)</button><button data-v="danada">💥 Membrana dañada (batido, aire)</button><button data-v="homog">⚙️ Homogeneizada (glóbulos pequeños)</button></div>
+          <div class="ctl" style="margin-top:12px"><label>Agitación <span class="val" id="v-ag"></span></label><input type="range" id="ag" min="1" max="5" step="1" value="2"></div>
+          <div class="row-btn"><button class="btn btn-ghost" id="rstB">↺ Reiniciar</button></div>
         </div>
-
-        <!-- Lienzo Interactivo -->
-        <div class="visual-area">
-            <div class="canvas-card">
-                <canvas id="mfgmCanvas" width="760" height="420"></canvas>
-            </div>
-            <div class="legend-strip" id="legend-strip"></div>
+        <div class="card">
+          <h3>📟 Conteo</h3>
+          <div class="counter"><div>Choques<br><b id="n-hit">0</b></div><div>Uniones<br><b id="n-co">0</b></div><div>Glóbulos<br><b id="n-g">0</b></div></div>
         </div>
+      </div>
+      <div class="col">
+        <div class="view"><b>🔬 Glóbulos en la fase acuosa</b><canvas id="c2"></canvas></div>
+        <div class="legend">
+          <span><i class="lg" style="background:#fde68a;border:2px solid #f97316"></i>Glóbulo con membrana</span>
+          <span><i class="lg" style="background:#c084fc"></i>Glicoproteínas (repulsión)</span>
+          <span><i class="lg" style="background:#facc15"></i>Grasa sin membrana</span>
+          <span><i class="lg" style="background:#93c5fd"></i>Caseínas adsorbidas</span>
+        </div>
+        <div class="box" id="exp2"></div>
+      </div>
     </div>
+    <div class="next"><button class="btn btn-primary" data-go="sep">Separar la grasa ➜</button></div>
+  </div>
 
-    <!-- Tarjetas Inferiores con Conceptos Clave del CECYBOOK -->
-    <div class="bottom-grid">
-        <div class="info-card">
-            <h3>🛡️ ¿Qué es la MFGM y por qué importa?</h3>
-            <div>
-                La <strong>Membrana del Glóbulo Graso de la Leche (MFGM)</strong> es una tricapa compleja de <b>proteínas, fosfolípidos, glicolípidos, colesterol y enzimas</b>. Su cara externa es hidrofílica y con carga negativa, lo que mantiene los glóbulos dispersos en el agua y evita que se fusionen solos.
-            </div>
-        </div>
-        <div class="info-card" style="border-top-color: #f59e0b;">
-            <h3>📐 Ley de Stokes en el Descremado</h3>
-            <div>
-                La velocidad de separación aumenta cuando el <strong>diámetro del glóbulo (1–10 µm)</strong>, la <strong>diferencia de densidades</strong> (grasa menos densa vs. fase acuosa más densa) y la <strong>aceleración centrífuga</strong> son mayores, y disminuye cuando la viscosidad del medio es alta.
-            </div>
-        </div>
-        <div class="info-card" style="border-top-color: #10b981;">
-            <h3>💡 Idea Clave de Proceso</h3>
-            <div>
-                <strong>"Obtener crema no significa producir grasa nueva":</strong> El separador centrífugo sólo acelera un fenómeno físico para redistribuir la grasa que ya estaba en la leche en dos corrientes: <b>crema</b> (rica en grasa) y <b>leche descremada</b> (≤ 0.5% grasa).
-            </div>
-        </div>
+  <!-- ===================== 3 · SEPARACIÓN ===================== -->
+  <div class="pane" data-p="sep">
+    <div class="presets"><span class="lbl">Método</span>
+      <button class="chip on" data-s="grav">🐢 Gravedad (tradicional)</button>
+      <button class="chip" data-s="cent">🚀 Centrífuga de discos (industrial)</button>
+      <button class="chip" data-s="mem">🔬 Membranas (emergente)</button>
     </div>
+    <div class="lab">
+      <div class="col">
+        <div class="card" id="ctlS"></div>
+        <div class="stokes"><b>v</b> = <span class="fr"><span>d² · (ρ<sub>fase acuosa</sub> − ρ<sub>grasa</sub>) · a</span><span>18 · η</span></span><small>a = g en reposo · a = ω²r en la centrífuga</small></div>
+      </div>
+      <div class="col">
+        <div class="kpis" id="kpis"></div>
+        <div class="view"><b><span id="st"></span><span id="ss" style="color:var(--muted)"></span></b><canvas id="c3"></canvas></div>
+        <div class="box" id="exp3"></div>
+      </div>
+    </div>
+    <div class="next"><button class="btn btn-primary" data-go="bal">Hacer el balance ➜</button></div>
+  </div>
+
+  <!-- ===================== 4 · BALANCE ===================== -->
+  <div class="pane" data-p="bal">
+    <div class="lab">
+      <div class="col">
+        <div class="card">
+          <h3>🥛 Separación</h3>
+          <div class="ctl"><label>Leche que entra <span class="val" id="v-M"></span></label><input type="range" id="M" min="500" max="5000" step="100"></div>
+          <div class="ctl"><label>Grasa de la leche <span class="val" id="v-xm"></span></label><input type="range" id="xm" min="3" max="4.6" step="0.1"></div>
+          <div class="ctl"><label>Grasa de la crema del separador <span class="val" id="v-xc"></span></label><input type="range" id="xc" min="30" max="50" step="1"></div>
+          <div class="ctl"><label>Grasa de la leche descremada <span class="val" id="v-xs"></span></label><input type="range" id="xs" min="0.03" max="0.5" step="0.01"><div class="scale"><span>0.03 %</span><span id="xsNote"></span><span>0.5 %</span></div></div>
+        </div>
+        <div class="card">
+          <h3>🎯 Estandarización (Figura 6)</h3>
+          <div class="seg" data-k="route"><button data-v="A" class="on">Ruta A: para batir</button><button data-v="B">Ruta B: menor grasa</button></div>
+          <div class="ctl" style="margin-top:10px"><label>Grasa objetivo <span class="val" id="v-xt"></span></label><input type="range" id="xt" min="10" max="40" step="1"><div class="scale" id="xtScale"></div></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="view"><b>⚖️ ¿A dónde va la grasa?</b><canvas id="c4"></canvas></div>
+        <table class="bal" id="tbal"></table>
+        <div class="view"><b>➕ Cuadro de Pearson: ¿cuánta descremada agrego?</b><canvas id="c4b"></canvas></div>
+        <div class="box" id="exp4"></div>
+        <div class="box" style="border-left-color:#7c3aed"><h3>❓ Pregunta de proceso (p. 9)</h3>«Una crema puede tener el porcentaje de grasa correcto y aun así ser inaceptable. ¿Qué otros datos revisarías antes de liberarla?» Marca todos los que revisarías:
+          <div class="checks" id="checks"></div>
+          <div class="row-btn"><button class="btn btn-primary" id="chkQ">✅ Revisar</button><button class="btn btn-ghost" id="rstQ">↺</button></div>
+          <div id="qfb"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <details class="teacher">
+    <summary>👩‍🏫 Notas para el docente</summary>
+    <ul>
+      <li><b>Pestaña 1:</b> la MFGM se presenta como una tricapa. La capa interna (proteínas y lípidos polares) proviene del retículo endoplásmico; la bicapa externa es la membrana plasmática de la célula secretora, que envuelve la gota de grasa al salir. Mide ≈ 10–20 nm, unas 200–400 veces menos que el glóbulo. En la vista de glóbulos se ve que <b>la mayoría de los glóbulos son pequeños, pero casi toda la grasa está en los de 2–8 µm</b>: es clave para entender el descremado.</li>
+      <li><b>Pestaña 3, modelo:</b> la velocidad de Stokes usa la viscosidad de la leche descremada en función de la temperatura (≈ 1.75 × la del agua) y la diferencia de densidad grasa–fase acuosa (≈ 0.1 g/mL). La centrífuga se modela con r = 0.15 m, una distancia entre discos ≈ 0.4 mm y un tiempo de residencia de ≈ 2.5 s; con eso se calcula el <b>diámetro crítico</b>: los glóbulos más pequeños escapan con la descremada. A 50 °C y 6000 rpm da ≈ 0.06 % de grasa en la descremada, del orden de lo que reporta Tetra Pak; en frío la separación es menos eficiente.</li>
+      <li><b>Descremado por gravedad en frío:</b> la Figura 5 dice que «la baja temperatura disminuye la movilidad de los glóbulos y favorece su ascenso». La explicación más precisa (Walstra et al.) es la <b>aglutinación en frío</b>: en leche cruda fría, unas inmunoglobulinas unen los glóbulos en racimos grandes, y como la velocidad depende de d², los racimos suben mucho más rápido. El frío por sí solo aumenta la viscosidad y frenaría el ascenso. Por eso la leche calentada u homogeneizada casi no forma capa de crema. El simulador permite comparar los dos casos.</li>
+      <li><b>Proteínas de la MFGM:</b> la Figura 4 incluye la α-lactoalbúmina, pero esta es una proteína del suero; las proteínas características de la membrana son la butirofilina, la xantina oxidasa, las mucinas y la lactadherina. Se mencionan así en la pestaña 1.</li>
+      <li><b>Normas de la crema:</b> el texto de la p. 9 cita la NMX-F-731-COFOCALEC-2017 (denominación) y la NOM-243-SSA1-2010 (sanidad). En la Figura 7 aparece la «NOM-155-SCFI-2012» como referencia para crema; esa norma corresponde a la leche (denominaciones y especificaciones fisicoquímicas). Conviene verificarlo con el grupo.</li>
+      <li><b>Pestaña 4:</b> el balance se resuelve con dos ecuaciones (masa total y masa de grasa) y la estandarización con el cuadro de Pearson. Las figuras 6 y 8 dan los rangos: para batir 35–40 %, de menor contenido graso 10–18 %, crema del separador 35–45 % y descremada ≤ 0.5 %. La descremada puede venir del cálculo de la pestaña 3. La pregunta de la p. 9 se califica con los datos de la Figura 7: acidez/pH, viscosidad, fosfatasa, microbiología y características sensoriales.</li>
+    </ul>
+  </details>
+  <footer>Recurso didáctico complementario · CECYBOOK Semana 15 · 7.4 Proceso para la obtención de crema y mantequilla.</footer>
 </div>
 
 <script>
-const canvas = document.getElementById('mfgmCanvas');
-const ctx = canvas.getContext('2d');
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function hiDPI(c,w,h){const d=Math.min(2,window.devicePixelRatio||1);c.width=w*d;c.height=h*d;const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return x;}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+function txt(c,s,x,y,o={}){c.font=(o.b?'bold ':'')+(o.s||12)+'px Segoe UI';c.fillStyle=o.c||'#0f1b33';c.textAlign=o.a||'center';c.fillText(s,x,y);}
+const f1=v=>v.toFixed(1), f2=v=>v.toFixed(2), f0=v=>Math.round(v).toLocaleString('es-MX');
+function fmtT(s){if(s<1)return f2(s)+' s';if(s<120)return f1(s)+' s';if(s<7200)return f0(s/60)+' min';if(s<172800)return f1(s/3600)+' h';return f0(s/86400)+' días';}
 
-let currentMode = 1; // 1 = Anatomía MFGM, 2 = Colisiones Con/Sin MFGM, 3 = Métodos de Separación
-let selectedLayer = 'all';
+/* ===================== física ===================== */
+function erf(x){const t=1/(1+0.3275911*Math.abs(x));const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return x>=0?y:-y;}
+const Phi=z=>0.5*(1+erf(z/Math.SQRT2));
+const fatFrac=dc=>0.98*Phi(Math.log(dc/4)/0.6)+0.02*Phi(Math.log(dc/0.5)/0.5);
+const etaW=T=>2.414e-5*Math.pow(10,247.8/(T+133.15));
+const eta=T=>1.75*etaW(T);
+const drho=T=>(1036-0.3*T)-(915+0.6*Math.max(0,40-T));
+const vStokes=(dum,T,a)=>Math.pow(dum*1e-6,2)*drho(T)*a/(18*eta(T));
 
-// Variables Modo 2 (Barrera de Estabilidad)
-let mfgmPresent = true;
-let agitateLevel = 2;
-let collideGlobules = [];
+let TAB='ana';
+function showTab(t){TAB=t;$$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));$$('.pane').forEach(p=>p.classList.toggle('show',p.dataset.p===t));refresh();window.scrollTo({top:$('.tabs').offsetTop-10,behavior:'smooth'});}
+$$('.tab').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.t)));
+$$('[data-go]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.go)));
+function refresh(){if(TAB==='ana')ref1();else if(TAB==='bar')ref2();else if(TAB==='sep')ref3();else ref4();}
 
-// Variables Modo 3 (Separación: Centrifugación, Gravedad, Membranas)
-let sepType = 'centrifuge'; // 'centrifuge', 'gravity', 'membrane'
-let globSize = 4.0;         // 1 a 10 µm
-let tempVal = 55;           // Temperatura (°C)
-let flowParticles = [];
-
-const MFGM_LAYERS = {
-    all: {
-        title: "Vista General del Glóbulo Graso (1–10 µm)",
-        desc: "Haz clic en cualquiera de los botones de arriba para iluminar y estudiar cada componente de la <b>Membrana del Glóbulo Graso (MFGM)</b> según la Figura 4 de tu CECYBOOK."
-    },
-    core: {
-        title: "1. Núcleo de Grasa (Triglicéridos)",
-        desc: "Constituye el 98% del interior del glóbulo. Es completamente <b>hidrofóbico (apolar)</b> y contiene triglicéridos con distintos puntos de fusión que cristalizan parcialmente al enfriar la leche o la crema."
-    },
-    phospho: {
-        title: "2. Fosfolípidos y Glicolípidos (Bicapa Anfipática)",
-        desc: "Forman una bicapa que da <b>flexibilidad y estabilidad a la membrana</b>. Sus colas apolares miran hacia el núcleo de grasa y sus cabezas polares miran hacia el agua de la leche."
-    },
-    proteins: {
-        title: "3. Proteínas Específicas de la MFGM",
-        desc: "Incluyen <b>α-lactoalbúmina, butirofilina y xantina oxidasa</b>, entre otras. Cumplen funciones estructurales y enzimáticas esenciales para anclar la membrana al núcleo graso."
-    },
-    glyco: {
-        title: "4. Glicoproteínas Superficiales",
-        desc: "Poseen <b>cadenas de carbohidratos orientadas hacia la superficie acuosa</b>. Cumplen función de reconocimiento e impiden por repulsión estérica y electrostática que dos glóbulos se peguen al chocar."
-    },
-    chol: {
-        title: "5. Colesterol",
-        desc: "Insertado entre los fosfolípidos de la membrana; <b>contribuye a la rigidez, estabilidad y organización</b> estructural de la MFGM frente a cambios de temperatura."
-    }
+/* ===================== 1 · ANATOMÍA ===================== */
+const A={zoom:2,sel:'all'};
+const COMP={
+ all:{c:'#38bdf8',n:'Vista general',d:'La <b>membrana del glóbulo graso de la leche (MFGM)</b> está formada por lípidos polares y proteínas. Separa la grasa de la fase acuosa y reduce la coalescencia espontánea. Toca cada componente para estudiarlo.'},
+ core:{c:'#facc15',n:'Núcleo de grasa (triglicéridos)',d:'Casi toda la grasa láctea (≈ 98 %) son <b>triglicéridos</b>: apolares, «huyen» del agua. Tienen distintos puntos de fusión, por eso al enfriar la leche o la crema una parte cristaliza (la base de la maduración física).'},
+ inner:{c:'#fb7185',n:'Capa interna de proteínas',d:'Pegada al núcleo hay una capa de proteínas y lípidos polares que viene del <b>retículo endoplásmico</b> de la célula que produce la leche. Aquí están la <b>butirofilina</b> y la <b>xantina oxidasa</b>, que anclan la membrana al núcleo.'},
+ phos:{c:'#f97316',n:'Bicapa de fosfolípidos y glicolípidos',d:'Al salir de la célula, la gota de grasa se envuelve con la <b>membrana plasmática</b>: una bicapa con cabezas polares hacia el agua y colas apolares hacia dentro. Da flexibilidad y estabilidad.'},
+ chol:{c:'#10b981',n:'Colesterol',d:'Se intercala entre los fosfolípidos de la bicapa y ayuda a mantenerla <b>organizada y estable</b> ante cambios de temperatura.'},
+ glyc:{c:'#a855f7',n:'Glicoproteínas',d:'Proteínas con <b>cadenas de carbohidratos</b> que se proyectan hacia el agua (mucinas, lactadherina). Funcionan como un «cepillo»: cuando dos glóbulos se acercan, se repelen (repulsión estérica) y no se unen.'}
 };
+$('#comp').innerHTML=Object.keys(COMP).map(k=>`<button class="cb${k==='all'?' on':''}" data-c="${k}"><i style="background:${COMP[k].c}"></i>${COMP[k].n}</button>`).join('');
+$$('.cb').forEach(b=>b.addEventListener('click',()=>{A.sel=b.dataset.c;if(A.sel!=='all'&&A.sel!=='core')A.zoom=2;syncSeg('zoom',A.zoom);$$('.cb').forEach(x=>x.classList.toggle('on',x===b));ref1();}));
+function syncSeg(k,v){$(`.seg[data-k="${k}"]`).querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v==String(v)));}
+function ref1(){
+  const Z=[['🥛 Un vaso de leche','3–4.5 % de grasa'],['🔬 Glóbulos de grasa','escala: 10 µm'],['🧬 La membrana (MFGM)','≈ 10–20 nm de grosor']];
+  $('#zt').textContent=Z[A.zoom][0];$('#zs').textContent=Z[A.zoom][1];
+  let e='';
+  if(A.zoom===0) e='<h3>🥛 Una emulsión de grasa en agua</h3><p>La grasa no forma una capa: está repartida en ≈ <b>10 000 millones de glóbulos por mililitro</b>, dispersos en una fase acuosa con proteínas, lactosa y minerales (Figura 3).</p>';
+  else if(A.zoom===1) e='<h3>🔬 Muchos pequeños, pocos grandes</h3><p>Los glóbulos miden de 1 a 10 µm. Aunque la <b>mayoría son pequeños</b>, casi toda la grasa está en los de 2–8 µm (mira la gráfica). Eso importa al descremar: los más pequeños son los que se escapan con la leche descremada.</p>';
+  else e=`<h3>${COMP[A.sel].n}</h3><p>${COMP[A.sel].d}</p>`;
+  $('#exp1').innerHTML=e+'<div class="book">📘 <b>En tu CECYBOOK:</b> Figura 3 (p. 5) y Figura 4 (p. 6).</div>';
+}
+const c1=$('#c1'),x1=hiDPI(c1,760,360);
+const GLB=(()=>{const r=mulberry32(5);const a=[];for(let i=0;i<220;i++){let d;const u=r();d=u<0.7?0.3+r()*0.9:u<0.92?1.2+r()*2.3:3.5+r()*3;a.push({x:r(),y:r(),d});}return a;})();
+function drawAna(t){
+  const c=x1;c.clearRect(0,0,760,360);
+  if(A.zoom===0){
+    c.fillStyle='#f8fafc';c.fillRect(0,0,760,360);
+    c.fillStyle='#fff';c.strokeStyle='#94a3b8';c.lineWidth=3;c.beginPath();c.moveTo(250,50);c.lineTo(270,320);c.lineTo(400,320);c.lineTo(420,50);c.stroke();
+    c.fillStyle='#fffdf5';c.beginPath();c.moveTo(254,90);c.lineTo(271,316);c.lineTo(399,316);c.lineTo(416,90);c.closePath();c.fill();
+    c.strokeStyle='#38bdf8';c.lineWidth=2;c.beginPath();c.arc(335,200,26,0,7);c.stroke();
+    c.beginPath();c.moveTo(361,200);c.lineTo(520,170);c.stroke();
+    c.save();c.beginPath();c.arc(600,170,95,0,7);c.clip();c.fillStyle='#dbeafe';c.fillRect(505,75,190,190);
+    const r=mulberry32(3);for(let i=0;i<45;i++){const R=3+r()*12;c.fillStyle='#fde68a';c.strokeStyle='#f97316';c.lineWidth=1.2;c.beginPath();c.arc(510+r()*180,80+r()*180,R,0,7);c.fill();c.stroke();}
+    c.restore();c.strokeStyle='#38bdf8';c.lineWidth=3;c.beginPath();c.arc(600,170,95,0,7);c.stroke();
+    txt(c,'≈ 10 000 millones de glóbulos por mL',600,292,{b:1,c:'#12306b'});txt(c,'Leche: emulsión de grasa en agua',335,345,{b:1});
+    return;}
+  if(A.zoom===1){
+    c.fillStyle='#dbeafe';c.fillRect(0,0,480,360);
+    GLB.forEach((g,i)=>{const R=g.d*4.2;const x=g.x*480+Math.sin(t*0.6+i)*1.5,y=g.y*360+Math.cos(t*0.5+i)*1.5;c.fillStyle='#fde68a';c.strokeStyle='#f97316';c.lineWidth=R>6?1.6:0.8;c.beginPath();c.arc(x,y,R,0,7);c.fill();c.stroke();});
+    c.fillStyle='#0f1b33';c.fillRect(380,335,42,3);txt(c,'10 µm',401,329,{s:11,b:1});
+    // histograma número vs grasa
+    const X0=510,X1=745,Y0=280,Y1=50;c.fillStyle='#fff';c.fillRect(480,0,280,360);
+    txt(c,'¿Dónde está la grasa?',(X0+X1)/2,30,{b:1,c:'#12306b'});
+    const bins=[[0,1],[1,2],[2,4],[4,6],[6,10]];const nb=bins.map(([a,b])=>GLB.filter(g=>g.d>=a&&g.d<b).length);const vb=bins.map(([a,b])=>GLB.filter(g=>g.d>=a&&g.d<b).reduce((s,g)=>s+g.d**3,0));
+    const nT=nb.reduce((a,b)=>a+b),vT=vb.reduce((a,b)=>a+b);const bw=(X1-X0)/bins.length;
+    bins.forEach((b,i)=>{const hn=nb[i]/nT*(Y0-Y1),hv=vb[i]/vT*(Y0-Y1);c.fillStyle='#93c5fd';c.fillRect(X0+i*bw+4,Y0-hn,bw/2-5,hn);c.fillStyle='#eab308';c.fillRect(X0+i*bw+bw/2,Y0-hv,bw/2-5,hv);txt(c,`${b[0]}–${b[1]}`,X0+i*bw+bw/2,Y0+14,{s:10.5,c:'#475569'});});
+    txt(c,'diámetro (µm)',(X0+X1)/2,Y0+30,{s:10.5,c:'#475569'});
+    c.fillStyle='#93c5fd';c.fillRect(X0,330,10,10);txt(c,'% de glóbulos',X0+14,339,{s:11,a:'left'});c.fillStyle='#eab308';c.fillRect(X0+110,330,10,10);txt(c,'% de la grasa',X0+124,339,{s:11,a:'left'});
+    return;}
+  // zoom 2: membrana
+  c.fillStyle='#dbeafe';c.fillRect(0,0,760,360);
+  const sel=A.sel, al=k=>(sel==='all'||sel===k)?1:0.18;
+  const cx=380, cy=900, R0=640; // gran arco
+  const yAt=(x,off)=>cy-Math.sqrt((R0+off)**2-(x-cx)**2);
+  // núcleo
+  c.globalAlpha=al('core');c.fillStyle='#fde68a';c.beginPath();c.moveTo(0,360);for(let x=0;x<=760;x+=10)c.lineTo(x,yAt(x,0));c.lineTo(760,360);c.closePath();c.fill();
+  const r=mulberry32(8);c.strokeStyle='rgba(161,98,7,.5)';c.lineWidth=1.4;for(let i=0;i<50;i++){const x=r()*760,y=yAt(x,0)+30+r()*90;c.beginPath();c.moveTo(x,y);c.lineTo(x+14,y+5);c.stroke();}
+  txt(c,'Núcleo de triglicéridos',380,330,{b:1,s:14,c:'#854d0e'});
+  // capa interna
+  c.globalAlpha=al('inner');for(let x=10;x<760;x+=26){const y=yAt(x,10);c.fillStyle='#fb7185';c.beginPath();c.ellipse(x,y,11,7,0,0,7);c.fill();}
+  // bicapa
+  c.globalAlpha=al('phos');
+  for(let x=4;x<760;x+=9){[[24,1],[52,-1]].forEach(([off,dir])=>{const y=yAt(x,off);c.strokeStyle='#fdba74';c.lineWidth=1.3;c.beginPath();c.moveTo(x-2,y+dir*4);c.lineTo(x-2,y+dir*13);c.moveTo(x+2,y+dir*4);c.lineTo(x+2,y+dir*13);c.stroke();c.fillStyle='#f97316';c.beginPath();c.arc(x,y,3.6,0,7);c.fill();});}
+  // colesterol
+  c.globalAlpha=al('chol');for(let x=30;x<760;x+=58){const y=yAt(x,38);c.fillStyle='#10b981';rr(c,x-3,y-8,6,16,3);c.fill();}
+  // proteínas transmembrana
+  c.globalAlpha=al('inner');for(let x=120;x<760;x+=210){const y=yAt(x,38);c.fillStyle='#ec4899';rr(c,x-11,y-26,22,44,9);c.fill();}
+  // glicoproteínas
+  c.globalAlpha=al('glyc');for(let x=60;x<760;x+=70){const y=yAt(x,56);const sw=Math.sin(t*1.2+x)*4;c.strokeStyle='#a855f7';c.lineWidth=2.4;c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+sw,y-25,x+sw*1.5,y-50);c.stroke();
+    [[-8,-30],[8,-38],[-6,-48],[6,-56]].forEach(([dx,dy])=>{c.fillStyle='#c084fc';c.beginPath();c.arc(x+sw*1.4+dx,y+dy,4,0,7);c.fill();});}
+  c.globalAlpha=1;
+  txt(c,'Fase acuosa (agua, proteínas del suero, lactosa)',380,26,{b:1,c:'#1d4ed8'});
+  // rótulos
+  const L=[['glyc',700,yAt(700,110),'Glicoproteínas'],['phos',700,yAt(700,40)-4,'Bicapa'],['inner',120,yAt(120,-6)+26,'Proteínas'],['chol',30,yAt(30,38)-14,'Colesterol']];
+  L.forEach(([k,x,y,s])=>{if(sel==='all'||sel===k){c.fillStyle='rgba(255,255,255,.9)';rr(c,x-50,y-14,100,20,6);c.fill();txt(c,s,x,y,{s:11.5,b:1,c:COMP[k].c==='#facc15'?'#854d0e':COMP[k].c});}});
+}
+$$('.seg[data-k="zoom"] button').forEach(b=>b.addEventListener('click',()=>{A.zoom=+b.dataset.v;syncSeg('zoom',A.zoom);ref1();}));
 
-function initParticles() {
-    collideGlobules = [];
-    for (let i = 0; i < 11; i++) {
-        collideGlobules.push({
-            x: 80 + Math.random() * (canvas.width - 160),
-            y: 70 + Math.random() * (canvas.height - 140),
-            vx: (Math.random() - 0.5) * 2.2,
-            vy: (Math.random() - 0.5) * 2.2,
-            r: 32
-        });
-    }
-
-    flowParticles = [];
-    for (let i = 0; i < 56; i++) {
-        flowParticles.push({
-            x: 60 + Math.random() * (canvas.width - 120),
-            y: 60 + Math.random() * (canvas.height - 120),
-            isFat: i < 28,
-            r: (i < 28) ? (5 + Math.random() * 5) : 3.5,
-            angle: Math.random() * Math.PI * 2
-        });
-    }
+/* ===================== 2 · BARRERA ===================== */
+const Bs={state:'intacta',ag:2,G:[],hit:0,co:0};
+function initB(){const r=mulberry32(Date.now()%1000);Bs.G=[];Bs.hit=0;Bs.co=0;
+  const n=Bs.state==='homog'?60:16;
+  for(let i=0;i<n;i++){const R=Bs.state==='homog'?7+r()*3:20+r()*9;Bs.G.push({x:40+r()*680,y:40+r()*260,vx:(r()-0.5)*2,vy:(r()-0.5)*2,R});}}
+$$('.seg[data-k="mstate"] button').forEach(b=>b.addEventListener('click',()=>{Bs.state=b.dataset.v;syncSeg('mstate',Bs.state);initB();ref2();}));
+$('#ag').addEventListener('input',e=>{Bs.ag=+e.target.value;ref2();});
+$('#rstB').addEventListener('click',()=>{initB();ref2();});
+function ref2(){
+  $('#v-ag').textContent=Bs.ag+'×';
+  const E={intacta:'<h3>✅ La membrana los protege</h3><p>Los glóbulos chocan todo el tiempo, pero las <b>glicoproteínas</b> y la superficie hidrofílica de la membrana los mantienen separados: rebotan. Por eso la grasa de la leche fresca sigue dispersa. Sube la agitación: los choques aumentan, pero no se unen.</p>',
+   danada:'<h3>💥 Sin membrana, la grasa se une</h3><p>Si la membrana se daña (agitación intensa con aire, como en el <b>batido</b>), la grasa queda expuesta. Al chocar, los glóbulos se fusionan: hay <b>coalescencia</b>. Los glóbulos se hacen más grandes y menos numerosos. Es justo lo que se busca para hacer mantequilla (Figura 9).</p>',
+   homog:'<h3>⚙️ Homogeneizada: muchos glóbulos pequeños</h3><p>La homogeneización rompe los glóbulos en otros mucho más pequeños; la nueva superficie se cubre con <b>caseínas</b> de la leche. Son estables, y como la velocidad de ascenso depende de d², <b>casi no forman capa de crema</b> (pestaña 3).</p>'};
+  $('#exp2').innerHTML=E[Bs.state]+'<div class="book">📘 <b>En tu CECYBOOK:</b> p. 6 (MFGM), Figura 9 (p. 11) y Figura 8, paso 6 (p. 10).</div>';
+}
+const c2=$('#c2'),x2=hiDPI(c2,760,330);
+function stepB(){
+  const G=Bs.G,sp=Bs.ag*0.9;
+  G.forEach(g=>{g.x+=g.vx*sp;g.y+=g.vy*sp;if(g.x<g.R||g.x>760-g.R){g.vx*=-1;g.x=clamp(g.x,g.R,760-g.R);}if(g.y<g.R||g.y>330-g.R){g.vy*=-1;g.y=clamp(g.y,g.R,330-g.R);}});
+  for(let i=0;i<G.length;i++)for(let j=i+1;j<G.length;j++){const a=G[i],b=G[j];const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),m=a.R+b.R+(Bs.state==='danada'?0:8);
+    if(d<m&&d>0){
+      if(Bs.state==='danada'&&Math.random()<0.12){Bs.hit++;const R=Math.sqrt(a.R*a.R+b.R*b.R);a.x=(a.x*a.R*a.R+b.x*b.R*b.R)/(R*R);a.y=(a.y*a.R*a.R+b.y*b.R*b.R)/(R*R);a.vx=(a.vx+b.vx)/2;a.vy=(a.vy+b.vy)/2;a.R=Math.min(R,70);G.splice(j,1);Bs.co++;j--;continue;}
+      const nx=dx/d,ny=dy/d,p=(a.vx-b.vx)*nx+(a.vy-b.vy)*ny;if(p>0){Bs.hit++;a.vx-=p*nx;a.vy-=p*ny;b.vx+=p*nx;b.vy+=p*ny;}
+      const o=(m-d)/2;a.x-=nx*o;a.y-=ny*o;b.x+=nx*o;b.y+=ny*o;}}
+  $('#n-hit').textContent=f0(Bs.hit);$('#n-co').textContent=Bs.co;$('#n-g').textContent=G.length;
+}
+function drawB(t){
+  const c=x2;c.clearRect(0,0,760,330);c.fillStyle='#dbeafe';c.fillRect(0,0,760,330);
+  Bs.G.forEach((g,i)=>{c.fillStyle=Bs.state==='danada'?'#facc15':'#fde68a';c.beginPath();c.arc(g.x,g.y,g.R,0,7);c.fill();
+    if(Bs.state==='intacta'){c.strokeStyle='#f97316';c.lineWidth=3;c.stroke();c.strokeStyle='#a855f7';c.lineWidth=1.6;for(let k=0;k<12;k++){const a=k/12*6.283+t*0.3+i;c.beginPath();c.moveTo(g.x+Math.cos(a)*g.R,g.y+Math.sin(a)*g.R);c.lineTo(g.x+Math.cos(a)*(g.R+8),g.y+Math.sin(a)*(g.R+8));c.stroke();}}
+    else if(Bs.state==='homog'){for(let k=0;k<6;k++){const a=k/6*6.283+i;c.fillStyle='#93c5fd';c.beginPath();c.arc(g.x+Math.cos(a)*g.R,g.y+Math.sin(a)*g.R,2.6,0,7);c.fill();}}
+    else{c.strokeStyle='rgba(234,88,12,.5)';c.setLineDash([3,5]);c.lineWidth=1.5;c.stroke();c.setLineDash([]);}});
 }
 
-function setMode(m) {
-    currentMode = m;
-    [1, 2, 3].forEach(i => document.getElementById('mode-' + i).classList.toggle('active', i === m));
-    initParticles();
-    renderControls();
+/* ===================== 3 · SEPARACIÓN ===================== */
+const S={m:'grav',d:4,T:4,raw:1,h:6,rpm:6000,Tc:50,flow:100,pore:0.8,uf:0};
+const SEP_CTL={
+ grav:`<h3>🐢 Reposo en un recipiente de 20 cm</h3>
+  <div class="ctl"><label>Temperatura <span class="val" id="v-T"></span></label><input type="range" id="T" min="4" max="40" step="1"></div>
+  <div class="ctl"><label>Horas de reposo <span class="val" id="v-h"></span></label><input type="range" id="h" min="0" max="48" step="1"></div>
+  <div class="ctl"><label>Leche</label><div class="seg" data-k="raw"><button data-v="1">Cruda</button><button data-v="0">Calentada u homogeneizada</button></div></div>
+  <div class="ctl"><label>Glóbulo de ejemplo <span class="val" id="v-d"></span></label><input type="range" id="d" min="0.5" max="10" step="0.5"></div>`,
+ cent:`<h3>🚀 Descremadora de discos</h3>
+  <div class="ctl"><label>Velocidad <span class="val" id="v-rpm"></span></label><input type="range" id="rpm" min="3000" max="8000" step="250"></div>
+  <div class="ctl"><label>Temperatura de separación <span class="val" id="v-Tc"></span></label><input type="range" id="Tc" min="4" max="60" step="1"><div class="scale"><span>en frío</span><span>45–55 °C es lo común</span><span>60 °C</span></div></div>
+  <div class="ctl"><label>Caudal <span class="val" id="v-flow"></span></label><input type="range" id="flow" min="50" max="160" step="5"><div class="scale"><span>lento</span><span>nominal</span><span>rápido</span></div></div>
+  <div class="ctl"><label>Glóbulo de ejemplo <span class="val" id="v-d"></span></label><input type="range" id="d" min="0.5" max="10" step="0.5"></div>`,
+ mem:`<h3>🔬 Filtración por membrana</h3>
+  <div class="ctl"><label>Tamaño de poro <span class="val" id="v-pore"></span></label><input type="range" id="pore" min="0.05" max="2" step="0.05"></div>
+  <div class="ctl"><label>Tipo</label><div class="seg" data-k="uf"><button data-v="0">Microfiltración (MF)</button><button data-v="1">Ultrafiltración (UF)</button></div></div>`
+};
+function buildSepCtl(){
+  $('#ctlS').innerHTML=SEP_CTL[S.m];
+  ['T','h','d','rpm','Tc','flow','pore'].forEach(k=>{const el=$('#'+k);if(!el)return;el.value=S[k];el.addEventListener('input',()=>{S[k]=+el.value;ref3();});});
+  $$('#ctlS .seg').forEach(s=>{s.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v==String(S[s.dataset.k])));s.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S[s.dataset.k]=+b.dataset.v;s.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));if(s.dataset.k==='uf')S.pore=S.uf?0.05:0.8;buildSepCtl();ref3();});});
+}
+$$('[data-s]').forEach(c=>c.addEventListener('click',()=>{S.m=c.dataset.s;$$('[data-s]').forEach(x=>x.classList.toggle('on',x===c));buildSepCtl();ref3();}));
+function grav(T,raw,hours){const agg=raw?clamp((15-T)/8,0,1):0;let s=0,tot=0;for(let i=0;i<100;i++){const d=Math.exp(Math.log(0.1)+i/99*Math.log(150));const w=fatFrac(d*1.035)-fatFrac(d/1.035);const de=d*(1+4*agg*(d>1?1:0.3));const v=vStokes(de,T,9.81);s+=w*Math.min(1,v*hours*3600/0.2);tot+=w;}return s/tot;}
+function cent(){const w=S.rpm*2*Math.PI/60,a=w*w*0.15;const tres=2.5*100/S.flow;const vneed=0.4e-3/tres;const dc=Math.sqrt(18*eta(S.Tc)*vneed/(drho(S.Tc)*a))*1e6;const f=fatFrac(dc);return {a,g:a/9.81,dc,f,xs:3.6*f/0.91};}
+let SEPRES={xs:0.06};
+function kpi(l,v,cl=''){return `<div class="kpi ${cl}"><small>${l}</small><b>${v}</b></div>`;}
+function ref3(){
+  ['T','h','d','rpm','Tc','flow','pore'].forEach(k=>{const e=$('#v-'+k);if(!e)return;e.textContent={T:S.T+' °C',h:S.h+' h',d:f1(S.d)+' µm',rpm:f0(S.rpm)+' rpm',Tc:S.Tc+' °C',flow:S.flow+' %',pore:f2(S.pore)+' µm'}[k];});
+  let K='',E='';
+  if(S.m==='grav'){
+    const fr=grav(S.T,S.raw,S.h), v=vStokes(S.d,S.T,9.81), agg=S.raw?clamp((15-S.T)/8,0,1):0, ve=vStokes(S.d*(1+4*agg),S.T,9.81);
+    const xs=3.6*(1-fr)/(1-0.09*fr);
+    K=kpi('Velocidad de un glóbulo de '+f1(S.d)+' µm',f1(v*3.6e6)+' mm/h')+kpi('En racimos (aglutinación)',agg>0?f1(ve*3.6e6)+' mm/h':'no hay',agg>0?'good':'')+kpi('Grasa ya en la capa de crema',Math.round(fr*100)+' %',fr>0.7?'good':'')+kpi('Grasa que queda abajo',f2(xs)+' %',xs>1?'bad':'');
+    $('#st').textContent='🐢 Descremado por gravedad';$('#ss').textContent=`${S.h} h a ${S.T} °C`;
+    E=agg>0.3?`<h3>🧊 Leche cruda y fría: los glóbulos se agrupan</h3><p>En la leche cruda fría, unas proteínas (inmunoglobulinas) unen los glóbulos en <b>racimos</b>. Como la velocidad depende de <b>d²</b>, un racimo sube muchísimo más rápido que un glóbulo solo: ${f1(ve*3.6e6)} contra ${f1(v*3.6e6)} mm/h. Por eso el descremado tradicional funciona en unas horas.</p><p>Aun así, es lento y queda bastante grasa abajo (${f2(xs)} %).</p>`
+      :`<h3>🐢 Sin racimos, muy lento</h3><p>${S.raw?'A esta temperatura casi no hay aglutinación':'Si la leche se calentó o se homogeneizó, ya no hay aglutinación'}: cada glóbulo sube solo, a ${f1(v*3.6e6)} mm/h. En ${S.h} h solo ${Math.round(fr*100)} % de la grasa llegó a la capa de crema. Por eso la leche homogeneizada casi no «hace nata».</p>`;
+    SEPRES.xs=xs;
+  }else if(S.m==='cent'){
+    const C=cent(), v=vStokes(S.d,S.Tc,C.a), vg=vStokes(S.d,S.Tc,9.81);
+    K=kpi('Aceleración',f0(C.g)+' × g')+kpi('Glóbulo de '+f1(S.d)+' µm cruza el disco en',fmtT(0.4e-3/v))+kpi('Diámetro crítico',f2(C.dc)+' µm')+kpi('Grasa en la descremada',f2(C.xs)+' %',C.xs<=0.1?'good':C.xs>0.2?'bad':'');
+    $('#st').textContent='🚀 Descremadora centrífuga de discos';$('#ss').textContent=`${f0(S.rpm)} rpm · ${S.Tc} °C`;
+    E=`<h3>🚀 La centrífuga multiplica la gravedad ${f0(C.g)} veces</h3><p>Entre los discos, la grasa (menos densa) se mueve <b>hacia el centro</b> y sale como crema; la fase acuosa (más densa) va <b>hacia la periferia</b> y sale como leche descremada. Un glóbulo de ${f1(S.d)} µm cruza el espacio entre discos (≈ 0.4 mm) en ${fmtT(0.4e-3/v)}; por gravedad tardaría ${fmtT(0.4e-3/vg)}.</p><p>Solo escapan los glóbulos menores de <b>${f2(C.dc)} µm</b>: tienen muy poca grasa, por eso la descremada queda con ${f2(C.xs)} %. ${S.Tc<30?'<b>En frío</b> la fase acuosa es más viscosa (η más alta): la separación es menos eficiente.':'A 45–55 °C la viscosidad es baja y la grasa está líquida: la separación es más eficiente.'} ${S.flow>120?'Con caudal alto, el tiempo de residencia es corto y escapan glóbulos más grandes.':''}</p>`;
+    SEPRES.xs=C.xs;
+  }else{
+    const f=fatFrac(S.pore), xs=3.6*f/0.9;
+    K=kpi('Poro',f2(S.pore)+' µm')+kpi('Grasa en el permeado',f2(xs)+' %',xs<0.1?'good':'bad')+kpi('Proteínas',S.uf?'retenidas en parte':'pasan al permeado')+kpi('Escala','industrial');
+    $('#st').textContent=S.uf?'🔬 Ultrafiltración':'🔬 Microfiltración';$('#ss').textContent=`poro ${f2(S.pore)} µm`;
+    E=`<h3>🔬 Separar por tamaño, no por densidad</h3><p>La membrana deja pasar la fase acuosa (<b>permeado</b>) y retiene los glóbulos de grasa más grandes que el poro (<b>retenido</b>, la crema). ${S.uf?'En <b>ultrafiltración</b> los poros son tan pequeños que también se retiene parte de las proteínas: el retenido se concentra en grasa y proteína.':'En <b>microfiltración</b> pasan la fase acuosa y los componentes solubles.'} Ventajas: separación continua y alta eficiencia. Limitaciones: equipo costoso y control estricto de operación y limpieza (Figura 5).</p>`;
+    SEPRES.xs=xs;
+  }
+  $('#kpis').innerHTML=K;
+  $('#exp3').innerHTML=E+'<div class="book">📘 <b>En tu CECYBOOK:</b> Figura 5 (p. 7) y Ley de Stokes (p. 6). «La centrífuga no “crea” crema; acelera la separación de dos corrientes con diferente concentración de grasa» (p. 8).</div>';
+}
+const c3=$('#c3'),x3=hiDPI(c3,760,320);
+const PS=(()=>{const r=mulberry32(12);return Array.from({length:140},()=>({u:r(),v:r(),d:r()<0.15?0.4+r()*0.8:1+r()*7,ph:r()}));})();
+function drawSep(t){
+  const c=x3;c.clearRect(0,0,760,320);c.fillStyle='#f8fafc';c.fillRect(0,0,760,320);
+  if(S.m==='grav'){
+    // dos vasos: ahora y a lo largo del tiempo
+    const fr=grav(S.T,S.raw,S.h);
+    const gx=70,gy=40,gw=170,gh=250;
+    c.fillStyle='#fff';c.strokeStyle='#94a3b8';c.lineWidth=3;rr(c,gx,gy,gw,gh,10);c.fill();
+    c.save();rr(c,gx,gy,gw,gh,10);c.clip();
+    const top=gy+20, ch=fr*36;
+    c.fillStyle='#f1f5fb';c.fillRect(gx,top,gw,gh);c.fillStyle='#fef3c7';c.fillRect(gx,top,gw,ch);
+    const agg=S.raw?clamp((15-S.T)/8,0,1):0;
+    PS.forEach((p,i)=>{const de=p.d*(1+4*agg*(p.d>1?1:0.3));const v=vStokes(de,S.T,9.81);const rise=Math.min(1,v*S.h*3600/0.2);const y=top+ch+(1-p.v)*(gh-20-ch)*(1-rise)+ (rise>=1?-(gh-20-ch)*0+0:0);
+      const yy=rise>=1?top+p.v*Math.max(4,ch-4):y; c.fillStyle='#facc15';c.beginPath();c.arc(gx+8+p.u*(gw-16),yy,1+p.d*0.45,0,7);c.fill();});
+    c.restore();c.strokeStyle='#94a3b8';c.lineWidth=3;rr(c,gx,gy,gw,gh,10);c.stroke();
+    txt(c,`${S.h} h · ${S.T} °C`,gx+gw/2,gy+gh+20,{b:1});
+    if(fr>0.15){txt(c,'crema',gx+gw+28,top+ch/2+4,{s:11,b:1,c:'#a16207',a:'left'});}
+    txt(c,'descremada',gx+gw+28,gy+gh-30,{s:11,b:1,c:'#1d4ed8',a:'left'});
+    // curva
+    const X0=400,X1=740,Y0=280,Y1=40, xs=h=>X0+(X1-X0)*h/48, ys=v=>Y0-(Y0-Y1)*v;
+    c.fillStyle='#fff';c.fillRect(X0,Y1,X1-X0,Y0-Y1);c.strokeStyle='#cbd5e1';c.strokeRect(X0,Y1,X1-X0,Y0-Y1);
+    txt(c,'% de la grasa en la capa de crema',X0,28,{s:11,b:1,a:'left',c:'#12306b'});
+    for(let h=0;h<=48;h+=12)txt(c,h+' h',xs(h),Y0+14,{s:10,c:'#64748b'});
+    [0,0.5,1].forEach(v=>txt(c,Math.round(v*100)+'%',X0-4,ys(v)+4,{s:10,a:'right',c:'#64748b'}));
+    [[1,'#eab308','cruda, fría (racimos)',4],[0,'#3b82f6','calentada/homogeneizada',4]].forEach(([raw,col,l,T])=>{c.strokeStyle=col;c.lineWidth=raw===S.raw&&S.T<=8?3.2:1.8;c.beginPath();for(let h=0;h<=48;h+=1){const y=ys(grav(T,raw,h));h?c.lineTo(xs(h),y):c.moveTo(xs(h),y);}c.stroke();});
+    c.strokeStyle='#0f1b33';c.lineWidth=2.6;c.setLineDash([5,4]);c.beginPath();for(let h=0;h<=48;h+=1){const y=ys(grav(S.T,S.raw,h));h?c.lineTo(xs(h),y):c.moveTo(xs(h),y);}c.stroke();c.setLineDash([]);
+    c.fillStyle='#0f1b33';c.beginPath();c.arc(xs(S.h),ys(fr),5,0,7);c.fill();
+    txt(c,'— cruda fría 4 °C',X0+6,Y1+16,{s:10.5,b:1,a:'left',c:'#ca8a04'});txt(c,'— calentada 4 °C',X0+6,Y1+30,{s:10.5,b:1,a:'left',c:'#3b82f6'});txt(c,'- - tu condición',X0+6,Y1+44,{s:10.5,b:1,a:'left',c:'#0f1b33'});
+  }else if(S.m==='cent'){
+    const C=cent();const cx=250,top=40,bot=290;
+    // tazón
+    c.fillStyle='#e2e8f0';c.beginPath();c.moveTo(cx-170,top+20);c.lineTo(cx+170,top+20);c.lineTo(cx+120,bot);c.lineTo(cx-120,bot);c.closePath();c.fill();
+    c.strokeStyle='#64748b';c.lineWidth=3;c.stroke();
+    // discos
+    for(let k=0;k<9;k++){const y=top+60+k*24;c.strokeStyle='#94a3b8';c.lineWidth=3;c.beginPath();c.moveTo(cx-140+k*3,y+40);c.lineTo(cx-30,y);c.moveTo(cx+30,y);c.lineTo(cx+140-k*3,y+40);c.stroke();}
+    c.fillStyle='#cbd5e1';c.fillRect(cx-12,10,24,bot-20);
+    // partículas
+    const sp=S.rpm/6000;
+    PS.forEach((p,i)=>{const fat=p.d>=C.dc*0.9;const ph=(p.ph+t*0.25*sp)%1;const side=i%2?1:-1;
+      let x,y;if(fat){x=cx+side*(140-ph*110);y=top+80+p.v*190-ph*40;}else{x=cx+side*(40+ph*110);y=top+70+p.v*190+ph*30;}
+      const isFat=p.d>=1||fat; c.fillStyle=fat?'#facc15':(p.d<C.dc?'#fde68a':'#93c5fd');
+      if(!fat&&p.d<C.dc){c.strokeStyle='#dc2626';c.lineWidth=1;}
+      c.beginPath();c.arc(x,y,fat?1.5+p.d*0.5:2,0,7);c.fill();if(!fat&&p.d<C.dc)c.stroke();});
+    // flechas
+    c.fillStyle='#ca8a04';c.font='bold 12px Segoe UI';c.textAlign='left';c.fillText('Crema → centro',cx+20,26);
+    c.fillStyle='#1d4ed8';c.fillText('Descremada → periferia',cx-170,bot+24);
+    // panel derecho: d crítico
+    const X0=470,X1=740,Y0=245,Y1=60;txt(c,'¿Qué glóbulos escapan?',(X0+X1)/2,40,{b:1,c:'#12306b'});
+    const xs=d=>X0+(X1-X0)*Math.log(d/0.1)/Math.log(100);
+    c.strokeStyle='#cbd5e1';c.strokeRect(X0,Y1,X1-X0,Y0-Y1);
+    c.fillStyle='rgba(220,38,38,.12)';c.fillRect(X0,Y1,xs(C.dc)-X0,Y0-Y1);
+    c.strokeStyle='#eab308';c.lineWidth=2.5;c.beginPath();for(let i=0;i<=100;i++){const d=0.1*Math.pow(100,i/100);const pdf=(fatFrac(d*1.05)-fatFrac(d/1.05));const y=Y0-(Y0-Y1)*clamp(pdf/0.11,0,1);i?c.lineTo(xs(d),y):c.moveTo(xs(d),y);}c.stroke();
+    c.strokeStyle='#dc2626';c.lineWidth=2;c.beginPath();c.moveTo(xs(C.dc),Y1);c.lineTo(xs(C.dc),Y0);c.stroke();
+    txt(c,`d crítico ${f2(C.dc)} µm`,xs(C.dc)+4,Y1+14,{s:11,b:1,a:'left',c:'#dc2626'});
+    [0.1,1,10].forEach(d=>txt(c,d+' µm',xs(d),Y0+14,{s:10,c:'#64748b'}));
+    txt(c,'— grasa según tamaño de glóbulo',X0,Y0+32,{s:10.5,b:1,a:'left',c:'#a16207'});
+    txt(c,'zona roja: se va con la descremada',X0,Y0+46,{s:10.5,a:'left',c:'#dc2626'});
+  }else{
+    // tubo de membrana
+    const y0=90,y1=200;c.fillStyle='#fff7ed';c.fillRect(60,y0,620,y1-y0);
+    c.strokeStyle='#16a34a';c.lineWidth=5;c.setLineDash([10,6]);c.beginPath();c.moveTo(60,y1);c.lineTo(680,y1);c.stroke();c.beginPath();c.moveTo(60,y0);c.lineTo(680,y0);c.stroke();c.setLineDash([]);
+    c.fillStyle='#eff6ff';c.fillRect(60,y1+4,620,90);c.fillRect(60,y0-80,620,76);
+    PS.forEach((p,i)=>{const x=60+((p.u*620+t*60)%620);const pass=p.d<S.pore*1.0;
+      let y=y0+10+p.v*(y1-y0-20);
+      if(pass){const k=((p.u*620+t*60)%620)/620;y=y0+10+p.v*(y1-y0-20)+k*120*(p.v>0.5?1:-1);}
+      c.fillStyle=pass?'#93c5fd':'#facc15';c.beginPath();c.arc(x,clamp(y,y0-70,y1+86),pass?2:1.5+p.d*0.5,0,7);c.fill();});
+    // proteínas
+    const r=mulberry32(4);for(let i=0;i<40;i++){const x=60+((r()*620+t*60)%620);const y=S.uf?y0+10+r()*(y1-y0-20):y1+10+r()*70;c.fillStyle='#a78bfa';c.beginPath();c.arc(x,y,1.6,0,7);c.fill();}
+    txt(c,'Leche →',30,150,{b:1,a:'left',s:11});
+    txt(c,'RETENIDO: crema →',672,y0+16,{b:1,a:'right',s:11.5,c:'#a16207'});
+    txt(c,'PERMEADO (fase acuosa)',370,y1+80,{b:1,s:12,c:'#1d4ed8'});txt(c,'PERMEADO',370,y0-62,{b:1,s:12,c:'#1d4ed8'});
+    txt(c,`membrana · poro ${f2(S.pore)} µm`,370,y1-8,{s:11,b:1,c:'#15803d'});
+    [['#facc15','grasa'],['#93c5fd','agua y solubles'],['#a78bfa','proteínas']].forEach(([col,l],i)=>{c.fillStyle=col;c.beginPath();c.arc(250+i*110,308,5,0,7);c.fill();txt(c,l,258+i*110,312,{s:11,a:'left',c:'#475569'});});
+  }
 }
 
-function selectLayer(layerKey) {
-    selectedLayer = layerKey;
-    renderControls();
+/* ===================== 4 · BALANCE ===================== */
+const Bl={M:1000,xm:3.6,xc:40,xs:0.06,route:'A',xt:36};
+const RNG={M:v=>f0(v)+' kg',xm:v=>f1(v)+' %',xc:v=>v+' %',xs:v=>f2(v)+' %',xt:v=>v+' %'};
+Object.keys(RNG).forEach(k=>{const el=$('#'+k);el.value=Bl[k];el.addEventListener('input',()=>{Bl[k]=+el.value;ref4();});});
+$$('.seg[data-k="route"] button').forEach(b=>b.addEventListener('click',()=>{Bl.route=b.dataset.v;syncSeg('route',Bl.route);const el=$('#xt');if(Bl.route==='A'){el.min=35;el.max=40;Bl.xt=36;}else{el.min=10;el.max=18;Bl.xt=15;}el.value=Bl.xt;ref4();}));
+function balance(){const {M,xm,xc,xs}=Bl;const C=M*(xm-xs)/(xc-xs),Sm=M-C;const add=Bl.xt<xc?C*(xc-Bl.xt)/(Bl.xt-xs):0;return {C,S:Sm,fatM:M*xm/100,fatC:C*xc/100,fatS:Sm*xs/100,add,final:C+add};}
+function ref4(){
+  Object.keys(RNG).forEach(k=>$('#v-'+k).textContent=RNG[k](Bl[k]));
+  $('#xsNote').innerHTML=`<a href="#" id="useXs" style="color:#1d4ed8;font-weight:700">usar pestaña 3: ${f2(SEPRES.xs)} %</a>`;$('#useXs').onclick=e=>{e.preventDefault();Bl.xs=Math.round(clamp(SEPRES.xs,0.03,0.5)*100)/100;$('#xs').value=Bl.xs;ref4();};
+  $('#xtScale').innerHTML=Bl.route==='A'?'<span>35 %</span><span>para batir</span><span>40 %</span>':'<span>10 %</span><span>media crema / para café</span><span>18 %</span>';
+  const R=balance();
+  $('#tbal').innerHTML=`<tr><th>Corriente</th><th>Masa</th><th>% grasa</th><th>Grasa</th></tr>
+   <tr><td>🥛 Leche que entra</td><td>${f0(R.M=Bl.M)} kg</td><td>${f1(Bl.xm)} %</td><td>${f1(R.fatM)} kg</td></tr>
+   <tr><td>🟡 Crema del separador</td><td>${f1(R.C)} kg</td><td>${Bl.xc} %</td><td>${f1(R.fatC)} kg</td></tr>
+   <tr><td>🔵 Leche descremada</td><td>${f1(R.S)} kg</td><td>${f2(Bl.xs)} %</td><td>${f2(R.fatS)} kg</td></tr>
+   <tr class="tot"><td>Suma de salidas</td><td>${f0(R.C+R.S)} kg</td><td></td><td>${f1(R.fatC+R.fatS)} kg = entra</td></tr>
+   <tr><td>➕ Descremada para estandarizar</td><td>${f1(R.add)} kg</td><td>${f2(Bl.xs)} %</td><td></td></tr>
+   <tr class="tot"><td>🎯 Crema estandarizada</td><td>${f1(R.final)} kg</td><td>${Bl.xt} %</td><td>${f1(R.fatC+R.add*Bl.xs/100)} kg</td></tr>`;
+  $('#exp4').innerHTML=`<h3>⚖️ La grasa no se crea: se reparte</h3><p>De ${f0(Bl.M)} kg de leche con ${f1(Bl.xm)} % salen <b>${f1(R.C)} kg de crema</b> al ${Bl.xc} % y <b>${f1(R.S)} kg de leche descremada</b>. La grasa que entra (${f1(R.fatM)} kg) es igual a la que sale (${f1(R.fatC)} + ${f2(R.fatS)} kg). Para llevar la crema al ${Bl.xt} % se mezclan <b>${f1(R.add)} kg de descremada</b> con la crema.</p>
+   <p style="font-size:12.5px;color:#475569">Ecuaciones: M = C + S y M·x<sub>m</sub> = C·x<sub>c</sub> + S·x<sub>s</sub> → C = M (x<sub>m</sub> − x<sub>s</sub>) / (x<sub>c</sub> − x<sub>s</sub>).</p>
+   <div class="book">📘 <b>En tu CECYBOOK:</b> p. 6 («obtener crema no significa producir grasa nueva»), Figura 6 (p. 8) y Figura 8 (p. 10).</div>`;
 }
-
-function renderControls() {
-    const header = document.getElementById('ctrl-header');
-    const ctrl = document.getElementById('dynamic-controls');
-    const detail = document.getElementById('detail-box');
-    const legend = document.getElementById('legend-strip');
-
-    if (currentMode === 1) {
-        header.innerText = '🔬 Explora la Estructura de la MFGM';
-        ctrl.innerHTML = `
-            <div class="layer-list">
-                <button class="layer-btn ${selectedLayer==='all'?'active':''}" onclick="selectLayer('all')">
-                    <span class="layer-dot" style="background:#38bdf8;"></span> Ver Todas las Capas (Glóbulo 1–10 µm)
-                </button>
-                <button class="layer-btn ${selectedLayer==='core'?'active':''}" onclick="selectLayer('core')">
-                    <span class="layer-dot" style="background:#facc15;"></span> 1. Núcleo de Grasa (Triglicéridos)
-                </button>
-                <button class="layer-btn ${selectedLayer==='phospho'?'active':''}" onclick="selectLayer('phospho')">
-                    <span class="layer-dot" style="background:#f97316;"></span> 2. Fosfolípidos y Glicolípidos (Bicapa)
-                </button>
-                <button class="layer-btn ${selectedLayer==='proteins'?'active':''}" onclick="selectLayer('proteins')">
-                    <span class="layer-dot" style="background:#ec4899;"></span> 3. Proteínas (Butirofilina, Xantina oxidasa)
-                </button>
-                <button class="layer-btn ${selectedLayer==='glyco'?'active':''}" onclick="selectLayer('glyco')">
-                    <span class="layer-dot" style="background:#a855f7;"></span> 4. Glicoproteínas (Cadenas de carbohidratos)
-                </button>
-                <button class="layer-btn ${selectedLayer==='chol'?'active':''}" onclick="selectLayer('chol')">
-                    <span class="layer-dot" style="background:#10b981;"></span> 5. Colesterol (Estabilidad de membrana)
-                </button>
-            </div>
-        `;
-        const info = MFGM_LAYERS[selectedLayer];
-        detail.innerHTML = `<h4>${info.title}</h4>${info.desc}`;
-
-        legend.innerHTML = `
-            <div class="legend-item"><span class="dot" style="background:#facc15;"></span> Núcleo Triglicéridos</div>
-            <div class="legend-item"><span class="dot" style="background:#f97316;"></span> Bicapa Fosfolípidos</div>
-            <div class="legend-item"><span class="dot" style="background:#ec4899;"></span> Proteínas</div>
-            <div class="legend-item"><span class="dot" style="background:#a855f7;"></span> Glicoproteínas</div>
-            <div class="legend-item"><span class="dot" style="background:#10b981;"></span> Colesterol</div>
-        `;
-    } 
-    else if (currentMode === 2) {
-        header.innerText = '🛡️ Experimento de Barrera MFGM';
-        ctrl.innerHTML = `
-            <div class="ctrl-group">
-                <label>Estado de la Membrana MFGM:</label>
-                <button class="layer-btn active" style="justify-content:center; background:${mfgmPresent ? '#059669' : '#dc2626'}; border-color:transparent;" onclick="mfgmPresent=!mfgmPresent; initParticles(); renderControls();">
-                    ${mfgmPresent ? '✅ MFGM Intacta (Los glóbulos rebotan)' : '💥 MFGM Rota / Ausente (Coalescencia)'}
-                </button>
-            </div>
-            <div class="ctrl-group">
-                <label><span>Agitación Mecánica / Térmica:</span><span class="val-tag" id="lbl-ag">${agitateLevel}x</span></label>
-                <input type="range" min="1" max="5" step="1" value="${agitateLevel}" oninput="agitateLevel=parseInt(this.value); document.getElementById('lbl-ag').innerText=this.value+'x';">
-            </div>
-        `;
-        detail.innerHTML = mfgmPresent
-            ? `<h4>✅ Con MFGM Intacta: Emulsión Estable</h4>Las cadenas de carbohidratos de las <b>glicoproteínas</b> y los <b>fosfolípidos</b> generan repulsión cuando los glóbulos chocan. Por eso la leche fresca y la crema mantienen su grasa dispersa sin unirse.`
-            : `<h4>💥 Sin MFGM: Coalescencia e Inversión</h4>Si eliminamos o rompemos la MFGM (como ocurre durante el batido de la mantequilla), los núcleos de triglicéridos hidrofóbicos se fusionan al tocarse para huir del agua.`;
-
-        legend.innerHTML = `
-            <div class="legend-item"><span class="dot" style="background:#082f49;"></span> Fase Acuosa</div>
-            <div class="legend-item"><span class="dot" style="background:#facc15; border:2px solid #f97316;"></span> Glóbulo Graso</div>
-            <div class="legend-item"><span class="dot" style="background:#a855f7;"></span> Glicoproteínas Protectoras</div>
-        `;
-    } 
-    else if (currentMode === 3) {
-        header.innerText = '⚙️ Métodos de Separación (Figura 5)';
-        ctrl.innerHTML = `
-            <div class="layer-list">
-                <button class="layer-btn ${sepType==='centrifuge'?'active':''}" onclick="sepType='centrifuge'; initParticles(); renderControls();">
-                    🚀 1. Centrifugación (Descremadora de discos)
-                </button>
-                <button class="layer-btn ${sepType==='gravity'?'active':''}" onclick="sepType='gravity'; initParticles(); renderControls();">
-                    🐢 2. Descremado por Gravedad (Reposo 4 °C)
-                </button>
-                <button class="layer-btn ${sepType==='membrane'?'active':''}" onclick="sepType='membrane'; initParticles(); renderControls();">
-                    🔬 3. Separación con Membranas (MF / UF)
-                </button>
-            </div>
-            <div class="ctrl-group" style="margin-top:6px;">
-                <label><span>Diámetro del Glóbulo (1–10 µm):</span><span class="val-tag" id="lbl-gs">${globSize.toFixed(1)} µm</span></label>
-                <input type="range" min="1.5" max="9.0" step="0.5" value="${globSize}" oninput="globSize=parseFloat(this.value); document.getElementById('lbl-gs').innerText=this.value+' µm';">
-                <div class="scale-notes"><span>1.5 µm (Pequeño)</span><span>5.0 µm (Medio)</span><span>9.0 µm (Grande)</span></div>
-            </div>
-        `;
-
-        if (sepType === 'centrifuge') {
-            detail.innerHTML = `
-                <h4>1. Centrifugación (Método Industrial)</h4>
-                <div class="stokes-box">
-                    <span style="color:#fcd34d; font-weight:bold;">v</span> =
-                    <div class="fraction">
-                        <span class="fraction-top"><i>d</i><sup>2</sup> &middot; (&rho;<sub>p</sub> &minus; &rho;<sub>g</sub>) &middot; <i>&omega;<sup>2</sup>r</i></span>
-                        <span class="fraction-bottom">18 &middot; &eta;</span>
-                    </div>
-                </div>
-                • <b>Principio:</b> La fuerza centrífuga envía los glóbulos grasos (menos densos) <b>hacia el centro</b> formando crema (35–45% grasa), y desplaza la fase acuosa (más densa) <b>hacia la periferia</b> como leche descremada (≤ 0.5% grasa).
-            `;
-        } else if (sepType === 'gravity') {
-            detail.innerHTML = `
-                <h4>2. Descremado por Gravedad (Tradicional)</h4>
-                • <b>Condición:</b> Se deja reposar la leche en frío (<b>4 °C</b>) durante varias horas.<br>
-                • <b>Ventajas:</b> Equipo simple, bajo costo, útil a pequeña escala.<br>
-                • <b>Limitaciones:</b> Proceso muy lento y menor eficiencia de separación que la centrífuga.
-            `;
-        } else {
-            detail.innerHTML = `
-                <h4>3. Separación con Membranas (Emergente)</h4>
-                • <b>Microfiltración (MF) / Ultrafiltración (UF):</b> Utiliza una membrana selectiva por tamaño de poro.<br>
-                • <b>Mecanismo:</b> Retiene los glóbulos de grasa grandes (<b>0.1–10 µm</b>) en el <b>retenido (crema)</b> y deja pasar el agua y solubles en el <b>permeado (leche descremada)</b>.
-            `;
-        }
-
-        legend.innerHTML = `
-            <div class="legend-item"><span class="dot" style="background:#facc15; border:2px solid #f97316;"></span> Glóbulos de Grasa (Crema, menor densidad)</div>
-            <div class="legend-item"><span class="dot" style="background:#38bdf8;"></span> Fase Acuosa (Leche descremada, mayor densidad)</div>
-        `;
-    }
+const c4=$('#c4'),x4=hiDPI(c4,760,220), c4b=$('#c4b'),x4b=hiDPI(c4b,760,200);
+function drawBal(){
+  const c=x4,R=balance();c.clearRect(0,0,760,220);c.fillStyle='#fff';c.fillRect(0,0,760,220);
+  const H=150, top=40, sc=H/Bl.M;
+  // leche
+  const mh=Bl.M*sc;c.fillStyle='#f1f5fb';rr(c,30,top,110,mh,8);c.fill();c.fillStyle='#facc15';const fh=Math.max(3,mh*Bl.xm/100*6);rr(c,30,top+mh-fh,110,fh,4);c.fill();
+  txt(c,'Leche',85,top-10,{b:1});txt(c,f0(Bl.M)+' kg',85,top+mh/2,{b:1,c:'#12306b'});
+  // separador
+  c.fillStyle='#cbd5e1';c.beginPath();c.moveTo(210,top+30);c.lineTo(290,top+30);c.lineTo(270,top+120);c.lineTo(230,top+120);c.closePath();c.fill();txt(c,'Separador',250,top+140,{s:11,b:1,c:'#475569'});
+  c.strokeStyle='#94a3b8';c.lineWidth=6;c.beginPath();c.moveTo(140,top+75);c.lineTo(210,top+75);c.stroke();
+  // salidas
+  c.strokeStyle='#eab308';c.beginPath();c.moveTo(290,top+40);c.lineTo(360,top+20);c.stroke();
+  c.strokeStyle='#93c5fd';c.beginPath();c.moveTo(270,top+110);c.lineTo(360,top+120);c.stroke();
+  const ch=Math.max(8,R.C*sc), sh=R.S*sc*0.85;
+  c.fillStyle='#fef3c7';rr(c,360,top,100,ch,6);c.fill();c.fillStyle='#facc15';rr(c,360,top+ch-Math.max(3,ch*Bl.xc/100),100,Math.max(3,ch*Bl.xc/100),4);c.fill();
+  txt(c,`Crema ${f1(R.C)} kg`,410,top-8,{b:1,s:11.5,c:'#a16207'});
+  c.fillStyle='#e0ecff';rr(c,360,top+ch+16,100,Math.min(sh,H-ch-10),6);c.fill();
+  txt(c,`Descremada ${f0(R.S)} kg`,410,top+ch+16+Math.min(sh,H-ch-10)/2+4,{b:1,s:11.5,c:'#1d4ed8'});
+  // estandarizada
+  c.strokeStyle='#94a3b8';c.lineWidth=4;c.beginPath();c.moveTo(460,top+ch/2);c.lineTo(560,top+40);c.stroke();
+  c.setLineDash([4,4]);c.beginPath();c.moveTo(460,top+ch+40);c.lineTo(560,top+70);c.stroke();c.setLineDash([]);
+  const fh2=Math.max(10,R.final*sc*1.2);c.fillStyle='#fffbeb';rr(c,560,top+20,150,fh2,8);c.fill();c.strokeStyle='#eab308';c.lineWidth=2;c.stroke();
+  txt(c,`Crema al ${Bl.xt} %`,635,top+10,{b:1,c:'#a16207'});txt(c,`${f1(R.final)} kg`,635,top+20+fh2/2+4,{b:1,s:13});
+  txt(c,`+ ${f1(R.add)} kg de descremada`,635,top+fh2+40,{s:11,b:1,c:'#1d4ed8'});
+  // barra de grasa
+  txt(c,`Grasa: entra ${f1(R.fatM)} kg = sale ${f1(R.fatC)} kg en crema + ${f2(R.fatS)} kg en descremada`,380,210,{s:12,b:1,c:'#12306b'});
 }
-
-function drawAnatomyMode() {
-    ctx.fillStyle = '#071120';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    let cx = canvas.width / 2 - 40;
-    let cy = canvas.height / 2 + 5;
-    let R = 128;
-
-    // 1. Núcleo de Grasa (Triglicéridos)
-    ctx.save();
-    ctx.globalAlpha = (selectedLayer === 'all' || selectedLayer === 'core') ? 1.0 : 0.25;
-    let grad = ctx.createRadialGradient(cx - 30, cy - 30, 15, cx, cy, R);
-    grad.addColorStop(0, '#fef08a');
-    grad.addColorStop(0.6, '#facc15');
-    grad.addColorStop(1, '#ca8a04');
-    ctx.beginPath();
-    ctx.arc(cx, cy, R, 0, Math.PI * 2);
-    ctx.fillStyle = grad;
-    ctx.fill();
-
-    ctx.fillStyle = '#451a03';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Núcleo de Grasa', cx, cy - 8);
-    ctx.font = '13px sans-serif';
-    ctx.fillText('(Triglicéridos)', cx, cy + 12);
-    ctx.restore();
-
-    // 2. Bicapa de Fosfolípidos y Glicolípidos
-    ctx.save();
-    ctx.globalAlpha = (selectedLayer === 'all' || selectedLayer === 'phospho') ? 1.0 : 0.22;
-    ctx.beginPath();
-    ctx.arc(cx, cy, R + 6, 0, Math.PI * 2);
-    ctx.lineWidth = 10;
-    ctx.strokeStyle = '#ea580c';
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.arc(cx, cy, R + 15, 0, Math.PI * 2);
-    ctx.lineWidth = 6;
-    ctx.strokeStyle = '#fb923c';
-    ctx.stroke();
-    ctx.restore();
-
-    // 3. Colesterol (insertado en la bicapa)
-    ctx.save();
-    ctx.globalAlpha = (selectedLayer === 'all' || selectedLayer === 'chol') ? 1.0 : 0.2;
-    for (let i = 0; i < 16; i++) {
-        let ang = (i * Math.PI * 2) / 16 + 0.1;
-        let x = cx + Math.cos(ang) * (R + 10);
-        let y = cy + Math.sin(ang) * (R + 10);
-        ctx.fillStyle = '#10b981';
-        ctx.beginPath();
-        ctx.arc(x, y, 5, 0, Math.PI * 2);
-        ctx.fill();
-    }
-    ctx.restore();
-
-    // 4. Proteínas (Butirofilina, Xantina oxidasa, α-lactoalbúmina)
-    ctx.save();
-    ctx.globalAlpha = (selectedLayer === 'all' || selectedLayer === 'proteins') ? 1.0 : 0.2;
-    for (let i = 0; i < 12; i++) {
-        let ang = (i * Math.PI * 2) / 12;
-        let x = cx + Math.cos(ang) * (R + 16);
-        let y = cy + Math.sin(ang) * (R + 16);
-        ctx.fillStyle = '#ec4899';
-        ctx.strokeStyle = '#831843';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.arc(x, y, 8.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-    }
-    ctx.restore();
-
-    // 5. Glicoproteínas con cadenas de carbohidratos en la superficie
-    ctx.save();
-    ctx.globalAlpha = (selectedLayer === 'all' || selectedLayer === 'glyco') ? 1.0 : 0.2;
-    let rot = Date.now() * 0.0004;
-    for (let i = 0; i < 20; i++) {
-        let ang = rot + (i * Math.PI * 2) / 20;
-        let x1 = cx + Math.cos(ang) * (R + 18);
-        let y1 = cy + Math.sin(ang) * (R + 18);
-        let x2 = cx + Math.cos(ang) * (R + 42);
-        let y2 = cy + Math.sin(ang) * (R + 42);
-
-        ctx.strokeStyle = '#a855f7';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-
-        // Ramificaciones de carbohidratos
-        ctx.fillStyle = '#c084fc';
-        ctx.beginPath();
-        ctx.arc(x2, y2, 4, 0, Math.PI * 2);
-        ctx.fill();
-    }
-    ctx.restore();
-
-    // Etiquetas estilo Figura 4 del CECYBOOK a la derecha
-    const labels = [
-        { key: 'glyco', y: 75, col: '#c084fc', title: 'Glicoproteínas', sub: 'Cadenas de carbohidratos (estabilización)' },
-        { key: 'proteins', y: 155, col: '#f472b6', title: 'Proteínas de Membrana', sub: 'Butirofilina, xantina oxidasa, α-lactoalbúmina' },
-        { key: 'phospho', y: 235, col: '#fb923c', title: 'Fosfolípidos y Glicolípidos', sub: 'Bicapa que da flexibilidad y estabilidad' },
-        { key: 'chol', y: 315, col: '#34d399', title: 'Colesterol', sub: 'Organización y estabilidad estructural' }
-    ];
-
-    labels.forEach(lb => {
-        let active = (selectedLayer === 'all' || selectedLayer === lb.key);
-        ctx.save();
-        ctx.globalAlpha = active ? 1.0 : 0.35;
-        ctx.fillStyle = '#1e293b';
-        ctx.strokeStyle = lb.col;
-        ctx.lineWidth = active ? 2 : 1;
-        ctx.beginPath();
-        ctx.roundRect(515, lb.y - 24, 230, 52, 8);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = lb.col;
-        ctx.font = 'bold 12.5px sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText(lb.title, 525, lb.y - 5);
-        ctx.fillStyle = '#cbd5e1';
-        ctx.font = '11px sans-serif';
-        ctx.fillText(lb.sub, 525, lb.y + 14);
-        ctx.restore();
-    });
+function drawPearson(){
+  const c=x4b,R=balance();c.clearRect(0,0,760,200);c.fillStyle='#fff';c.fillRect(0,0,760,200);
+  const cx=300,cy=100;c.strokeStyle='#cbd5e1';c.lineWidth=2;c.strokeRect(cx-60,cy-60,120,120);
+  c.strokeStyle='#94a3b8';c.beginPath();c.moveTo(cx-60,cy-60);c.lineTo(cx+60,cy+60);c.moveTo(cx+60,cy-60);c.lineTo(cx-60,cy+60);c.stroke();
+  txt(c,`Crema ${Bl.xc} %`,cx-110,cy-55,{b:1,c:'#a16207'});txt(c,`Descremada ${f2(Bl.xs)} %`,cx-120,cy+70,{b:1,c:'#1d4ed8'});
+  c.fillStyle='#fff';c.beginPath();c.arc(cx,cy,26,0,7);c.fill();c.strokeStyle='#12306b';c.lineWidth=2;c.stroke();txt(c,Bl.xt+' %',cx,cy+5,{b:1,s:14,c:'#12306b'});
+  const pc=Bl.xt-Bl.xs, ps=Bl.xc-Bl.xt;
+  txt(c,`${f2(pc)} partes de crema`,cx+150,cy-55,{b:1,a:'left',c:'#a16207'});txt(c,`${f2(ps)} partes de descremada`,cx+150,cy+70,{b:1,a:'left',c:'#1d4ed8'});
+  txt(c,`(${Bl.xt} − ${f2(Bl.xs)})`,cx+150,cy-38,{s:11,a:'left',c:'#64748b'});txt(c,`(${Bl.xc} − ${Bl.xt})`,cx+150,cy+87,{s:11,a:'left',c:'#64748b'});
+  txt(c,`Por cada kg de crema: ${f2(ps/pc)} kg de descremada`,cx+150,cy+10,{s:12.5,b:1,a:'left'});
 }
+const CHK=[['Acidez / pH',1],['Viscosidad y estabilidad (sin separación)',1],['Fosfatasa residual (pasteurización)',1],['Microbiología (coliformes, S. aureus)',1],['Olor, sabor y color',1],['Color de la etiqueta',0],['Marca del separador',0],['Peso del envase vacío',0]];
+function buildChecks(){$('#checks').innerHTML=CHK.map((k,i)=>`<label data-i="${i}"><input type="checkbox"> ${k[0]}</label>`).join('');$('#qfb').innerHTML='';}
+$('#chkQ').addEventListener('click',()=>{let ok=0,bad=0,miss=0;$$('#checks label').forEach(l=>{const i=+l.dataset.i,on=l.querySelector('input').checked,should=CHK[i][1];l.classList.remove('right','wrong','miss');if(on&&should){ok++;l.classList.add('right');}else if(on&&!should){bad++;l.classList.add('wrong');}else if(!on&&should){miss++;l.classList.add('miss');}});
+  $('#qfb').innerHTML=`<div class="verdict ${bad===0&&miss===0?'good':'mid'}">${bad===0&&miss===0?'✔ ¡Completo!':`Marcaste ${ok} de 5 correctos${bad?`, ${bad} que no ayudan a decidir`:''}${miss?`, te faltaron ${miss} (en amarillo)`:''}.`} La Figura 7 separa dos preguntas: <b>¿cómo se denomina?</b> (grasa) y <b>¿es aceptable?</b> (acidez, viscosidad, fosfatasa, microbiología y características sensoriales). Una crema con la grasa correcta pero con coliformes altos o fosfatasa positiva <b>no se libera</b>.</div>`;});
+$('#rstQ').addEventListener('click',buildChecks);
 
-function drawBarrierMode() {
-    ctx.fillStyle = '#082f49';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    for (let i = 0; i < collideGlobules.length; i++) {
-        let g1 = collideGlobules[i];
-        g1.x += g1.vx * agitateLevel;
-        g1.y += g1.vy * agitateLevel;
-
-        if (g1.x < 40 || g1.x > canvas.width - 40) g1.vx *= -1;
-        if (g1.y < 40 || g1.y > canvas.height - 40) g1.vy *= -1;
-
-        for (let j = i + 1; j < collideGlobules.length; j++) {
-            let g2 = collideGlobules[j];
-            let dx = g2.x - g1.x;
-            let dy = g2.y - g1.y;
-            let dist = Math.hypot(dx, dy);
-            let minDist = g1.r + g2.r + (mfgmPresent ? 16 : -12);
-
-            if (dist < minDist && dist > 0) {
-                let ang = Math.atan2(dy, dx);
-                if (mfgmPresent) {
-                    // Rebote limpio por repulsión de la MFGM
-                    g1.vx = -Math.cos(ang) * 1.7;
-                    g1.vy = -Math.sin(ang) * 1.7;
-                    g2.vx = Math.cos(ang) * 1.7;
-                    g2.vy = Math.sin(ang) * 1.7;
-                } else {
-                    // Sin MFGM: se fusionan (coalescencia)
-                    g1.x += Math.cos(ang) * 0.6;
-                    g1.y += Math.sin(ang) * 0.6;
-                    g2.x -= Math.cos(ang) * 0.6;
-                    g2.y -= Math.sin(ang) * 0.6;
-                    g1.vx *= 0.85; g1.vy *= 0.85;
-                    g2.vx *= 0.85; g2.vy *= 0.85;
-                }
-            }
-        }
-
-        ctx.save();
-        ctx.translate(g1.x, g1.y);
-        ctx.beginPath();
-        ctx.arc(0, 0, g1.r, 0, Math.PI * 2);
-        ctx.fillStyle = '#facc15';
-        ctx.fill();
-
-        if (mfgmPresent) {
-            ctx.lineWidth = 4;
-            ctx.strokeStyle = '#ea580c';
-            ctx.stroke();
-
-            ctx.strokeStyle = '#c084fc';
-            ctx.lineWidth = 2;
-            for (let k = 0; k < 10; k++) {
-                let a = (k * Math.PI * 2) / 10;
-                ctx.beginPath();
-                ctx.moveTo(Math.cos(a) * g1.r, Math.sin(a) * g1.r);
-                ctx.lineTo(Math.cos(a) * (g1.r + 10), Math.sin(a) * (g1.r + 10));
-                ctx.stroke();
-            }
-        }
-        ctx.restore();
-    }
+/* ===================== bucle ===================== */
+let last=performance.now(),tt=0;
+function loop(now){
+  try{const dt=Math.min(0.05,(now-last)/1000);last=now;tt+=dt;
+    if(TAB==='ana')drawAna(tt);else if(TAB==='bar'){stepB();drawB(tt);}else if(TAB==='sep')drawSep(tt);else{drawBal();drawPearson();}
+  }catch(e){console.error(e);}
+  requestAnimationFrame(loop);
 }
-
-function drawSeparationMode() {
-    ctx.fillStyle = '#071120';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    let sizeFactor = globSize / 4.0;
-
-    if (sepType === 'centrifuge') {
-        // Descremadora centrífuga de discos (vista esquemática Figura 5.1)
-        let cx = canvas.width / 2;
-        let cy = canvas.height / 2 + 12;
-
-        ctx.fillStyle = '#f8fafc';
-        ctx.font = 'bold 14px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('1. DESCREMADORA CENTRÍFUGA DE DISCOS (Crema al centro | Leche descremada a la periferia)', cx, 26);
-
-        [165, 118, 68].forEach((r, idx) => {
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, 0, Math.PI * 2);
-            ctx.strokeStyle = idx === 2 ? '#f59e0b' : '#334155';
-            ctx.lineWidth = idx === 2 ? 3 : 1.5;
-            ctx.stroke();
-        });
-
-        flowParticles.forEach((p, idx) => {
-            let dx = p.x - cx;
-            let dy = p.y - cy;
-            let dist = Math.hypot(dx, dy) || 1;
-            let ang = Math.atan2(dy, dx) + 0.045;
-
-            if (p.isFat) {
-                dist = Math.max(15 + (idx % 38), dist - 1.5 * sizeFactor);
-            } else {
-                dist = Math.min(155 - (idx % 25), dist + 1.5);
-            }
-            p.x = cx + Math.cos(ang) * dist;
-            p.y = cy + Math.sin(ang) * dist;
-
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.isFat ? globSize * 1.45 : 4, 0, Math.PI * 2);
-            ctx.fillStyle = p.isFat ? '#facc15' : '#38bdf8';
-            ctx.fill();
-            if (p.isFat) {
-                ctx.strokeStyle = '#ea580c';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-            }
-        });
-    } 
-    else if (sepType === 'gravity') {
-        // Vaso de descremado tradicional por gravedad en frío (4 °C)
-        ctx.fillStyle = '#f8fafc';
-        ctx.font = 'bold 14px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('2. DESCREMADO POR GRAVEDAD EN FRÍO (4 °C) — Ascenso lento hacia la capa superior', canvas.width / 2, 26);
-
-        ctx.strokeStyle = '#64748b';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(220, 48, 320, 340);
-
-        flowParticles.forEach(p => {
-            if (p.isFat) {
-                p.y -= 0.22 * sizeFactor;
-                if (p.y < 65) p.y = 65 + Math.random() * 22;
-            } else {
-                p.y += 0.15;
-                if (p.y > 370) p.y = 370 - Math.random() * 40;
-            }
-            p.x = Math.max(235, Math.min(525, p.x + (Math.random() - 0.5) * 0.6));
-
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.isFat ? globSize * 1.45 : 4, 0, Math.PI * 2);
-            ctx.fillStyle = p.isFat ? '#facc15' : '#38bdf8';
-            ctx.fill();
-        });
-
-        ctx.fillStyle = '#fcd34d';
-        ctx.font = 'bold 12px sans-serif';
-        ctx.fillText('⬅ Crema (Capa superior, menor densidad)', 645, 85);
-        ctx.fillStyle = '#38bdf8';
-        ctx.fillText('⬅ Leche descremada (Capa inferior)', 635, 340);
-    } 
-    else if (sepType === 'membrane') {
-        // Separación con membranas selectivas (Microfiltración / Ultrafiltración - Figura 5.3)
-        ctx.fillStyle = '#f8fafc';
-        ctx.font = 'bold 14px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('3. SEPARACIÓN CON MEMBRANAS (Microfiltración: Retiene glóbulos 0.1–10 µm)', canvas.width / 2, 26);
-
-        // Membrana selectiva horizontal en medio del canal
-        ctx.strokeStyle = '#10b981';
-        ctx.lineWidth = 5;
-        ctx.setLineDash([12, 8]);
-        ctx.beginPath();
-        ctx.moveTo(80, 220);
-        ctx.lineTo(680, 220);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        ctx.fillStyle = '#10b981';
-        ctx.font = 'bold 12px sans-serif';
-        ctx.fillText('MEMBRANA SELECTIVA POR TAMAÑO', 380, 210);
-
-        flowParticles.forEach(p => {
-            p.x += 2.2;
-            if (p.x > 670) p.x = 90;
-
-            if (p.isFat) {
-                // Los glóbulos grasos son retenidos arriba de la membrana (Retenido = Crema)
-                if (p.y > 195) p.y = 140;
-                p.y += (Math.random() - 0.5) * 1.2;
-                p.y = Math.max(70, Math.min(195, p.y));
-            } else {
-                // La fase acuosa atraviesa los poros hacia abajo (Permeado = Leche descremada)
-                if (p.x > 220 && p.y < 245) p.y += 1.8;
-                p.y = Math.min(360, p.y);
-            }
-
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.isFat ? globSize * 1.45 : 4, 0, Math.PI * 2);
-            ctx.fillStyle = p.isFat ? '#facc15' : '#38bdf8';
-            ctx.fill();
-            if (p.isFat) {
-                ctx.strokeStyle = '#ea580c';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-            }
-        });
-
-        ctx.fillStyle = '#fcd34d';
-        ctx.fillText('RETENIDO: Crema concentrada en grasa ➔', 550, 105);
-        ctx.fillStyle = '#38bdf8';
-        ctx.fillText('PERMEADO: Fase acuosa y solubles (Leche descremada) ➔', 500, 350);
-    }
-}
-
-function animate() {
-    if (currentMode === 1) drawAnatomyMode();
-    else if (currentMode === 2) drawBarrierMode();
-    else if (currentMode === 3) drawSeparationMode();
-    requestAnimationFrame(animate);
-}
-
-initParticles();
-renderControls();
-animate();
+initB(); buildSepCtl(); buildChecks(); refresh(); requestAnimationFrame(loop);
 </script>
-
 </body>
 </html>

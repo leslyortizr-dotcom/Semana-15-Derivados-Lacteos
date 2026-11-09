@@ -1,182 +1,308 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laboratorio Virtual: Crema, Mantequilla y Helado - Semana 15</title>
-    <style>
-        :root {
-            --bg: #0b1120;
-            --panel: #1e293b;
-            --card: #0f172a;
-            --border: #334155;
-            --text: #f8fafc;
-            --muted: #94a3b8;
-            --accent: #38bdf8;
-            --gold: #fcd34d;
-        }
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 24px;
-            display: flex;
-            justify-content: center;
-        }
-        .container {
-            max-width: 1080px;
-            width: 100%;
-            background: var(--panel);
-            border-radius: 16px;
-            padding: 30px;
-            border: 1px solid var(--border);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-        }
-        header {
-            text-align: center;
-            margin-bottom: 25px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 20px;
-        }
-        .badge {
-            display: inline-block;
-            background: rgba(56, 189, 248, 0.15);
-            color: var(--accent);
-            border: 1px solid var(--accent);
-            padding: 4px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-        h1 { margin: 0 0 8px 0; color: var(--gold); font-size: 25px; }
-        p.subtitle { color: var(--muted); margin: 0; font-size: 14px; line-height: 1.45; }
-        .grid-sims {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(295px, 1fr));
-            gap: 16px;
-            margin-bottom: 10px;
-        }
-        .sim-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 18px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: transform 0.2s, border-color 0.2s;
-        }
-        .sim-card:hover { transform: translateY(-3px); border-color: var(--accent); }
-        .sim-card h3 { margin: 0 0 8px 0; color: var(--accent); font-size: 15.5px; line-height: 1.35; }
-        .sim-card p { color: var(--muted); font-size: 12.5px; line-height: 1.45; margin: 0 0 16px 0; }
-        .sim-btn {
-            background: #0284c7;
-            color: white;
-            text-decoration: none;
-            text-align: center;
-            padding: 9px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 13px;
-        }
-        .sim-btn:hover { background: #0369a1; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laboratorio Virtual de Crema, Mantequilla y Helado · Semana 15</title>
+<style>
+:root{
+  --navy:#12306b; --navy-2:#1d4196; --ink:#0f1b33; --text:#22304a; --muted:#64748b;
+  --bg:#eef2f8; --card:#ffffff; --line:#dbe3ef; --soft:#f6f8fc;
+  --orange:#f05a28; --magenta:#d61f5c;
+  --e1:#0891b2; --e2:#b45309; --e3:#db2777; --e4:#16a34a;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+a{color:inherit}
+
+/* Encabezado */
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#12306b 0%,#1d4196 60%,#2a56b8 100%);color:#fff;padding:34px 24px 74px}
+.hero::after{content:"";position:absolute;inset:auto -10% -60px -10%;height:120px;background:var(--bg);border-radius:50% 50% 0 0/100% 100% 0 0}
+.hero .bubble{position:absolute;border-radius:50%;background:rgba(255,255,255,.07)}
+.hero-in{position:relative;z-index:1;max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr;gap:24px;align-items:center}
+@media (max-width:860px){.hero-in{grid-template-columns:1fr}.hero-art{display:none}}
+.brand{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:6px 12px;border-radius:999px;font-size:12.5px;font-weight:700;letter-spacing:.3px}
+.brand i{width:8px;height:8px;border-radius:50%;background:linear-gradient(90deg,var(--orange),var(--magenta));display:inline-block}
+.hero h1{margin:14px 0 8px;font-size:clamp(28px,4vw,42px);line-height:1.1;letter-spacing:-.5px}
+.hero h1 span{background:linear-gradient(90deg,#ffb38f,#ff7aa8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{margin:0;color:#dbe6ff;font-size:15.5px;max-width:620px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.stat{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:12px;padding:8px 14px}
+.stat b{display:block;font-size:20px}
+.stat span{font-size:12px;color:#c9d7fb}
+.hero-art{display:flex;justify-content:center}
+.wheel{width:260px;height:260px;filter:drop-shadow(0 18px 30px rgba(0,0,0,.25))}
+
+/* Contenedor */
+.wrap{max-width:1180px;margin:-40px auto 0;padding:0 24px 30px;position:relative;z-index:2}
+
+/* Ruta */
+.route{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 30px rgba(15,27,51,.08);padding:16px 18px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+@media (max-width:760px){.route{grid-template-columns:1fr}}
+.route h2{margin:0;font-size:15px;color:var(--navy)}
+.route small{color:var(--muted);font-size:12.5px}
+.steps{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.step{display:flex;align-items:center;gap:8px;text-decoration:none;border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--soft);font-weight:700;font-size:13.5px;color:var(--ink);transition:.15s}
+.step:hover{transform:translateY(-1px);border-color:var(--navy-2)}
+.step .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px}
+.arrow{color:#94a3b8;font-weight:800}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin:18px 0 4px}
+.f{border:1.5px solid var(--line);background:#fff;color:var(--muted);padding:6px 12px;border-radius:999px;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit}
+.f.on{background:var(--navy);border-color:var(--navy);color:#fff}
+
+/* Secciones */
+section{margin-top:26px}
+.sec-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.sec-head .badge{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:18px;box-shadow:0 6px 14px rgba(0,0,0,.12)}
+.sec-head h2{margin:0;font-size:20px;color:var(--ink)}
+.sec-head p{margin:0;font-size:13.5px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:640px){.grid{grid-template-columns:1fr}}
+
+/* Tarjetas */
+.card{position:relative;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 14px rgba(15,27,51,.05);transition:transform .2s,box-shadow .2s,border-color .2s;overflow:hidden}
+.card:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(15,27,51,.12);border-color:#b8c8f0}
+.card::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:var(--c)}
+.top{display:flex;align-items:flex-start;gap:12px}
+.ico{flex:none;width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:26px;background:var(--cbg)}
+.card h3{margin:2px 0 0;font-size:16.5px;line-height:1.3;color:var(--ink)}
+.card .sub{font-size:12px;color:var(--muted);font-weight:600}
+.card p{margin:0;font-size:13.5px;color:#475569;flex:1}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.tag{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--soft);border:1px solid var(--line);color:#475569}
+.tag.book{background:#fff7ed;border-color:#fed7aa;color:#9a3412}
+.meta{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:2px}
+.meta span{font-size:12px;color:var(--muted);font-weight:600}
+.btn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;background:var(--c);color:#fff;font-weight:700;font-size:13.5px;padding:9px 14px;border-radius:10px;transition:filter .15s,transform .15s;white-space:nowrap}
+.btn:hover{filter:brightness(1.08);transform:translateX(2px)}
+.new{position:absolute;top:14px;right:14px;font-size:10.5px;font-weight:800;letter-spacing:.5px;color:#fff;background:linear-gradient(90deg,var(--orange),var(--magenta));padding:3px 8px;border-radius:999px}
+.visited{display:none;font-size:11px;font-weight:800;color:#16a34a}
+.card.seen .visited{display:inline}
+
+/* Tarjetas destacadas */
+.feature{grid-column:span 3;display:grid;grid-template-columns:1.3fr 1fr;gap:18px;align-items:center;padding:22px;background:linear-gradient(135deg,#ffffff 0%,var(--cbg) 100%)}
+@media (max-width:1000px){.feature{grid-column:span 2}}
+.feature.two{grid-column:span 2}
+@media (max-width:640px){.feature,.feature.two{grid-column:span 1;grid-template-columns:1fr}}
+.feature h3{font-size:20px}
+.feature .points{display:grid;gap:8px;margin-top:16px}
+.feature .pt{display:flex;gap:10px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 11px;font-size:13px}
+.feature .pt b{display:block;color:var(--ink);font-size:13.5px}
+
+/* Cómo usar */
+.how{margin-top:30px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:760px){.how{grid-template-columns:1fr}}
+.how div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;font-size:13.5px}
+.how b{display:block;color:var(--navy);margin-bottom:2px}
+footer{max-width:1180px;margin:0 auto;padding:10px 24px 30px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.hidden{display:none!important}
+.wheel{width:280px;height:260px}
+</style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <span class="badge">CECYBOOK SEMANA 15 • CONTENIDOS 7.4 Y 7.5</span>
-        <h1>🍦 Laboratorio Virtual: Crema, Mantequilla y Helados</h1>
-        <p class="subtitle">CECyTE Guanajuato • Unidad 7: Procesos de transformación para la obtención de derivados de la leche</p>
-    </header>
-
-    <div class="grid-sims">
-        <!-- Tarjeta 1 -->
-        <div class="sim-card">
-            <div>
-                <h3>Una Misma Grasa, Tres Destinos Tecnológicos SEMANA 15</h3>
-                <p>Comparador microscópico de la grasa láctea: emulsión O/W concentrada en crema, inversión de fase a W/O en mantequilla y sistema multifásico en helado.</p>
-            </div>
-            <a href="tres_destinos_grasa.html" class="sim-btn">Abrir Simulador ➔</a>
-        </div>
-
-        <!-- Tarjeta 2 -->
-        <div class="sim-card">
-            <div>
-                <h3>La Membrana MFGM y Separación Centrífuga SEMANA 15</h3>
-                <p>Anatomía interactiva de las capas de la membrana del glóbulo graso (MFGM), Ley de Stokes y comparación entre centrifugación, gravedad y membranas.</p>
-            </div>
-            <a href="mfgm_separacion.html" class="sim-btn">Abrir Simulador ➔</a>
-        </div>
-
-        <!-- Tarjeta 3 -->
-        <div class="sim-card">
-            <div>
-                <h3>Laboratorio de Maduración Física y Batido de Mantequilla SEMANA 15</h3>
-                <p>Efecto de la temperatura de la crema sobre la proporción grasa sólida/líquida y recorrido por las etapas del batido hasta la separación de buttermilk.</p>
-            </div>
-            <a href="maduracion_y_batido.html" class="sim-btn">Abrir Simulador ➔</a>
-        </div>
-
-        <!-- Tarjeta 4 -->
-        <div class="sim-card">
-            <div>
-                <h3>Amasado (Working), Salado y Control de Composición SEMANA 15</h3>
-                <p>Lavado con agua fría, intensidad de amasado para prevenir bolsas de agua ("llorado"), dosificación de sal y norma Codex (80/16).</p>
-            </div>
-            <a href="amasado_y_salado.html" class="sim-btn">Abrir Simulador ➔</a>
-        </div>
-
-        <!-- Tarjeta 5 -->
-        <div class="sim-card">
-            <div>
-                <h3>Microestructura del Helado, Overrun y Cadena de Frío SEMANA 15</h3>
-                <p>Balanza interactiva para cálculo de overrun por masas (1.0 L), función de estabilizantes y simulación de recristalización por choque térmico.</p>
-            </div>
-            <a href="helado_overrun_frio.html" class="sim-btn">Abrir Simulador ➔</a>
-        </div>
-
-        <!-- Tarjeta 6 -->
-        <div class="sim-card">
-            <div>
-                <h3>Diagnóstico de Defectos e Inocuidad NOM-243 SEMANA 15</h3>
-                <p>Análisis de casos (Dato ➔ Causa ➔ Etapa ➔ Decisión) y simulador de dictamen sanitario bajo los límites microbiológicos de la NOM-243-SSA1-2010.</p>
-            </div>
-            <a href="diagnostico_y_norma.html" class="sim-btn">Abrir Simulador ➔</a>
-        </div>
-
-        <!-- Tarjeta 7 -->
-        <div class="sim-card">
-            <div>
-                <h3>Entrenador Autocalificable: Ordena el Proceso de Mantequilla SEMANA 15</h3>
-                <p>Actividad interactiva oficial bajo la lógica: Materia prima ➔ Acondicionamiento ➔ Transformación ➔ Estabilización.</p>
-            </div>
-            <a href="ordenar_mantequilla.html" class="sim-btn">Iniciar Secuencia ➔</a>
-        </div>
-
-        <!-- Tarjeta 8: Planta Interactiva (Gemelo Digital SCADA) -->
-        <div class="sim-card" style="grid-column: 1 / -1; background: linear-gradient(135deg, #0f172a, #04070f); border-color: #06b6d4;">
-            <div>
-                <h3 style="color:#06b6d4;">🎛️ Planta Piloto Interactiva y Gemelo Digital 4.0 (Semana 15)</h3>
-                <p style="color:#e2e8f0;">Entra a cada área de la planta industrial, opera los equipos en tiempo real y visualiza de manera simultánea la respuesta mecánica de la maquinaria y el comportamiento microscópico de la grasa y los cristales de hielo.</p>
-            </div>
-            <a href="planta_derivados_areas.html" class="sim-btn" style="background:#06b6d4;">Abrir Planta Interactiva ➔</a>
-        </div>
-
-        <!-- Tarjeta 9: Recorrido Guiado con tuberías independientes -->
-        <div class="sim-card" style="grid-column: 1 / -1; background: linear-gradient(135deg, #18384f, #0f172a); border-color: #287da5;">
-            <div>
-                <h3 style="color:#e9ca79;">🗺️ Recorrido Guiado y Mapa de Planta con Flujo Continuo (Semana 15)</h3>
-                <p style="color:#e2e8f0;">Sigue el recorrido interactivo paso a paso por las operaciones unitarias. Las tuberías muestran caudales independientes por color para Crema, Mantequilla y Helado sin cruces incorrectos, acompañados de preguntas de evaluación y retroalimentación.</p>
-            </div>
-            <a href="recorrido_guiado.html" class="sim-btn" style="background:#287da5;">Iniciar Recorrido Guiado ➔</a>
-        </div>
+<header class="hero">
+  <div class="bubble" style="width:280px;height:280px;left:-80px;top:-90px"></div>
+  <div class="bubble" style="width:160px;height:160px;right:8%;top:20px"></div>
+  <div class="hero-in">
+    <div>
+      <span class="brand"><i></i>CECyTE Guanajuato · Módulo II: Procesamiento de Leche y Derivados Lácteos</span>
+      <h1>Laboratorio Virtual de <span>Crema, Mantequilla y Helado</span></h1>
+      <p>Semana 15 · Unidad 7: Procesos de transformación para la obtención de derivados de la leche. Una misma grasa, tres destinos: sepárala, invierte su fase o congélala con aire, y decide como en una planta real.</p>
+      <div class="stats">
+        <div class="stat"><b>10</b><span>recursos interactivos</span></div>
+        <div class="stat"><b>4</b><span>etapas de aprendizaje</span></div>
+        <div class="stat"><b>7.4 · 7.5</b><span>Crema, mantequilla y helados</span></div>
+      </div>
     </div>
-</div>
+    <div class="hero-art">
+      <svg class="wheel" viewBox="0 0 280 260" aria-hidden="true">
+        <defs>
+          <linearGradient id="bt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1a8"/><stop offset="1" stop-color="#f8d34a"/></linearGradient>
+          <linearGradient id="bs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3c533"/><stop offset="1" stop-color="#d9a21e"/></linearGradient>
+          <linearGradient id="cn" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5c27a"/><stop offset="1" stop-color="#d98e3a"/></linearGradient>
+          <radialGradient id="sc" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ffe0ee"/><stop offset="1" stop-color="#f58bb7"/></radialGradient>
+          <radialGradient id="sv" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fffdf2"/><stop offset="1" stop-color="#f3e3b5"/></radialGradient>
+        </defs>
+        <!-- mantequilla -->
+        <path d="M24 176 L120 160 L150 178 L54 196 Z" fill="url(#bt)"/>
+        <path d="M24 176 L54 196 L54 232 L24 212 Z" fill="#e8b52a"/>
+        <path d="M54 196 L150 178 L150 214 L54 232 Z" fill="url(#bs)"/>
+        <path d="M120 160 L150 178" stroke="#fff6c8" stroke-width="2"/>
+        <!-- helado -->
+        <path d="M168 150 L246 150 L207 248 Z" fill="url(#cn)"/>
+        <path d="M178 162 L234 162 M186 182 L228 182 M194 202 L220 202 M188 150 L214 220 M226 150 L200 220" stroke="#c07a2c" stroke-width="2" opacity=".6"/>
+        <circle cx="190" cy="138" r="30" fill="url(#sv)"/>
+        <circle cx="226" cy="136" r="30" fill="url(#sc)"/>
+        <circle cx="208" cy="104" r="30" fill="url(#sc)"/>
+        <circle cx="200" cy="96" r="5" fill="#fff" opacity=".7"/>
+        <!-- iconos -->
+        <g transform="translate(70 70)"><circle r="34" fill="rgba(255,255,255,.18)"/><text x="0" y="11" text-anchor="middle" font-size="32">🔬</text></g>
+        <g transform="translate(140 28)"><circle r="22" fill="rgba(255,255,255,.18)"/><text x="0" y="8" text-anchor="middle" font-size="22">🥛</text></g>
+      </svg>
+    </div>
+  </div>
+</header>
 
+<main class="wrap">
+  <div class="route">
+    <div><h2>🧭 Ruta sugerida</h2><small>Sigue el orden del proceso de tu CECYBOOK</small></div>
+    <div class="steps">
+      <a class="step" href="#etapa1"><span class="n" style="background:var(--e1)">1</span>La grasa y la crema</a><span class="arrow">→</span>
+      <a class="step" href="#etapa2"><span class="n" style="background:var(--e2)">2</span>Mantequilla</a><span class="arrow">→</span>
+      <a class="step" href="#etapa3"><span class="n" style="background:var(--e3)">3</span>Helado</a><span class="arrow">→</span>
+      <a class="step" href="#etapa4"><span class="n" style="background:var(--e4)">4</span>Planta, calidad y evaluación</a>
+    </div>
+  </div>
+
+  <div class="filters" id="filters">
+    <button class="f on" data-f="all">Todos</button>
+    <button class="f" data-f="sim">🔬 Simuladores</button>
+    <button class="f" data-f="reto">🎯 Con retos</button>
+    <button class="f" data-f="eval">📝 Evaluación</button>
+  </div>
+
+  <!-- ===================== ETAPA 1 ===================== -->
+  <section id="etapa1">
+    <div class="sec-head"><div class="badge" style="background:var(--e1)">1</div><div><h2>La grasa y la crema</h2><p>Cómo se organiza la grasa de la leche, cómo se separa y cómo se comporta al batir.</p></div></div>
+    <div class="grid">
+      <article class="card" data-k="sim reto" style="--c:#0891b2;--cbg:#e0f7fb">
+        <div class="top"><div class="ico">🔬</div><div><div class="sub">Simulador <span class="visited">· ✓ visitado</span></div><h3>Una misma grasa, tres destinos</h3></div></div>
+        <p>Al microscopio y a escala real: cómo la grasa de la leche termina en crema (grasa en agua), mantequilla (agua en grasa) o helado. Cierra con el reto «¿Qué estructura es?».</p>
+        <div class="tags"><span class="tag book">Figura 1 · p. 3</span><span class="tag">Pregunta detonadora</span><span class="tag">Reto</span></div>
+        <div class="meta"><span>⏱ 15–20 min</span><a class="btn" href="tres_destinos_grasa.html">Abrir ➔</a></div>
+      </article>
+      <article class="card" data-k="sim reto" style="--c:#0891b2;--cbg:#e0f7fb">
+        <div class="top"><div class="ico">🧬</div><div><div class="sub">Simulador <span class="visited">· ✓ visitado</span></div><h3>El glóbulo de grasa y la separación de la crema</h3></div></div>
+        <p>La membrana MFGM por dentro, la Ley de Stokes con gravedad, centrífuga y membranas, y el balance de materia con el cuadro de Pearson.</p>
+        <div class="tags"><span class="tag book">Figuras 3–8 · pp. 5–10</span><span class="tag">Balance</span><span class="tag">Checklist p. 9</span></div>
+        <div class="meta"><span>⏱ 20–25 min</span><a class="btn" href="mfgm_separacion.html">Abrir ➔</a></div>
+      </article>
+      <article class="card" data-k="sim reto eval" style="--c:#0891b2;--cbg:#e0f7fb">
+        <span class="new">NUEVO</span>
+        <div class="top"><div class="ico">🥄</div><div><div class="sub">Simulador <span class="visited">· ✓ visitado</span></div><h3>Crema para batir: ¿monta, no bate o se corta?</h3></div></div>
+        <p>Prepara la crema, bátela y decide cuándo parar. Después resuelve 6 casos con la cadena dato → hipótesis → evidencia → decisión.</p>
+        <div class="tags"><span class="tag book">Tabla 3 · salida rápida p. 30</span><span class="tag">Retos</span><span class="tag">Diagnóstico</span></div>
+        <div class="meta"><span>⏱ 15–20 min</span><a class="btn" href="crema_batida.html">Abrir ➔</a></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===================== ETAPA 2 ===================== -->
+  <section id="etapa2">
+    <div class="sec-head"><div class="badge" style="background:var(--e2)">2</div><div><h2>Mantequilla: invertir la fase</h2><p>Madurar, batir, lavar, amasar y salar hasta obtener una emulsión de agua en grasa.</p></div></div>
+    <div class="grid">
+      <article class="card" data-k="sim reto" style="--c:#b45309;--cbg:#fef3c7">
+        <div class="top"><div class="ico">❄️</div><div><div class="sub">Simulador <span class="visited">· ✓ visitado</span></div><h3>Maduración física y batido</h3></div></div>
+        <p>Cristaliza la grasa en frío, detén la batidora cuando los gránulos midan 3–5 mm y compara dos lotes de crema en una carrera.</p>
+        <div class="tags"><span class="tag book">Figuras 9–14 · pp. 11–16</span><span class="tag">Carrera de lotes</span></div>
+        <div class="meta"><span>⏱ 20 min</span><a class="btn" href="maduracion_y_batido.html">Abrir ➔</a></div>
+      </article>
+      <article class="card" data-k="sim reto" style="--c:#b45309;--cbg:#fef3c7">
+        <div class="top"><div class="ico">🧈</div><div><div class="sub">Simulador <span class="visited">· ✓ visitado</span></div><h3>Lavado, amasado y salado</h3></div></div>
+        <p>Lava los gránulos, amasa para repartir el agua en microgotas, dosifica la sal y libera el lote según el Codex (80/16/2) y la NOM-243.</p>
+        <div class="tags"><span class="tag book">pp. 11–15 · Tabla 3</span><span class="tag">Casos de práctica</span></div>
+        <div class="meta"><span>⏱ 20 min</span><a class="btn" href="amasado_y_salado.html">Abrir ➔</a></div>
+      </article>
+      <article class="card" data-k="eval" style="--c:#b45309;--cbg:#fef3c7">
+        <div class="top"><div class="ico">🧩</div><div><div class="sub">Actividad autocalificable <span class="visited">· ✓ visitado</span></div><h3>Ordena los procesos</h3></div></div>
+        <p>La actividad I del CECYBOOK para la mantequilla, más las rutas de crema y helado y el reto de inicio. Cada error muestra su consecuencia en el proceso.</p>
+        <div class="tags"><span class="tag book">Actividad I · p. 32</span><span class="tag book">Reto de inicio · p. 5</span></div>
+        <div class="meta"><span>⏱ 10–15 min</span><a class="btn" href="ordenar_mantequilla.html">Abrir ➔</a></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===================== ETAPA 3 ===================== -->
+  <section id="etapa3">
+    <div class="sec-head"><div class="badge" style="background:var(--e3)">3</div><div><h2>Helado: formular, airear y congelar</h2><p>Un sistema multifásico en el que conviven hielo, aire, grasa y fase no congelada.</p></div></div>
+    <div class="grid">
+      <article class="card feature" data-k="sim reto" style="--c:#db2777;--cbg:#fce7f3">
+        <div>
+          <div class="top"><div class="ico" style="width:60px;height:60px;font-size:30px">🍨</div><div><div class="sub">Simulador integrador <span class="visited">· ✓ visitado</span></div><h3>Helado: mix, overrun y cadena de frío</h3></div></div>
+          <p style="margin:10px 0">Formula y madura el mix, congélalo mientras incorporas aire, calcula el overrun con la balanza y lleva el helado hasta el consumidor sin que crezcan los cristales de hielo.</p>
+          <div class="tags" style="margin-bottom:12px"><span class="tag book">Figuras 15–23 · pp. 17–26</span><span class="tag">Reto 25 % vs. 130 %</span><span class="tag">Quiz</span></div>
+          <div class="meta"><span>⏱ 25–30 min</span><a class="btn" href="helado_overrun_frio.html">Entrar al laboratorio ➔</a></div>
+        </div>
+        <div class="points">
+          <div class="pt">🧪<div><b>Formula y madura</b>Ingredientes de la Tabla 1 y curva de congelación del mix.</div></div>
+          <div class="pt">⚖️<div><b>Congela con aire</b>Overrun en el congelador y balanza de la Figura 20.</div></div>
+          <div class="pt">🚚<div><b>Cuida la cadena de frío</b>Endurecimiento y recristalización (Figuras 22–23).</div></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===================== ETAPA 4 ===================== -->
+  <section id="etapa4">
+    <div class="sec-head"><div class="badge" style="background:var(--e4)">4</div><div><h2>Planta, calidad y evaluación</h2><p>Flujos, zonas sanitarias, defectos, límites de la NOM-243 y decisiones de liberación.</p></div></div>
+    <div class="grid">
+      <article class="card feature" data-k="sim reto" style="--c:#16a34a;--cbg:#dcfce7">
+        <div>
+          <div class="top"><div class="ico" style="width:60px;height:60px;font-size:30px">🏭</div><div><div class="sub">Plano interactivo <span class="visited">· ✓ visitado</span></div><h3>Planta de crema, mantequilla y helado</h3></div></div>
+          <p style="margin:10px 0">Recorre las 18 áreas de la planta, sigue la ruta de cada producto, revisa zonas sanitarias y temperaturas, y en modo auditoría encuentra los 8 peligros.</p>
+          <div class="tags" style="margin-bottom:12px"><span class="tag book">Figuras 2, 6, 8, 14, 16–22</span><span class="tag">Auditoría</span><span class="tag">Balance del día</span></div>
+          <div class="meta"><span>⏱ 25 min</span><a class="btn" href="planta_derivados_areas.html">Abrir la planta ➔</a></div>
+        </div>
+        <div class="points">
+          <div class="pt">🗺️<div><b>Rutas</b>Crema, mantequilla y helado, cada una con su flujo.</div></div>
+          <div class="pt">🌡️<div><b>Temperaturas</b>Mapa de frío de cada área.</div></div>
+          <div class="pt">🕵️<div><b>Auditoría</b>8 peligros sanitarios por encontrar.</div></div>
+        </div>
+      </article>
+      <article class="card" data-k="sim eval reto" style="--c:#16a34a;--cbg:#dcfce7">
+        <div class="top"><div class="ico">🔍</div><div><div class="sub">Simulador <span class="visited">· ✓ visitado</span></div><h3>Diagnóstico de defectos e inocuidad (NOM-243)</h3></div></div>
+        <p>Detective de defectos de la Tabla 3, laboratorio de placas y diluciones, y dictamen de 9 lotes con los límites de cada producto.</p>
+        <div class="tags"><span class="tag book">Tablas 3 y 4 · pp. 26–30</span><span class="tag">Dictamen</span></div>
+        <div class="meta"><span>⏱ 25 min</span><a class="btn" href="diagnostico_y_norma.html">Abrir ➔</a></div>
+      </article>
+      <article class="card feature two" data-k="eval reto" style="--c:#16a34a;--cbg:#dcfce7">
+        <div>
+          <div class="top"><div class="ico" style="width:60px;height:60px;font-size:30px">🧭</div><div><div class="sub">Evaluación final <span class="visited">· ✓ visitado</span></div><h3>Recorrido guiado por la planta</h3></div></div>
+          <p style="margin:10px 0">Elige crema, mantequilla o helado y toma en cada etapa la decisión de un técnico: aceptar una pipa, detener el batido, calcular el overrun, liberar un lote. Al final obtienes tu constancia.</p>
+          <div class="tags" style="margin-bottom:12px"><span class="tag book">A.C.5 · A.C.6 · A.C.7</span><span class="tag">Constancia imprimible</span></div>
+          <div class="meta"><span>⏱ 20–25 min</span><a class="btn" href="recorrido_guiado.html">Iniciar recorrido ➔</a></div>
+        </div>
+        <div class="points">
+          <div class="pt">✅<div><b>Decide</b>Aceptar, rechazar, liberar o retener.</div></div>
+          <div class="pt">🧮<div><b>Calcula</b>Estandarización con Pearson y overrun.</div></div>
+          <div class="pt">⏱️<div><b>Actúa a tiempo</b>Fin de la maduración y punto del batido.</div></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <div class="how">
+    <div><b>1 · Lee tu CECYBOOK</b>Cada tarjeta indica las páginas y figuras con las que se relaciona.</div>
+    <div><b>2 · Experimenta</b>Cambia una sola variable a la vez y registra lo que observas.</div>
+    <div><b>3 · Demuestra lo aprendido</b>Termina con el recorrido guiado e imprime tu constancia.</div>
+  </div>
+</main>
+
+<footer>
+  <span>CECyTE Guanajuato · CECYBOOK Semana 15 · 7.4 Crema y mantequilla · 7.5 Helados</span>
+  <span>Recursos didácticos complementarios</span>
+</footer>
+
+<script>
+// Filtros por tipo de recurso
+document.querySelectorAll('.f').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.f').forEach(x=>x.classList.toggle('on',x===b));
+  const f=b.dataset.f;
+  document.querySelectorAll('article.card').forEach(c=>c.classList.toggle('hidden',f!=='all'&&!c.dataset.k.split(' ').includes(f)));
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('hidden',!s.querySelector('article.card:not(.hidden)')));
+}));
+// Marca "visitado" en este navegador (opcional; no afecta si el navegador lo bloquea)
+const KEY='s15_visitados';
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(e){ return []; } }
+function save(v){ try{ localStorage.setItem(KEY,JSON.stringify(v)); }catch(e){} }
+const seen=load();
+document.querySelectorAll('article.card').forEach(c=>{
+  const a=c.querySelector('a.btn'); if(!a) return; const h=a.getAttribute('href');
+  if(seen.includes(h)) c.classList.add('seen');
+  a.addEventListener('click',()=>{ const v=load(); if(!v.includes(h)){ v.push(h); save(v); } });
+});
+</script>
 </body>
 </html>

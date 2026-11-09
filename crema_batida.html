@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crema para batir · Semana 15</title>
+<style>
+:root{
+  --navy:#12306b; --navy-2:#1d4196; --ink:#0f1b33; --text:#22304a; --muted:#64748b;
+  --bg:#eef2f8; --card:#ffffff; --line:#dbe3ef; --soft:#f6f8fc;
+  --orange:#f05a28; --magenta:#d61f5c; --ok:#16a34a; --warn:#d97706; --bad:#dc2626;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--text);padding:18px;line-height:1.45}
+.app{max-width:1200px;margin:0 auto;background:var(--card);border-radius:18px;box-shadow:0 12px 34px rgba(15,27,51,.10);overflow:hidden}
+.topbar{height:6px;background:linear-gradient(90deg,var(--orange),var(--magenta))}
+header{padding:16px 24px 6px}
+.back{display:inline-flex;align-items:center;gap:6px;background:#334155;color:#f8fafc;text-decoration:none;padding:8px 14px;border-radius:8px;font-weight:600;font-size:13px;border:1px solid #475569;margin-bottom:12px}
+.back:hover{background:#1e293b}
+.title-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+h1{margin:0;color:var(--navy);font-size:26px;letter-spacing:-.3px}
+.subtitle{color:var(--muted);font-size:14px;margin-top:2px;max-width:820px}
+.week-tag{background:var(--navy);color:#fff;font-weight:700;font-size:12px;padding:6px 12px;border-radius:999px;white-space:nowrap}
+.week-tag b{color:#ffb38f}
+.tabs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px 24px 0}
+@media (max-width:480px){.tabs{grid-template-columns:1fr}}
+.tab{border:2px solid var(--line);background:#fff;border-radius:12px;padding:10px 14px;text-align:left;cursor:pointer;font:inherit;color:var(--muted)}
+.tab b{display:block;font-size:15px;color:inherit}
+.tab small{font-size:12.5px}
+.tab.on{border-color:var(--navy);background:#eef3ff;color:var(--navy)}
+.pane{display:none;padding:12px 24px 18px}
+.pane.show{display:block}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.presets .lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-right:4px}
+.chip{border:1.5px solid var(--line);background:#fff;color:var(--text);padding:6px 11px;border-radius:999px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.chip:hover{border-color:var(--navy-2)}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.chip:disabled{opacity:.5;cursor:default}
+.lab{display:grid;grid-template-columns:300px 1fr;gap:16px}
+@media (max-width:960px){.lab{grid-template-columns:1fr}}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.card h3{margin:0 0 8px;font-size:14.5px;color:var(--navy)}
+.ctl{margin-bottom:11px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;align-items:baseline;font-weight:600;font-size:13px;margin-bottom:3px;gap:8px}
+.ctl label .val{font-weight:800;font-size:16px;color:var(--navy);white-space:nowrap}
+.ctl input[type=range]{width:100%;cursor:pointer;accent-color:var(--navy)}
+.ctl input:disabled{opacity:.5;cursor:default}
+.scale{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted)}
+.seg{display:flex;background:#e6ecf5;border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;padding:7px 4px;border-radius:8px;font-weight:600;font-size:12px;color:#475569;cursor:pointer;font-family:inherit;line-height:1.2}
+.seg button.on{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.seg button:disabled{cursor:default}
+.info{font-size:12.5px;background:#fff;border:1px dashed var(--line);border-radius:10px;padding:7px 10px;margin-top:4px}
+.info b{color:var(--navy)}
+.view{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.view>b{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--navy);padding:7px 10px;border-bottom:1px solid var(--line);background:var(--soft);flex-wrap:wrap}
+canvas{display:block;width:100%;height:auto}
+.box{padding:12px 14px;border-radius:12px;background:var(--soft);border-left:5px solid var(--navy);font-size:13.5px}
+.box h3{margin:0 0 6px;font-size:15px;color:var(--navy)}
+.box p{margin:5px 0}
+.box ul{margin:5px 0;padding-left:18px}
+.box.good{border-left-color:var(--ok);background:#f0fdf4}
+.box.mid{border-left-color:var(--warn);background:#fffbeb}
+.box.bad{border-left-color:var(--bad);background:#fef2f2}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:700px){.kpis{grid-template-columns:1fr 1fr}}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 10px;text-align:center}
+.kpi small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.kpi b{font-size:16px;color:var(--navy)}
+.kpi.bad b{color:var(--bad)} .kpi.good b{color:var(--ok)} .kpi.mid b{color:var(--warn)}
+.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit}
+.btn:disabled{opacity:.45;cursor:default}
+.btn-accent{background:linear-gradient(90deg,var(--orange),var(--magenta));color:#fff}
+.btn-ghost{background:#fff;border:1.5px solid var(--line);color:var(--text)}
+.btn-primary{background:var(--navy);color:#fff}
+.row-btn{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.missions{display:flex;flex-direction:column;gap:6px}
+.mis{display:flex;gap:8px;align-items:flex-start;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:7px 10px;font-size:12.5px}
+.mis i{font-style:normal;flex:0 0 auto}
+.mis.done{border-color:var(--ok);background:#f0fdf4}
+.next{display:flex;justify-content:flex-end;margin-top:12px}
+/* diagnóstico */
+.cases{display:flex;flex-direction:column;gap:6px}
+.case{display:flex;gap:8px;align-items:center;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:8px 10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--text);text-align:left}
+.case .st{margin-left:auto;font-size:11.5px;color:var(--muted);white-space:nowrap}
+.case.on{border-color:var(--navy);background:#eef3ff;color:var(--navy)}
+.chain{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+@media (max-width:600px){.chain{grid-template-columns:1fr 1fr}}
+.chain div{border-radius:10px;padding:7px 9px;font-size:12px;font-weight:700;background:#e2e8f0;color:#475569;text-align:center}
+.chain div.cur{background:var(--orange);color:#fff}
+.chain div.ok{background:#dcfce7;color:#14532d}
+.chain div.no{background:#fee2e2;color:#7f1d1d}
+.dato{background:#fff;border:1px solid var(--line);border-left:5px solid var(--orange);border-radius:12px;padding:12px 14px;font-size:14px;margin-bottom:10px}
+.dato .big{font-size:30px;float:left;margin-right:10px;line-height:1}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px 11px;text-align:left;font:inherit;font-size:13.5px;cursor:pointer;color:var(--text)}
+.opt:hover:not(:disabled){border-color:var(--navy-2)}
+.opt.right{border-color:var(--ok);background:#f0fdf4;color:#14532d}
+.opt.wrong{border-color:var(--bad);background:#fef2f2;color:#7f1d1d}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;padding:9px 11px;border-radius:10px;font-size:13px}
+.fb.good{background:#f0fdf4;border:1px solid #bbf7d0;color:#14532d}
+.fb.bad{background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d}
+.summ{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;margin-top:10px}
+.summ p{margin:4px 0}
+details.teacher{margin:0 24px 22px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:#fbfcfe;font-size:13.5px}
+details.teacher summary{cursor:pointer;font-weight:700;color:var(--navy)}
+details.teacher li{margin:3px 0}
+footer{padding:0 24px 18px;font-size:11.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar"></div>
+  <header>
+    <a class="back" href="index.html">⬅ Volver al Menú Principal</a>
+    <div class="title-row">
+      <div>
+        <h1>🥄 Crema para batir: ¿monta, no bate o se corta?</h1>
+        <div class="subtitle">La misma coalescencia parcial que forma la mantequilla, detenida a tiempo, sostiene el aire de una crema batida. Prepara la crema, bátela y decide cuándo parar.</div>
+      </div>
+      <div class="week-tag">Semana 15 · <b>Tabla 3 · salida rápida p. 30</b></div>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab on" data-t="bat"><b>1 · La batidora</b><small>Grasa, frío, reposo y punto de batido</small></button>
+    <button class="tab" data-t="dx"><b>2 · Diagnóstico</b><small>Dato → hipótesis → evidencia → decisión</small></button>
+  </div>
+
+  <!-- ===================== 1 · BATIDORA ===================== -->
+  <div class="pane show" data-p="bat">
+    <div class="presets"><span class="lbl">Cremas de ejemplo</span>
+      <button class="chip" data-pr="ok">✅ Bien preparada</button>
+      <button class="chip" data-pr="fresh">🧊 Recién enfriada</button>
+      <button class="chip" data-pr="warm">🌡️ Tibia (20 °C)</button>
+      <button class="chip" data-pr="light">🥛 Crema ligera</button>
+      <button class="chip" data-pr="hom">⚙️ Homogeneizada</button>
+    </div>
+    <div class="lab">
+      <div class="col">
+        <div class="card">
+          <h3>🥣 Prepara la crema</h3>
+          <div class="ctl"><label>Grasa <span class="val" id="v-fat"></span></label><input type="range" id="fat" min="15" max="45" step="1"><div class="scale"><span>15 %</span><span>30 %</span><span>45 %</span></div></div>
+          <div class="ctl"><label>Reposo en frío antes de batir <span class="val" id="v-h"></span></label><input type="range" id="h" min="0" max="24" step="1"><div class="scale"><span>0 h</span><span>12 h</span><span>24 h</span></div></div>
+          <div class="ctl"><label>Temperatura al batir <span class="val" id="v-T"></span></label><input type="range" id="T" min="2" max="25" step="1"><div class="scale"><span>2 °C</span><span>12 °C</span><span>25 °C</span></div></div>
+          <div class="ctl"><label>Homogeneizada a presión alta</label><div class="seg" id="hom"><button data-v="0" class="on">No</button><button data-v="1">Sí</button></div></div>
+          <div class="info" id="sfc"></div>
+        </div>
+        <div class="card">
+          <h3>🎯 Retos</h3>
+          <div class="missions" id="mis"></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="kpis" id="kp"></div>
+        <div class="view"><b><span>🥣 Batidora</span><span style="color:var(--muted)">🔬 Al microscopio (campo ≈ 100 µm)</span></b><canvas id="cv"></canvas></div>
+        <div class="row-btn" style="margin-top:0">
+          <button class="btn btn-accent" id="go">▶ Batir</button>
+          <button class="btn btn-primary" id="stop" disabled>⏹ Detener y evaluar</button>
+          <button class="btn btn-ghost" id="rst">↺ Nueva crema</button>
+          <div class="seg" id="spd" style="width:120px;margin-left:auto"><button data-v="1" class="on">×1</button><button data-v="3">×3</button></div>
+        </div>
+        <div class="view"><b><span>📈 Volumen y firmeza durante el batido</span><span style="color:var(--muted)">tiempo simulado</span></b><canvas id="ch"></canvas></div>
+        <div class="box" id="exp"></div>
+      </div>
+    </div>
+    <div class="next"><button class="btn btn-primary" data-go="dx">Diagnosticar casos ➜</button></div>
+  </div>
+
+  <!-- ===================== 2 · DIAGNÓSTICO ===================== -->
+  <div class="pane" data-p="dx">
+    <div class="lab">
+      <div class="col">
+        <div class="card">
+          <h3>📋 Casos de planta</h3>
+          <div class="cases" id="cases"></div>
+          <div class="info" id="dscore" style="margin-top:10px"></div>
+        </div>
+        <div class="box"><h3>La lógica de la p. 28</h3><p>No memorices defectos: sigue el proceso hacia atrás.</p><p><b>Dato observado → hipótesis → evidencia que necesito → decisión.</b></p></div>
+      </div>
+      <div class="col">
+        <div class="chain" id="chain"></div>
+        <div id="dbody"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="teacher">
+    <summary>👩‍🏫 Notas para el docente</summary>
+    <ul>
+      <li><b>Propósito:</b> cubre un tema que el CECYBOOK pide pero que no tenía simulador: la <b>capacidad de batido de la crema</b> (punto 2 del resumen, pregunta 1 de la salida rápida, p. 30) y los defectos de crema de la <b>Tabla 3</b> («crema no bate» y «crema se separa en almacenamiento», p. 27). También sirve de puente entre la mantequilla y el helado: en los tres productos actúa la coalescencia parcial; lo que cambia es hasta dónde se lleva.</li>
+      <li><b>Qué controla el modelo:</b>
+        <ul>
+          <li><b>Grasa:</b> por debajo de ≈ 30 % no hay suficientes glóbulos para formar la red que sostiene el aire. Con más de 40 % la crema monta rápido, pero se pasa con facilidad.</li>
+          <li><b>Grasa cristalizada:</b> depende de la temperatura al batir y de las horas de reposo en frío, porque la cristalización tarda horas (Figura 11). Se necesita una mezcla de grasa sólida y líquida, igual que en el batido de la mantequilla.</li>
+          <li><b>Homogeneización a presión alta:</b> produce glóbulos pequeños recubiertos de caseína que resisten la coalescencia parcial, así que la crema tarda más y queda blanda.</li>
+          <li><b>Tiempo de batido:</b> pasa por espuma blanda, picos suaves, picos firmes, sobrebatido y mantequilla con buttermilk, que corresponde a la Figura 10.</li>
+        </ul></li>
+      <li><b>Valores de referencia:</b> el CECYBOOK no da cifras para la crema batida. Las referencias usadas vienen de la literatura técnica citada en la semana (Walstra et al., 2006; Goff et al., 2025): ≥ 30 % de grasa (lo usual es 35–40 %), batir entre 4 y 8 °C después de varias horas en frío, overrun de ≈ 100–150 %. Los tiempos dependen de la batidora; aquí corresponden a una batidora de mano. El drenado es el líquido que suelta una porción de 100 g en 1 h.</li>
+      <li><b>Pestaña 2:</b> 6 casos con la cadena dato → hipótesis → evidencia → decisión (actividad de aula, p. 28). El caso 1 es la pregunta 1 de la salida rápida y el caso 5 es la fila «crema se separa» de la Tabla 3. Las opciones se barajan; cada paso vale 1 punto si se acierta al primer intento.</li>
+    </ul>
+  </details>
+  <footer>Recurso didáctico complementario · CECYBOOK Semana 15 · 7.4 Crema y mantequilla · Figuras 10 y 11 · Tabla 3 · p. 30.</footer>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function hiDPI(c,w,h){const d=Math.min(2,window.devicePixelRatio||1);c.width=w*d;c.height=h*d;const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return x;}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), lerp=(a,b,t)=>a+(b-a)*t;
+const sm=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);};
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+function txt(c,s,x,y,o={}){c.font=(o.b?'bold ':'')+(o.s||12)+'px Segoe UI, system-ui, sans-serif';c.fillStyle=o.c||'#0f1b33';c.textAlign=o.a||'center';c.fillText(s,x,y);}
+const f0=v=>Math.round(v).toString();
+const mmss=t=>{t=Math.round(t);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0');};
+const shuffle=a=>{const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
+
+/* ===================== Modelo ===================== */
+const SFCP=[[2,58],[5,54],[8,48],[10,44],[12,38],[15,30],[18,24],[20,20],[25,12],[30,6]];
+function sfcEq(T){for(let i=1;i<SFCP.length;i++){if(T<=SFCP[i][0]){const[a,b]=SFCP[i-1],[c,d]=SFCP[i];return b+(d-b)*(T-a)/(c-a);}}return 6;}
+function model(C){
+  const age=0.35+0.65*(1-Math.exp(-C.h/3)), S=sfcEq(C.T)*age;
+  const Q=sm(24,33,C.fat)*sm(14,36,S)*(1-0.15*sm(48,60,S))*(C.hom?0.55:1);
+  const tp=150*Math.pow(36/C.fat,1.5)*(C.hom?1.7:1)*(1+1.2*(1-sm(14,40,S)));
+  const ORc=(35+95*Q)*(1-0.22*sm(36,45,C.fat));
+  let tb=tp*(3.2+1.5*(1-Q)); if(C.fat<28) tb*=3;
+  return {S,Q,tp,ORc,tb,age};
+}
+const STG={liq:'Líquida',soft:'Espuma blanda',spk:'Picos suaves',firm:'Picos firmes',over:'Sobrebatida: granulosa',cut:'Se corta: grumos',butter:'Mantequilla + buttermilk',weak:'Espuma floja que se baja'};
+function at(M,t){
+  const x=t/M.tp, xb=M.tb/M.tp, E=1-Math.exp(-2.4);
+  let OR,F,st;
+  if(M.Q<0.4){
+    const pk=0.7;
+    OR=x<pk?M.ORc*sm(0.05,pk,x):M.ORc*(0.35+0.65*Math.exp(-(x-pk)*1.6));
+    F=100*M.Q*sm(0.2,pk,x)*(x>pk?Math.exp(-(x-pk)):1);
+    st=x<0.3?'liq':'weak';
+  }else{
+    OR=x<=1?M.ORc*sm(0.05,1,x):x<=1.35?M.ORc:M.ORc*(1-0.85*sm(1.35,xb,x));
+    F=100*M.Q*sm(0.2,1.0,x)*(1-0.35*sm(1.3,xb,x));
+    st=x<0.3?'liq':x<0.7?'soft':x<0.95?'spk':x<=1.3?'firm':x<0.8*xb?'over':'cut';
+  }
+  if(x>=xb){OR=Math.min(OR,4);F=0;st='butter';}
+  let D;
+  if(st==='liq')D=null; else if(st==='butter')D=null;
+  else{D=3+30*(1-M.Q);if(st==='soft'||st==='spk')D+=35*(1-sm(0.3,0.95,x));if(st==='over'||st==='cut')D+=25*sm(1.3,xb,x);if(st==='weak')D+=25;D=clamp(D,0,60);}
+  return {x,xb,OR,F,st,D};
+}
+
+/* ===================== Estado ===================== */
+const C={fat:36,h:12,T:6,hom:0};
+let M=model(C), t=0, run=false, spd=1, hist=[], done=false, evals=0;
+const MIS=[
+  {id:'firm',t:'Logra picos firmes con ≥ 90 % de overrun y drenado ≤ 10 mL.'},
+  {id:'butter',t:'Bate de más hasta obtener mantequilla y buttermilk (Figura 10).'},
+  {id:'qs',t:'Reproduce la salida rápida: una crema de ≥ 30 % de grasa que no bate. ¿Qué variable cambiaste?'}
+];
+const misDone={};
+const PRE={ok:{fat:36,h:12,T:6,hom:0},fresh:{fat:36,h:0,T:6,hom:0},warm:{fat:36,h:12,T:20,hom:0},light:{fat:18,h:12,T:6,hom:0},hom:{fat:36,h:12,T:6,hom:1}};
+
+const cv=$('#cv'), c=hiDPI(cv,760,390), ch=$('#ch'), cc=hiDPI(ch,760,190);
+const W=760,H=390;
+
+function syncCtl(){
+  $('#fat').value=C.fat;$('#h').value=C.h;$('#T').value=C.T;
+  $('#v-fat').textContent=C.fat+' %';$('#v-h').textContent=C.h+' h';$('#v-T').textContent=C.T+' °C';
+  $$('#hom button').forEach(b=>b.classList.toggle('on',+b.dataset.v===C.hom));
+  M=model(C);
+  $('#sfc').innerHTML=`Grasa cristalizada al batir: <b>≈ ${f0(M.S)} %</b>${C.h<4?' · aún cristalizando':''}<br><span style="color:var(--muted)">La red que sostiene el aire necesita grasa sólida y líquida a la vez (Figura 11).</span>`;
+  $$('[data-pr]').forEach(b=>{const p=PRE[b.dataset.pr];b.classList.toggle('on',p.fat===C.fat&&p.h===C.h&&p.T===C.T&&p.hom===C.hom);});
+}
+function lockCtl(on){['#fat','#h','#T'].forEach(id=>$(id).disabled=on);$$('#hom button,[data-pr]').forEach(b=>b.disabled=on);}
+function reset(){run=false;t=0;hist=[];done=false;$('#go').textContent='▶ Batir';$('#go').disabled=false;$('#stop').disabled=true;lockCtl(false);syncCtl();
+  $('#exp').className='box';$('#exp').innerHTML=`<h3>¿Montará?</h3><p>Prepara la crema con los controles de la izquierda y pulsa <b>▶ Batir</b>. Observa el volumen y la firmeza, y detén la batidora cuando creas que está en su punto. Después puedes seguir batiendo para ver qué pasa si te pasas.</p>`;
+  kpis();}
+['fat','h','T'].forEach(k=>$('#'+k).oninput=e=>{C[k]=+e.target.value;reset();});
+$$('#hom button').forEach(b=>b.onclick=()=>{C.hom=+b.dataset.v;reset();});
+$$('[data-pr]').forEach(b=>b.onclick=()=>{Object.assign(C,PRE[b.dataset.pr]);reset();});
+$$('#spd button').forEach(b=>b.onclick=()=>{spd=+b.dataset.v;$$('#spd button').forEach(x=>x.classList.toggle('on',x===b));});
+$('#go').onclick=()=>{run=true;done=false;$('#go').disabled=true;$('#stop').disabled=false;lockCtl(true);$('#exp').className='box';$('#exp').innerHTML='<h3>Batiendo…</h3><p>Observa cómo cambian el volumen, la superficie y el microscopio. ¿Cuándo detendrías la batidora?</p>';};
+$('#stop').onclick=()=>{run=false;evaluate();$('#go').disabled=false;$('#go').textContent='▶ Seguir batiendo';$('#stop').disabled=true;};
+$('#rst').onclick=reset;
+
+function kpis(){
+  const s=at(M,t), D=s.D;
+  const cls=s.st==='firm'?'good':(s.st==='weak'||s.st==='butter'||s.st==='cut')?'bad':(s.st==='over'||s.st==='soft'||s.st==='spk')?'mid':'';
+  $('#kp').innerHTML=[['Tiempo de batido',mmss(t),''],['Overrun',f0(s.OR)+' %',''],['Firmeza',t>0&&s.st!=='butter'?f0(s.F)+' / 100':'—',''],['Estado',STG[s.st],cls]].map(k=>`<div class="kpi ${k[2]}"><small>${k[0]}</small><b>${k[1]}</b></div>`).join('');
+}
+function renderMis(){$('#mis').innerHTML=MIS.map(m=>`<div class="mis ${misDone[m.id]?'done':''}"><i>${misDone[m.id]?'✅':'⬜'}</i><span>${m.t}</span></div>`).join('');}
+
+function reasons(){
+  const r=[];
+  if(C.fat<30)r.push(`<b>Grasa ${C.fat} %:</b> con menos de ≈ 30 % no hay suficientes glóbulos para formar la red que rodea las burbujas.`);
+  if(C.fat>40)r.push(`<b>Grasa ${C.fat} %:</b> monta rápido, pero el punto dura poco y se pasa con facilidad a mantequilla.`);
+  if(C.T>10)r.push(`<b>${C.T} °C al batir:</b> solo ≈ ${f0(M.S)} % de la grasa está cristalizada. Los glóbulos casi líquidos se funden entre sí en vez de formar una red, y la espuma se baja.`);
+  if(C.h<3)r.push(`<b>${C.h} h de reposo en frío:</b> la grasa todavía no termina de cristalizar, porque tarda horas (Figura 11). Recién enfriada, la crema bate mal.`);
+  if(C.hom)r.push(`<b>Homogeneizada a presión alta:</b> glóbulos pequeños recubiertos de caseína que resisten la coalescencia parcial. Tarda más y la espuma queda blanda.`);
+  return r;
+}
+function evaluate(){
+  const s=at(M,t); evals++;
+  let cls,h,p;
+  const R=reasons(), list=R.length?'<ul>'+R.map(x=>'<li>'+x+'</li>').join('')+'</ul>':'';
+  const Dtxt=s.D==null?'':` Drenado en 1 h: <b>${f0(s.D)} mL</b> por cada 100 g.`;
+  if(s.st==='firm'&&s.OR>=90&&s.D<=10){cls='good';h='✅ Crema batida en su punto';p=`Picos firmes con ${f0(s.OR)} % de overrun.${Dtxt} Los glóbulos con grasa parcialmente cristalizada se unieron <b>parcialmente</b> alrededor de las burbujas: esa red sostiene el aire. Te detuviste antes de que la coalescencia llegara a invertir la fase.`;misDone.firm=1;}
+  else if(s.st==='firm'){cls='mid';h='🟡 Monta, pero queda blanda o con poco volumen';p=`Llegaste al mejor punto que permite esta crema: ${f0(s.OR)} % de overrun y firmeza ${f0(s.F)}/100.${Dtxt}`;}
+  else if(s.st==='soft'||s.st==='spk'){cls='mid';h='🟡 Detuviste demasiado pronto';p=`Hay aire (${f0(s.OR)} %), pero la red de grasa todavía no se completa: la espuma es blanda y suelta líquido.${Dtxt} Sigue batiendo hasta los picos firmes.`;}
+  else if(s.st==='weak'){cls='bad';h='❌ La crema no bate';p=`Entra algo de aire, pero la espuma no se sostiene y se baja (${f0(s.OR)} % de overrun).${Dtxt} Batir más no lo arregla: falta la estructura que sostiene el aire.`;if(C.fat>=30)misDone.qs=1;}
+  else if(s.st==='over'||s.st==='cut'){cls='bad';h='❌ Sobrebatida';p=`La coalescencia siguió avanzando: los grumos de grasa crecen, el aire se escapa (${f0(s.OR)} %) y aparece una textura granulosa y amarillenta.${Dtxt} Es el camino hacia la mantequilla (Figura 10, etapas 2 y 3).`;}
+  else if(s.st==='butter'){cls='mid';h='🧈 Hiciste mantequilla';p='La espuma colapsó, los grumos se unieron en gránulos de mantequilla y se separó el buttermilk: es la etapa 3 de la Figura 10. Si se drena y se amasa, la grasa queda como fase continua. Para crema batida hay que detenerse mucho antes.';misDone.butter=1;}
+  else{cls='';h='Apenas empezaste';p='La crema sigue líquida. Bate un poco más antes de evaluar.';}
+  $('#exp').className='box '+cls;
+  $('#exp').innerHTML=`<h3>${h}</h3><p>${p}</p>${list&&s.st!=='liq'?'<p><b>Lo que influyó en esta crema:</b></p>'+list:''}`;
+  renderMis();kpis();drawChart(true);
+}
+
+/* ===================== Dibujo ===================== */
+const RB=mulberry32(7);
+const BUB=[];for(let i=0;i<12;i++){const a=RB()*6.28,d=Math.sqrt(RB())*112;BUB.push({x:Math.cos(a)*d,y:Math.sin(a)*d,r:15+RB()*14});}
+const GL=[];for(let i=0;i<300;i++){const a=RB()*6.28,d=Math.sqrt(RB())*130;GL.push({x:Math.cos(a)*d,y:Math.sin(a)*d,r:3+RB()*3.2,rh:1.2+RB()*1.3,b:i%12,an:RB()*6.28,u:RB(),ph:RB()*6.28,k:i%6});}
+const CL=[];for(let i=0;i<6;i++){const a=i*1.047+0.3,d=60+RB()*25;CL.push({x:Math.cos(a)*d,y:Math.sin(a)*d});}
+const SPK=[];for(let i=0;i<40;i++)SPK.push({x:RB(),y:RB(),r:1.5+RB()*2});
+
+function bowl(time){
+  const s=at(M,t), lvl=300-0.9*Math.min(140,s.OR), cx=200;
+  // tazón de vidrio (fondo)
+  c.save();
+  const inner=()=>{c.beginPath();c.moveTo(50,170);c.quadraticCurveTo(60,368,cx,368);c.quadraticCurveTo(340,368,350,170);};
+  inner();c.lineTo(350,170);c.fillStyle='rgba(226,232,240,.35)';c.fill();
+  // contenido
+  c.save();inner();c.lineTo(350,60);c.lineTo(50,60);c.closePath();c.clip();
+  const body=s.st==='butter'?'#e8eef6':mix2(s);
+  const surf=x=>{
+    const u=(x-50)/300, dome=-Math.sin(Math.PI*u)*Math.min(26,s.OR*0.18);
+    let n=0;
+    if(s.st==='liq')n=Math.sin(x*0.05+time*(run?6:1))*(run?2.5:1);
+    else if(s.st==='soft'||s.st==='weak')n=Math.sin(x*0.21+time)*3+Math.sin(x*0.53)*2;
+    else if(s.st==='spk'||s.st==='firm'){const amp=s.st==='firm'?14*(s.F/100+0.2):7;const ph=((x-50)%34)/34;n=-amp*Math.pow(Math.max(0,1-Math.abs(ph-0.5)*2),2.2)+3;}
+    else if(s.st==='over'||s.st==='cut')n=Math.sin(x*0.37)*5+Math.sin(x*0.91)*3;
+    return lvl+dome+n;
+  };
+  if(s.st==='butter'){
+    c.fillStyle='#e8eef6';c.fillRect(40,300,320,80);
+    c.fillStyle='#facc15';c.strokeStyle='#ca8a04';c.lineWidth=1.5;
+    [[150,292,46,24],[225,288,52,28],[290,296,34,18],[110,300,26,14]].forEach(g=>{c.beginPath();c.ellipse(g[0],g[1],g[2],g[3],0,0,7);c.fill();c.stroke();});
+  }else{
+    c.beginPath();c.moveTo(40,380);for(let x=40;x<=360;x+=3)c.lineTo(x,surf(x));c.lineTo(360,380);c.closePath();
+    const g=c.createLinearGradient(0,lvl-30,0,370);g.addColorStop(0,'#fffef8');g.addColorStop(1,body);c.fillStyle=g;c.fill();
+    c.strokeStyle='rgba(203,213,225,.9)';c.lineWidth=1.5;c.beginPath();for(let x=40;x<=360;x+=3)x===40?c.moveTo(x,surf(x)):c.lineTo(x,surf(x));c.stroke();
+    if(s.st==='soft'||s.st==='spk'||s.st==='firm'||s.st==='weak'){c.fillStyle='rgba(255,255,255,.9)';c.strokeStyle='rgba(203,213,225,.7)';c.lineWidth=0.8;for(let i=0;i<26;i++){const x=60+(i*53)%280,y=surf(x)+10+((i*29)%60);c.beginPath();c.arc(x,y,2+(i%3),0,7);c.fill();c.stroke();}}
+    if(s.st==='over'||s.st==='cut'){const k=s.st==='cut'?1:sm(1.3,0.8*s.xb,s.x);c.fillStyle='#facc15';SPK.forEach((p,i)=>{if(i/SPK.length>k)return;const x=55+p.x*290,y=surf(x)+6+p.y*70;c.beginPath();c.arc(x,y,p.r*(s.st==='cut'?1.8:1),0,7);c.fill();});
+      if(s.st==='cut'){c.fillStyle='rgba(203,213,225,.6)';c.fillRect(40,345,320,40);}}
+    if(s.st==='weak'&&s.x>0.9){c.fillStyle='rgba(219,234,254,.8)';c.fillRect(40,lvl+40,320,200);}
+  }
+  c.restore();
+  // borde de vidrio
+  inner();c.strokeStyle='#94a3b8';c.lineWidth=3;c.stroke();
+  c.beginPath();c.ellipse(cx,170,150,14,0,0,7);c.strokeStyle='rgba(148,163,184,.8)';c.lineWidth=2;c.stroke();
+  c.strokeStyle='rgba(255,255,255,.7)';c.lineWidth=4;c.beginPath();c.moveTo(70,200);c.quadraticCurveTo(76,300,110,340);c.stroke();
+  // batidora
+  const down=run?1:0.0, by=lerp(70,lvl+25,down*0.85);
+  c.fillStyle='#cbd5e1';rr(c,130,8,140,40,14);c.fill();c.strokeStyle='#94a3b8';c.lineWidth=1.5;c.stroke();
+  txt(c,run?'girando':'detenida',200,33,{s:11,b:1,c:'#475569'});
+  [170,230].forEach((bx,i)=>{c.strokeStyle='#64748b';c.lineWidth=3;c.beginPath();c.moveTo(bx,48);c.lineTo(bx,by-30);c.stroke();
+    const w=run?Math.abs(Math.sin(time*14+i))*14+2:12;c.lineWidth=2;for(let k=0;k<3;k++){c.beginPath();c.ellipse(bx,by-8,w*(1-k*0.3),26,0,0,7);c.stroke();}});
+  c.restore();
+  // etiqueta del nivel
+  if(s.OR>18&&s.st!=='butter'){c.strokeStyle='#db2777';c.lineWidth=1.5;c.setLineDash([4,3]);c.beginPath();c.moveTo(360,300);c.lineTo(392,300);c.moveTo(360,lvl-10);c.lineTo(392,lvl-10);c.stroke();c.setLineDash([]);
+    c.beginPath();c.moveTo(384,300);c.lineTo(384,lvl-8);c.stroke();txt(c,'+'+f0(s.OR)+' %',388,(300+lvl)/2,{s:11,b:1,c:'#db2777',a:'left'});txt(c,'volumen',388,(300+lvl)/2+13,{s:10,c:'#db2777',a:'left'});}
+  txt(c,'nivel inicial',392,314,{s:9.5,c:'#94a3b8',a:'left'});
+}
+function mix2(s){return s.st==='over'||s.st==='cut'?'#fef3c7':s.st==='liq'?'#fff7e0':'#fffbeb';}
+
+function micro(time){
+  const s=at(M,t), X=595, Y=175, R=140;
+  c.save();c.beginPath();c.arc(X,Y,R,0,7);c.fillStyle=s.st==='butter'?'#e8eef6':'#e6f3fb';c.fill();c.clip();
+  const net=M.Q<0.4?M.Q*sm(0.2,0.7,s.x)*(s.x>0.7?Math.exp(-(s.x-0.7)*1.5):1):sm(0.25,1,s.x);
+  const nb=s.st==='butter'?0:Math.round(12*clamp(s.OR/130,0,1));
+  const clump=s.st==='butter'?1:sm(1.3,s.xb,s.x);
+  const liquidFat=M.S<25;
+  const jit=run?1.6:0;
+  // burbujas
+  BUB.forEach((b,i)=>{if(i>=nb)return;const r=b.r*(1-0.5*clump);c.fillStyle='#fff';c.beginPath();c.arc(X+b.x,Y+b.y,r,0,7);c.fill();c.strokeStyle='#94a3b8';c.lineWidth=1.2;if(M.Q<0.4)c.setLineDash([3,3]);c.stroke();c.setLineDash([]);});
+  // glóbulos
+  const hom=!!C.hom;
+  GL.forEach((g,i)=>{
+    const r=hom?g.rh:g.r;
+    let x=g.x+Math.sin(time*2+g.ph)*jit, y=g.y+Math.cos(time*1.7+g.ph)*jit;
+    const b=BUB[g.b], att=g.b<nb&&g.u<net*(hom?0.3:0.55);
+    if(att){const br=b.r*(1-0.5*clump);x=b.x+Math.cos(g.an)*(br+r*0.4);y=b.y+Math.sin(g.an)*(br+r*0.4);}
+    if(clump>0){const k=CL[g.k];const ang=i*2.4,rad=Math.sqrt((i/6)+1)*3.6;x=lerp(x,k.x+Math.cos(ang)*rad,clump);y=lerp(y,k.y+Math.sin(ang)*rad,clump);}
+    x+=X;y+=Y;
+    if(att&&liquidFat&&clump<0.5){c.fillStyle='#facc15';c.beginPath();c.ellipse(x,y,r*1.5,r*0.6,g.an+1.57,0,7);c.fill();return;}
+    c.fillStyle=clump>0.4?'#facc15':'#fde68a';c.beginPath();c.arc(x,y,r*(1+clump*0.25),0,7);c.fill();
+    if(s.x<0.3||(!att&&clump<0.3)){c.strokeStyle='#f97316';c.lineWidth=1;c.stroke();}
+    else if(clump<0.4){c.strokeStyle='#f97316';c.lineWidth=1;c.setLineDash([2,2]);c.stroke();c.setLineDash([]);}
+    if(!hom&&r>4&&M.S>20&&clump<0.6){c.strokeStyle='rgba(255,255,255,.9)';c.lineWidth=1;c.beginPath();c.moveTo(x-r*0.5,y-r*0.2);c.lineTo(x+r*0.4,y+r*0.3);c.stroke();}
+  });
+  c.restore();
+  c.beginPath();c.arc(X,Y,R,0,7);c.strokeStyle='#12306b';c.lineWidth=4;c.stroke();
+  // escala (campo ≈ 100 µm → 2.7 px/µm)
+  c.strokeStyle='#12306b';c.lineWidth=2.5;c.beginPath();c.moveTo(X-27,Y+R-14);c.lineTo(X+27,Y+R-14);c.stroke();txt(c,'20 µm',X,Y+R-19,{s:9.5,b:1,c:'#12306b'});
+  const cap={liq:'Glóbulos dispersos con su membrana',soft:'El aire entra; los glóbulos llegan a las burbujas',spk:'Se dañan las membranas; empieza la unión parcial',firm:'Red de glóbulos parcialmente unidos alrededor del aire',over:'La coalescencia sigue: se forman grumos',cut:'Grumos grandes; el aire se escapa',butter:'Gránulos de grasa en el buttermilk',weak:liquidFat?'Grasa casi líquida: se extiende y la burbuja se rompe':'Pocos glóbulos o glóbulos que no se unen: la red no se forma'}[s.st];
+  txt(c,cap,X,Y+R+22,{s:11.5,b:1,c:'#12306b'});
+}
+function draw(time){c.clearRect(0,0,W,H);c.fillStyle='#fff';c.fillRect(0,0,W,H);bowl(time);micro(time);}
+
+function drawChart(showWin){
+  const w=760,h=190,L=46,Rr=46,T=16,B=30,tmax=900;
+  cc.clearRect(0,0,w,h);cc.fillStyle='#fff';cc.fillRect(0,0,w,h);
+  const xs=v=>L+(w-L-Rr)*v/tmax, yo=v=>h-B-(h-B-T)*v/150, yf=v=>h-B-(h-B-T)*v/100;
+  if(showWin&&M.Q>=0.4){cc.fillStyle='rgba(22,163,74,.10)';cc.fillRect(xs(0.95*M.tp),T,xs(1.3*M.tp)-xs(0.95*M.tp),h-B-T);txt(cc,'picos firmes',(xs(0.95*M.tp)+xs(1.3*M.tp))/2,T+11,{s:10,b:1,c:'#16a34a'});
+    if(M.tb<tmax){cc.fillStyle='rgba(202,138,4,.10)';cc.fillRect(xs(M.tb),T,w-Rr-xs(M.tb),h-B-T);txt(cc,'mantequilla',Math.min(xs(M.tb)+40,w-Rr-34),T+11,{s:10,b:1,c:'#a16207'});}}
+  cc.strokeStyle='#e2e8f0';cc.lineWidth=1;
+  for(let m=0;m<=15;m+=3){cc.beginPath();cc.moveTo(xs(m*60),T);cc.lineTo(xs(m*60),h-B);cc.stroke();txt(cc,m+' min',xs(m*60),h-B+15,{s:10,c:'#64748b'});}
+  for(let v=0;v<=150;v+=50){cc.beginPath();cc.moveTo(L,yo(v));cc.lineTo(w-Rr,yo(v));cc.stroke();txt(cc,v+' %',L-6,yo(v)+4,{s:10,c:'#db2777',a:'right'});}
+  for(let v=0;v<=100;v+=50)txt(cc,String(v),w-Rr+6,yf(v)+4,{s:10,c:'#12306b',a:'left'});
+  txt(cc,'overrun',L+4,T+2,{s:10,b:1,c:'#db2777',a:'left'});txt(cc,'firmeza',w-Rr-4,T+2,{s:10,b:1,c:'#12306b',a:'right'});
+  if(hist.length>1){
+    cc.strokeStyle='#db2777';cc.lineWidth=2.5;cc.beginPath();hist.forEach((p,i)=>{const X=xs(p[0]),Y=yo(Math.min(150,p[1]));i?cc.lineTo(X,Y):cc.moveTo(X,Y);});cc.stroke();
+    cc.strokeStyle='#12306b';cc.lineWidth=2;cc.setLineDash([6,4]);cc.beginPath();hist.forEach((p,i)=>{const X=xs(p[0]),Y=yf(p[2]);i?cc.lineTo(X,Y):cc.moveTo(X,Y);});cc.stroke();cc.setLineDash([]);
+  }
+  cc.strokeStyle='#f05a28';cc.lineWidth=2;cc.beginPath();cc.moveTo(xs(t),T);cc.lineTo(xs(t),h-B);cc.stroke();
+}
+
+let last=null;
+function loop(ts){
+  const time=ts/1000;
+  try{
+    if(last!==null&&run){
+      const dt=Math.min(0.05,time-last);
+      t=Math.min(900,t+dt*12*spd);
+      const s=at(M,t);hist.push([t,s.OR,s.F]);
+      kpis();drawChart(false);
+      if(t>=900){run=false;evaluate();$('#go').disabled=true;$('#stop').disabled=true;}
+    }
+    if($('[data-p=bat]').classList.contains('show'))draw(time);
+  }catch(e){console.error(e);}
+  last=time;requestAnimationFrame(loop);
+}
+
+/* ===================== Diagnóstico ===================== */
+const CASES=[
+ {ico:'🥣',t:'Crema que no bate',d:'Una crema para batir de 36 % de grasa sigue líquida después de varios minutos de batido y forma una espuma poco estable (salida rápida, p. 30).',
+  s:[[['A la crema le falta grasa cristalizada: estaba tibia o no reposó en frío el tiempo suficiente',1,''],['Tiene demasiada grasa',0,'36 % está en el rango normal de una crema para batir.'],['Le falta azúcar',0,'El azúcar endulza, pero no forma la red que sostiene el aire.']],
+     [['Temperatura de la crema al batir y su curva de enfriamiento y reposo (Tabla 3)',1,''],['Conteo de coliformes',0,'Es un dato de inocuidad; no explica por qué no monta.'],['Color de la crema',0,'El color no dice nada del estado de la grasa.']],
+     [['Enfriar a 4–8 °C, dejar reposar varias horas y batir con el tazón y los batidores fríos',1,''],['Batir más rápido y durante más tiempo',0,'Sin grasa cristalizada no se forma la red; batir más no lo corrige.'],['Agregar leche para que se ablande',0,'Bajaría la grasa y empeoraría el problema.']]]},
+ {ico:'🏷️',t:'«Para batir» que no monta',d:'Un lote etiquetado como crema para batir no monta, aunque está a 5 °C y reposó toda la noche en la cámara.',
+  s:[[['Su contenido de grasa es demasiado bajo para batir',1,''],['Le faltó reposo en frío',0,'Reposó toda la noche: esa variable está cubierta.'],['Está sobrebatida',0,'Ni siquiera llegó a montar.']],
+     [['Determinar el % de grasa del lote y revisar los registros de estandarización',1,''],['Medir solo el pH',0,'El pH no informa sobre la grasa.'],['Revisar la cámara de congelación',0,'La crema se conserva refrigerada, no congelada.']],
+     [['Corregir la estandarización (≈ 30–40 %) y no venderla como «para batir» si no cumple su especificación',1,''],['Inyectarle aire con una bomba',0,'Sin red de grasa, el aire se escapa.'],['Calentarla para que bata mejor',0,'En caliente bate todavía peor.']]]},
+ {ico:'🟡',t:'Granulosa y amarillenta',d:'La crema batida se volvió granulosa, se ve amarillenta y en el fondo hay un líquido turbio.',
+  s:[[['Se batió de más: la coalescencia avanzó hacia la mantequilla',1,''],['Le faltaba grasa',0,'Con poca grasa no monta; no forma grumos amarillos.'],['Estaba demasiado fría',0,'El frío ayuda a batir; los grumos indican que se pasó.']],
+     [['Tiempo de batido y momento en que se alcanzaron los picos firmes',1,''],['Fecha de caducidad',0,'No explica la textura.'],['Contenido de sal',0,'La crema batida no lleva sal; no es la causa.']],
+     [['Detener el batido al alcanzar picos firmes y controlar el tiempo en lotes siguientes',1,''],['Batirla más para que vuelva a montar',0,'Ya no regresa: seguirá hacia mantequilla y buttermilk.'],['Agregar agua para suavizarla',0,'No reconstruye la red y diluye el producto.']]]},
+ {ico:'⚙️',t:'Homogeneizada que queda blanda',d:'Una crema homogeneizada a presión alta tarda mucho en montar y queda blanda, con poco volumen.',
+  s:[[['La homogeneización dejó glóbulos pequeños recubiertos de proteína que resisten la coalescencia parcial',1,''],['El tratamiento térmico eliminó la grasa',0,'El calor no elimina la grasa.'],['Está demasiado fría',0,'La temperatura no es el problema.']],
+     [['Presión de homogeneización y tamaño de los glóbulos de grasa',1,''],['Conteo de hongos y levaduras',0,'Es un dato sanitario.'],['Peso del envase',0,'No está relacionado.']],
+     [['Para crema para batir, no homogeneizar o hacerlo a presión baja',1,''],['Homogeneizar a más presión',0,'Empeora: glóbulos aún más pequeños y más estables.'],['Batir a 25 °C',0,'En caliente la red no se forma.']]]},
+ {ico:'🫙',t:'Se separa en el envase',d:'Una crema envasada forma en almacenamiento una capa de grasa arriba y una fase líquida abajo (Tabla 3).',
+  s:[[['Estandarización u homogeneización inadecuada, o daño de la emulsión',1,''],['Recristalización del hielo',0,'Eso ocurre en el helado congelado.'],['Exceso de sal',0,'La crema no lleva sal.']],
+     [['Composición del lote, temperatura de almacenamiento y operación del homogeneizador',1,''],['Solo el color de la etiqueta',0,'No aporta información del proceso.'],['El overrun',0,'El overrun se mide en productos aireados.']],
+     [['Corregir la composición y el homogeneizador; conservar en frío y evitar golpes y agitación brusca',1,''],['Pedir al cliente que agite el envase',0,'No corrige la causa en el proceso.'],['Congelar la crema',0,'La congelación desestabiliza todavía más la emulsión.']]]},
+ {ico:'💧',t:'Suelta líquido al rato',d:'La crema batida se veía bien, pero una hora después hay mucho líquido en el fondo del recipiente.',
+  s:[[['Se detuvo antes de los picos firmes o la red de grasa quedó débil (poca grasa o crema tibia)',1,''],['Se batió hasta mantequilla',0,'En ese caso se vería granulosa y amarilla desde el principio.'],['Le faltó homogeneizar',0,'Homogeneizar empeoraría el batido.']],
+     [['Punto en que se detuvo, % de grasa y temperatura de la crema al batir',1,''],['Conteo de mesófilos',0,'No explica la separación del líquido.'],['Tipo de envase de venta',0,'No explica la separación del líquido.']],
+     [['Batir hasta picos firmes con crema fría de ≥ 30 % de grasa y mantenerla refrigerada',1,''],['Dejarla a temperatura ambiente para que se seque',0,'El calor funde la red y suelta todavía más líquido.'],['Agregar agua fría',0,'Agrega fase acuosa: más líquido.']]]}
+];
+const CH=['Dato','Hipótesis','Evidencia','Decisión'];
+const DX=CASES.map(cs=>({step:0,miss:[],first:[null,null,null],pick:[null,null,null],ord:cs.s.map(o=>shuffle(o.map((_,i)=>i)))}));
+let CUR=0;
+function renderCases(){
+  $('#cases').innerHTML=CASES.map((cs,i)=>{const d=DX[i];const st=d.step>=3?`${d.first.filter(x=>x===1).length}/3 ✓`:d.step>0?'en curso':'';return `<button class="case ${i===CUR?'on':''}" data-i="${i}"><span>${cs.ico}</span>${cs.t}<span class="st">${st}</span></button>`;}).join('');
+  $$('.case').forEach(b=>b.onclick=()=>{CUR=+b.dataset.i;renderCases();renderCase();});
+  const pts=DX.reduce((a,d)=>a+d.first.filter(x=>x===1).length,0), fin=DX.filter(d=>d.step>=3).length;
+  $('#dscore').innerHTML=`<b>${pts}</b> de 18 puntos · ${fin} de 6 casos resueltos`;
+}
+function renderCase(){
+  const cs=CASES[CUR], d=DX[CUR];
+  $('#chain').innerHTML=CH.map((n,i)=>{let cl='';if(i===0)cl='ok';else if(i-1<d.step)cl=d.first[i-1]===1?'ok':'no';else if(i-1===d.step)cl='cur';return `<div class="${cl}">${n}</div>`;}).join('');
+  let html=d.step>=3?'':`<div class="dato"><span class="big">${cs.ico}</span><b>Dato observado.</b> ${cs.d}<div style="clear:both"></div></div>`;
+  if(d.step<3){
+    const k=d.step, q=['¿Cuál es tu hipótesis?','¿Qué evidencia necesitas para confirmarla?','¿Qué decisión tomas?'][k];
+    const solved=d.pick[k]!==null&&cs.s[k][d.pick[k]][1];d.wr=d.wr||[[],[],[]];
+    html+=`<h3 style="margin:4px 0 8px;font-size:15px;color:var(--navy)">${q}</h3><div class="opts">${d.ord[k].map(i=>{const o=cs.s[k][i];let cl='';if(solved&&o[1])cl='right';else if(d.wr[k].includes(i))cl='wrong';return `<button class="opt ${cl}" data-i="${i}" ${solved||d.wr[k].includes(i)?'disabled':''}>${o[0]}</button>`;}).join('')}</div>`;
+    if(d.pick[k]!==null){const o=cs.s[k][d.pick[k]];html+=o[1]?`<div class="fb good">✅ Correcto.</div><div class="row-btn"><button class="btn btn-primary" id="dnext">${k<2?'Siguiente paso ➜':'Ver la cadena completa'}</button></div>`:`<div class="fb bad">❌ ${o[2]} Intenta otra opción.</div>`;}
+  }else{
+    const ok=i=>cs.s[i].find(o=>o[1])[0];
+    html+=`<div class="summ"><p><b>Dato observado →</b> ${cs.d}</p><p><b>Hipótesis →</b> ${ok(0)}.</p><p><b>Evidencia que necesito →</b> ${ok(1)}.</p><p><b>Decisión →</b> ${ok(2)}.</p></div>
+      <div class="row-btn">${CUR<CASES.length-1?'<button class="btn btn-primary" id="dgo">Siguiente caso ➜</button>':''}<button class="btn btn-ghost" id="dre">↺ Repetir este caso</button></div>`;
+  }
+  $('#dbody').innerHTML=html;
+  $$('#dbody .opt').forEach(b=>b.onclick=()=>{const k=d.step,i=+b.dataset.i,o=cs.s[k][i];if(d.pick[k]!==null&&cs.s[k][d.pick[k]][1])return;d.pick[k]=i;d.wr=d.wr||[[],[],[]];if(!o[1])d.wr[k].push(i);if(d.first[k]===null)d.first[k]=o[1]?1:0;renderCase();renderCases();});
+  if($('#dnext'))$('#dnext').onclick=()=>{d.step++;renderCase();renderCases();};
+  if($('#dgo'))$('#dgo').onclick=()=>{CUR++;renderCases();renderCase();};
+  if($('#dre'))$('#dre').onclick=()=>{DX[CUR]={step:0,miss:[],first:[null,null,null],pick:[null,null,null],ord:cs.s.map(o=>shuffle(o.map((_,i)=>i)))};renderCase();renderCases();};
+}
+
+/* ===================== Pestañas ===================== */
+function show(tb){$$('.tab').forEach(x=>x.classList.toggle('on',x.dataset.t===tb));$$('.pane').forEach(p=>p.classList.toggle('show',p.dataset.p===tb));}
+$$('.tab').forEach(b=>b.onclick=()=>show(b.dataset.t));
+$$('[data-go]').forEach(b=>b.onclick=()=>{show(b.dataset.go);window.scrollTo({top:0,behavior:'smooth'});});
+
+reset();renderMis();drawChart(false);renderCases();renderCase();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

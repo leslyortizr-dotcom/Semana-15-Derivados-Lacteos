@@ -1,600 +1,676 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diagnóstico de Defectos e Inocuidad NOM-243 - Semana 15</title>
-    <style>
-        :root {
-            --bg: #0b1120;
-            --panel: #1e293b;
-            --card: #0f172a;
-            --border: #334155;
-            --text: #f8fafc;
-            --muted: #94a3b8;
-            --accent: #38bdf8;
-            --gold: #fcd34d;
-            --ok: #10b981;
-            --warn: #f59e0b;
-            --err: #ef4444;
-        }
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 18px;
-            display: flex;
-            justify-content: center;
-        }
-        .app-container {
-            max-width: 1220px;
-            width: 100%;
-            background: var(--panel);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid var(--border);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.65);
-        }
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #334155;
-            color: #f8fafc;
-            text-decoration: none;
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 13px;
-            border: 1px solid #475569;
-            transition: 0.2s;
-        }
-        .back-btn:hover { background: #475569; border-color: var(--accent); }
-        .badge {
-            background: rgba(239, 68, 68, 0.15);
-            color: #fca5a5;
-            border: 1px solid var(--err);
-            padding: 5px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 700;
-        }
-        header {
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 16px;
-            margin-bottom: 18px;
-        }
-        h1 { margin: 0 0 6px 0; color: var(--gold); font-size: 24px; }
-        .subtitle { color: var(--muted); margin: 0 auto; max-width: 900px; font-size: 14px; line-height: 1.45; }
-
-        .mode-tabs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 18px;
-        }
-        @media (max-width: 700px) { .mode-tabs { grid-template-columns: 1fr; } }
-        .tab-btn {
-            background: var(--card);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 14px;
-            color: var(--text);
-            cursor: pointer;
-            text-align: center;
-            transition: 0.2s;
-        }
-        .tab-btn strong { display: block; font-size: 15px; color: var(--gold); margin-bottom: 4px; }
-        .tab-btn span { font-size: 12px; color: var(--muted); }
-        .tab-btn.active {
-            background: rgba(56, 189, 248, 0.15);
-            border-color: var(--accent);
-            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2);
-        }
-
-        .dashboard {
-            display: grid;
-            grid-template-columns: 380px 1fr;
-            gap: 18px;
-        }
-        @media (max-width: 960px) { .dashboard { grid-template-columns: 1fr; } }
-
-        .left-panel {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .panel-title {
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--accent);
-            border-bottom: 1px solid #1e293b;
-            padding-bottom: 6px;
-        }
-
-        .case-btn {
-            background: #1e293b;
-            border: 1px solid var(--border);
-            color: #f1f5f9;
-            padding: 10px 12px;
-            border-radius: 8px;
-            text-align: left;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            transition: 0.2s;
-        }
-        .case-btn:hover { border-color: var(--accent); }
-        .case-btn.active { background: #0284c7; border-color: var(--accent); color: white; }
-
-        .right-panel {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        canvas#defectCanvas {
-            width: 100%;
-            height: 220px;
-            background: #070d19;
-            border-radius: 10px;
-            border: 2px solid var(--border);
-        }
-
-        .chain-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-        @media (max-width: 700px) { .chain-grid { grid-template-columns: 1fr; } }
-        .step-box {
-            background: #1e293b;
-            border-left: 4px solid var(--accent);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            line-height: 1.45;
-        }
-        .step-box h4 { margin: 0 0 5px 0; color: var(--gold); font-size: 13.5px; }
-
-        .ctrl-row {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            margin-bottom: 8px;
-        }
-        .ctrl-row label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            font-weight: 600;
-        }
-        select, input[type="range"] {
-            width: 100%;
-            padding: 8px;
-            border-radius: 6px;
-            background: #1e293b;
-            color: white;
-            border: 1px solid var(--border);
-            font-size: 13px;
-        }
-        .verdict-banner {
-            padding: 16px;
-            border-radius: 10px;
-            font-size: 14px;
-            line-height: 1.5;
-            border: 2px solid var(--ok);
-            background: rgba(16, 185, 129, 0.12);
-        }
-        .norm-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12.5px;
-        }
-        .norm-table th, .norm-table td {
-            padding: 8px 10px;
-            border: 1px solid var(--border);
-            text-align: left;
-        }
-        .norm-table th { background: #1e293b; color: var(--gold); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico de Defectos y NOM-243 · Semana 15</title>
+<style>
+:root{
+  --navy:#12306b; --navy-2:#1d4196; --ink:#0f1b33; --text:#22304a; --muted:#64748b;
+  --bg:#eef2f8; --card:#ffffff; --line:#dbe3ef; --soft:#f6f8fc;
+  --orange:#f05a28; --magenta:#d61f5c; --ok:#16a34a; --warn:#d97706; --bad:#dc2626;
+  --crema:#0891b2; --mant:#ca8a04; --hel:#db2777;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--text);padding:18px;line-height:1.45}
+.app{max-width:1200px;margin:0 auto;background:var(--card);border-radius:18px;box-shadow:0 12px 34px rgba(15,27,51,.10);overflow:hidden}
+.topbar{height:6px;background:linear-gradient(90deg,var(--orange),var(--magenta))}
+header{padding:16px 24px 6px}
+.back{display:inline-flex;align-items:center;gap:6px;background:#334155;color:#f8fafc;text-decoration:none;padding:8px 14px;border-radius:8px;font-weight:600;font-size:13px;border:1px solid #475569;margin-bottom:12px}
+.back:hover{background:#1e293b}
+.title-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+h1{margin:0;color:var(--navy);font-size:26px;letter-spacing:-.3px}
+.subtitle{color:var(--muted);font-size:14px;margin-top:2px;max-width:820px}
+.week-tag{background:var(--navy);color:#fff;font-weight:700;font-size:12px;padding:6px 12px;border-radius:999px;white-space:nowrap}
+.week-tag b{color:#ffb38f}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 24px 0}
+@media (max-width:700px){.tabs{grid-template-columns:1fr}}
+.tab{border:2px solid var(--line);background:#fff;border-radius:12px;padding:10px 14px;text-align:left;cursor:pointer;font:inherit;color:var(--muted)}
+.tab b{display:block;font-size:15px;color:inherit}
+.tab small{font-size:12.5px}
+.tab.on{border-color:var(--navy);background:#eef3ff;color:var(--navy)}
+.pane{display:none;padding:12px 24px 18px}
+.pane.show{display:block}
+.lab{display:grid;grid-template-columns:290px 1fr;gap:16px}
+@media (max-width:960px){.lab{grid-template-columns:1fr}}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.card h3{margin:0 0 8px;font-size:14.5px;color:var(--navy)}
+.view{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.view>b{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--navy);padding:7px 10px;border-bottom:1px solid var(--line);background:var(--soft)}
+canvas{display:block;width:100%;height:auto}
+.box{padding:12px 14px;border-radius:12px;background:var(--soft);border-left:5px solid var(--navy);font-size:13.5px}
+.box h3{margin:0 0 6px;font-size:15px;color:var(--navy)}
+.box p{margin:5px 0}
+.book{font-size:12.5px;color:#475569;margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit}
+.btn-ghost{background:#fff;border:1.5px solid var(--line);color:var(--text)}
+.btn-primary{background:var(--navy);color:#fff}
+.row-btn{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+/* casos */
+.clist{display:flex;flex-direction:column;gap:6px}
+@media (max-width:960px){.clist{flex-direction:row;overflow-x:auto;padding-bottom:4px}.clist .cbtn{min-width:190px;flex:0 0 auto}}
+.cbtn{display:flex;gap:8px;align-items:flex-start;text-align:left;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:8px 10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--text)}
+.cbtn:hover{border-color:var(--navy-2)}
+.cbtn.on{border-color:var(--navy);background:#eef3ff}
+.cbtn .ic{font-size:18px;line-height:1}
+.cbtn small{display:block;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
+.cbtn .chk{margin-left:auto;font-size:14px}
+.tag-crema{color:var(--crema)} .tag-mant{color:var(--mant)} .tag-hel{color:var(--hel)}
+.score{font-size:13px;font-weight:700;color:var(--navy);background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.dato{background:#eff6ff;border:1px solid #bfdbfe;border-left:5px solid #2563eb;border-radius:12px;padding:10px 12px;font-size:14px}
+.dato b.k{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:#1d4ed8}
+.step{border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;background:#fff}
+.step.lock{opacity:.45;pointer-events:none}
+.step h4{margin:0 0 6px;font-size:14px;color:var(--navy);display:flex;gap:8px;align-items:center}
+.step h4 .n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;font-size:12px}
+.step.done h4 .n{background:var(--ok)}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{border:1.5px solid var(--line);background:var(--soft);border-radius:10px;padding:8px 10px;text-align:left;cursor:pointer;font-family:inherit;font-size:13px;color:var(--text)}
+.opt:hover{border-color:var(--navy-2)}
+.opt.right{border-color:var(--ok);background:#f0fdf4;font-weight:700}
+.opt.wrong{border-color:#fecaca;background:#fef2f2;color:#991b1b;text-decoration:line-through}
+.fbk{font-size:12.5px;margin-top:6px;color:#7f1d1d}
+.find{background:#fffbeb;border:1px solid #fde68a;border-left:5px solid var(--warn);border-radius:12px;padding:10px 12px;font-size:13.5px}
+.find b.k{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:#b45309}
+.chain{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:760px){.chain{grid-template-columns:1fr 1fr}}
+@media (max-width:460px){.chain{grid-template-columns:1fr}}
+.chain div{background:#fff;border:1px solid var(--line);border-top:4px solid;border-radius:10px;padding:8px 10px;font-size:12.5px}
+.chain div b{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+/* laboratorio */
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.presets .lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-right:4px}
+.chip{border:1.5px solid var(--line);background:#fff;color:var(--text);padding:6px 11px;border-radius:999px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.chip:hover{border-color:var(--navy-2)}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.seg{display:flex;background:#e6ecf5;border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;padding:7px 4px;border-radius:8px;font-weight:600;font-size:12.5px;color:#475569;cursor:pointer;font-family:inherit;line-height:1.2}
+.seg button.on{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;align-items:baseline;font-weight:600;font-size:13px;margin-bottom:4px;gap:8px}
+.ctl label .val{font-weight:800;font-size:15px;color:var(--navy);white-space:nowrap}
+.ctl input[type=range]{width:100%;cursor:pointer;accent-color:var(--navy)}
+.ctl.na{opacity:.4}
+.ctl .note{font-size:11px;color:var(--muted)}
+.verdict{padding:10px 12px;border-radius:12px;font-size:13.5px}
+.verdict.good{background:#f0fdf4;border:1px solid #bbf7d0;color:#14532d}
+.verdict.bad{background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d}
+.verdict.mid{background:#fffbeb;border:1px solid #fde68a;color:#78350f}
+.verdict h4{margin:0 0 4px;font-size:15px}
+.verdict ul{margin:4px 0 0;padding-left:18px}
+table.nt{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:10px;overflow:hidden}
+table.nt th{background:var(--navy);color:#fff;text-align:left;padding:7px 9px;font-size:12px}
+table.nt td{padding:6px 9px;border-bottom:1px solid var(--line)}
+table.nt td.na{color:#94a3b8;font-style:italic}
+.okc{color:var(--ok);font-weight:800}
+.badc{color:var(--bad);font-weight:800}
+/* reto */
+.lots{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.lot{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px}
+.lot h4{margin:0;font-size:14.5px;color:var(--navy)}
+.lot .pt{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.lot .data{font-size:12.5px;background:var(--soft);border-radius:8px;padding:6px 9px;margin:6px 0}
+.lot .data div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed #e2e8f0;padding:1px 0}
+.lot .data div:last-child{border:0}
+.lot select{width:100%;padding:7px;border-radius:8px;border:1.5px solid var(--line);font-family:inherit;font-size:12.5px;margin-top:4px;background:#fff}
+.lot.right{border-color:var(--ok);background:#f7fef9}
+.lot.wrong{border-color:var(--bad);background:#fffafa}
+.lot .fb{font-size:12.5px;margin-top:6px;display:none}
+.lot.right .fb,.lot.wrong .fb{display:block}
+details.teacher{margin:0 24px 22px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:#fbfcfe;font-size:13.5px}
+details.teacher summary{cursor:pointer;font-weight:700;color:var(--navy)}
+details.teacher li{margin:3px 0}
+footer{padding:0 24px 18px;font-size:11.5px;color:var(--muted)}
+</style>
 </head>
 <body>
-
-<div class="app-container">
-    <div class="top-bar">
-        <a href="index.html" class="back-btn">⬅ Volver al Menú Principal</a>
-        <span class="badge">CECYBOOK SEMANA 15 </span>
+<div class="app">
+  <div class="topbar"></div>
+  <header>
+    <a class="back" href="index.html">⬅ Volver al Menú Principal</a>
+    <div class="title-row">
+      <div>
+        <h1>🔍 Diagnóstico de defectos e inocuidad (NOM-243)</h1>
+        <div class="subtitle">No memorices defectos: sigue la cadena de proceso hacia atrás. Investiga lotes de crema, mantequilla y helado, lee placas de laboratorio y decide si un lote se puede liberar.</div>
+      </div>
+      <div class="week-tag">Semana 15 · <b>Tablas 3 y 4, pp. 26–30</b></div>
     </div>
+  </header>
 
-    <header>
-        <h1>🔍 Diagnóstico de Defectos (Dato ➔ Causa ➔ Decisión) e Inocuidad NOM-243</h1>
-        <p class="subtitle">
-            <strong>No memorices defectos; sigue la cadena de proceso hacia atrás:</strong> Analiza desviaciones tecnológicas en crema, mantequilla y helado, y dictamina lotes bajo los criterios microbiológicos de la NOM-243-SSA1-2010.
-        </p>
-    </header>
+  <div class="tabs">
+    <button class="tab on" data-t="det"><b>1 · Detective de defectos</b><small>Dato → hipótesis → evidencia → decisión</small></button>
+    <button class="tab" data-t="mic"><b>2 · Laboratorio NOM-243</b><small>Placas, diluciones y dictamen</small></button>
+    <button class="tab" data-t="ret"><b>3 · Dictamina lotes</b><small>¿Cumple o no cumple? Reto autocalificable</small></button>
+  </div>
 
-    <div class="mode-tabs">
-        <button id="m-defects" class="tab-btn active" onclick="switchMode('defects')">
-            <strong>🛠️ 1. Diagnóstico de Defectos de Proceso </strong>
-            <span>Secuencia lógica: Dato observado ➔ Hipótesis / Causa ➔ Etapa ➔ Decisión</span>
-        </button>
-        <button id="m-micro" class="tab-btn" onclick="switchMode('micro')">
-            <strong>🦠 2. Auditoría Microbiológica NOM-243-SSA1-2010 </strong>
-            <span>Dictamen sanitario para Crema, Mantequilla, Helados y Bases</span>
-        </button>
+  <!-- ===================== 1 · DETECTIVE ===================== -->
+  <div class="pane show" data-p="det">
+    <div class="lab">
+      <div class="col">
+        <div class="clist" id="clist"></div>
+        <div class="score" id="dscore"></div>
+      </div>
+      <div class="col">
+        <div class="view"><b><span id="vtitle"></span><span id="vtime" style="color:var(--muted);font-weight:600"></span></b><canvas id="cv"></canvas></div>
+        <div class="dato" id="dato"></div>
+        <div class="step" id="s1"></div>
+        <div class="step" id="s2"></div>
+        <div class="find" id="find" style="display:none"></div>
+        <div class="step" id="s3"></div>
+        <div id="chainBox" style="display:none">
+          <div class="chain" id="chain"></div>
+          <div class="book" id="dbook"></div>
+          <div class="row-btn"><button class="btn btn-primary" id="nextCase">Siguiente caso ➜</button><button class="btn btn-ghost" id="redoCase">↺ Repetir este caso</button></div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <div class="dashboard" id="main-content"></div>
+  <!-- ===================== 2 · LABORATORIO ===================== -->
+  <div class="pane" data-p="mic">
+    <div class="presets"><span class="lbl">Muestras</span>
+      <button class="chip" data-m="limpio">✅ Lote limpio</button>
+      <button class="chip" data-m="detona">🧈 82 % de grasa, pero…</button>
+      <button class="chip" data-m="manip">🧤 Manipulación sin higiene</button>
+      <button class="chip" data-m="pasteur">🔥 Pasteurización fallida</button>
+      <button class="chip" data-m="lister">🍦 Helado con <i>Listeria</i></button>
+    </div>
+    <div class="lab">
+      <div class="col">
+        <div class="card">
+          <div class="ctl"><label>Producto que se dictamina</label>
+            <div class="seg" data-k="prod"><button data-v="mc" class="on">Mantequilla y cremas</button><button data-v="hel">Helados y sorbetes</button><button data-v="base">Bases o mezclas</button></div></div>
+        </div>
+        <div class="card">
+          <h3>🧪 Resultados del laboratorio</h3>
+          <div class="ctl" data-par="col"><label>Coliformes totales <span class="val" id="v-col"></span></label><input type="range" id="r-col" min="0" step="1"></div>
+          <div class="ctl" data-par="sa"><label><span><i>S. aureus</i></span> <span class="val" id="v-sa"></span></label><input type="range" id="r-sa" min="0" step="1"></div>
+          <div class="ctl" data-par="mes"><label>Mesófilos aerobios <span class="val" id="v-mes"></span></label><input type="range" id="r-mes" min="0" step="1"></div>
+          <div class="ctl" data-par="fos"><label>Fosfatasa residual <span class="val" id="v-fos"></span></label><input type="range" id="r-fos" min="0" step="1"></div>
+          <div class="ctl" data-par="salm"><label><span><i>Salmonella</i> spp. (25 g)</span></label><div class="seg" data-k="salm"><button data-v="0" class="on">Ausente</button><button data-v="1">Presente</button></div></div>
+          <div class="ctl" data-par="lis"><label><span><i>Listeria monocytogenes</i> (25 g)</span></label><div class="seg" data-k="lis"><button data-v="0" class="on">Ausente</button><button data-v="1">Presente</button></div></div>
+          <div class="ctl note" style="font-size:11.5px;color:var(--muted)">Los parámetros en gris no aplican al producto elegido: sus límites no se trasladan de un producto a otro.</div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="view"><b>🧫 Mesa del laboratorio</b><canvas id="cm"></canvas></div>
+        <div id="mverdict"></div>
+        <table class="nt" id="mtable"></table>
+        <div class="box"><h3>⚖️ Mismo resultado, distinto producto</h3><div id="mcompare"></div>
+          <div class="book">📘 <b>En tu CECYBOOK:</b> p. 28 y Tabla 4 (p. 29). Mantequilla y cremas: Figura 13 (p. 15). «La NOM-243 no establece en su Tabla 5 un límite específico de <i>Listeria</i> para mantequilla; no inventar ni trasladar límites de otros derivados».</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== 3 · RETO ===================== -->
+  <div class="pane" data-p="ret">
+    <div class="box" style="margin-bottom:12px;border-left-color:var(--orange)"><h3>🏁 Dictamina cada lote con la NOM-243</h3>Fíjate primero en <b>qué producto es</b>: el mismo número puede cumplir en un producto y no en otro. Si no cumple, indica qué parámetro falla. Puedes consultar la pestaña 2.</div>
+    <div class="lots" id="lots"></div>
+    <div class="row-btn"><button class="btn btn-primary" id="chkLots">✅ Revisar</button><button class="btn btn-ghost" id="rstLots">↺ Volver a empezar</button><b id="lotScore" style="color:var(--navy)"></b></div>
+  </div>
+
+  <details class="teacher">
+    <summary>👩‍🏫 Notas para el docente</summary>
+    <ul>
+      <li><b>Pestaña 1:</b> los siete casos son los de la Tabla 3 (p. 27). Los casos «Crema no bate», «Mantequilla con gotas de agua» y «Helado con cristales grandes» corresponden a la <b>Salida rápida</b> de la p. 30. La secuencia sigue la Actividad de aula de la p. 28: dato → hipótesis → evidencia → decisión. El «hallazgo» solo aparece después de elegir qué evidencia buscar, para que el alumno no adivine la causa sin evidencia.</li>
+      <li><b>Pestaña 2:</b> la mesa muestra cómo se obtiene el resultado. El conteo en placa se multiplica por el factor de dilución. Con una dilución 10⁻¹ y ninguna colonia, el resultado se reporta como «&lt; 10 UFC/g»; por eso el límite de coliformes en mantequilla se expresa así. La fosfatasa se muestra como una prueba de color: más amarillo = más enzima = pasteurización insuficiente.</li>
+      <li><b>Límites usados</b> (Tabla 4 y Figura 13 del CECYBOOK, NOM-243-SSA1-2010):
+        <ul>
+          <li>Mantequilla y cremas: coliformes &lt; 10, <i>S. aureus</i> &lt; 100 UFC/g o mL, <i>Salmonella</i> ausente en 25 g, fosfatasa ≤ 4 UF/g.</li>
+          <li>Helados y sorbetes: coliformes &lt; 100, mesófilos máx. 200,000 UFC/g o mL, <i>Salmonella</i> y <i>Listeria</i> ausentes en 25 g.</li>
+          <li>Bases o mezclas: coliformes &lt; 50, mesófilos máx. 100,000 UFC/g o mL, <i>Salmonella</i> y <i>Listeria</i> ausentes.</li>
+        </ul></li>
+      <li><b>Ajustes respecto a la versión anterior:</b>
+        <ul>
+          <li>Se quitaron como valores universales «grasa 30–40 %», «maduración a 4 °C» y «batido a 8–15 °C». El CECYBOOK insiste en que son condiciones operativas que dependen de la grasa, la estación y el equipo (p. 13 y p. 16).</li>
+          <li>En «helado se derrite rápido» la causa central es una <b>red de grasa/aire insuficiente</b> (Tabla 3), no «exceso de overrun»: el overrun se revisa, pero más aire no implica por sí mismo un derretimiento más rápido.</li>
+          <li>El dictamen sanitario ya no dice «lote liberado» solo por cumplir la microbiología: también hay que verificar la composición y la calidad (p. 15).</li>
+          <li>Se agregó que la recristalización del hielo es <b>irreversible</b>: volver a congelar no elimina los cristales grandes.</li>
+        </ul></li>
+      <li><b>Para discutir:</b> ¿por qué el límite de coliformes es más estricto en mantequilla que en helado? Porque son productos y procesos distintos, y la norma los trata por separado. La lección es buscar siempre el límite del producto correcto, no deducirlo.</li>
+    </ul>
+  </details>
+  <footer>Recurso didáctico complementario · CECYBOOK Semana 15 · 7.4 Crema y mantequilla · 7.5 Helados.</footer>
 </div>
 
 <script>
-let currentMode = 'defects';
-let selectedCase = 0;
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function hiDPI(c,w,h){const d=Math.min(2,window.devicePixelRatio||1);c.width=w*d;c.height=h*d;const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return x;}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function hex(h){h=h.replace('#','');return[parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
+function mix(a,b,t){t=clamp(t,0,1);const A=hex(a),B=hex(b);return'rgb('+A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(',')+')';}
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+const ss=x=>{x=clamp(x,0,1);return x*x*(3-2*x);};
+const fmt=n=>n.toLocaleString('es-MX');
+function txt(c,s,x,y,o={}){c.font=(o.b?'bold ':'')+(o.s||12)+'px Segoe UI';c.fillStyle=o.c||'#0f1b33';c.textAlign=o.a||'center';c.fillText(s,x,y);}
 
-// Casos y Salida Rápida
-const DEFECT_CASES = [
-    {
-        prod: 'CREMA',
-        title: '1. Crema se separa en almacenamiento',
-        dato: 'Se observa una capa densa de grasa en la parte superior y una fase líquida (descremada) en el fondo del envase.',
-        causa: 'Estandarización u homogeneización inadecuada; daño parcial de la emulsión O/W.',
-        etapa: 'Formulación / Homogeneización / Cadena de frío.',
-        decision: 'Revisar composición (% de grasa), temperatura de proceso y presión de operación del homogeneizador.',
-        drawType: 'cream_sep'
-    },
-    {
-        prod: 'CREMA',
-        title: '2. Crema para batir no monta (no bate)',
-        dato: 'La crema permanece líquida después de varios minutos de batido y forma una espuma muy débil e inestable.',
-        causa: 'Contenido de grasa insuficiente (<30%), temperatura tibia o falta de maduración física en frío (cristalización insuficiente). También ocurre si se sobre-homogeneizó.',
-        etapa: 'Composición (Estandarización) / Maduración física en frío.',
-        decision: 'Confirmar que el % de grasa sea 30–40% y verificar la curva de enfriamiento/maduración (4 °C) antes del batido.',
-        drawType: 'cream_nowhip'
-    },
-    {
-        prod: 'MANTEQUILLA',
-        title: '3. Mantequilla muy blanda o untuosa',
-        dato: 'El bloque pierde su forma a temperatura de trabajo y presenta consistencia excesivamente blanda.',
-        causa: 'Fracción sólida de grasa insuficiente (exceso de grasa líquida libre por crema batida demasiado tibia o falta de maduración).',
-        etapa: 'Maduración física de la crema / Temperatura de batido (Churning).',
-        decision: 'Revisar temperatura y tiempo de maduración física en frío, y ajustar la temperatura de batido (8–15 °C).',
-        drawType: 'butter_soft'
-    },
-    {
-        prod: 'MANTEQUILLA',
-        title: '4. Mantequilla con gotas de agua ("Llorado")',
-        dato: 'Al cortar la mantequilla aparecen gotas grandes de agua libre en la superficie.',
-        causa: 'Amasado (working) insuficiente o mala distribución de la humedad residual tras el drenado/lavado.',
-        etapa: 'Amasado (Working).',
-        decision: 'Ajustar el tiempo e intensidad del amasado para dispersar el agua en microgotas (<10 µm) y verificar humedad ≤ 16%.',
-        drawType: 'butter_water'
-    },
-    {
-        prod: 'HELADO',
-        title: '5. Helado con cristales grandes de hielo (Textura áspera)',
-        dato: 'Sensación fría, áspera y presencia de cristales de hielo perceptibles en boca (> 50 µm).',
-        causa: 'Congelación/endurecimiento demasiado lento o recristalización por fluctuaciones de temperatura durante el almacenamiento.',
-        etapa: 'Congelación (Endurecimiento en túnel) / Almacenamiento y cadena de frío.',
-        decision: 'Verificar capacidad frigorífica del túnel (-25 a -40 °C) y corregir fluctuaciones en cámaras para mantener ≤ -18 °C constantes.',
-        drawType: 'ice_crystals'
-    },
-    {
-        prod: 'HELADO',
-        title: '6. Helado arenoso',
-        dato: 'Textura persistentemente arenosa en boca que no desaparece tan rápido como el hielo al derretirse.',
-        causa: 'Cristalización de la lactosa favorecida por exceso de Sólidos No Grasos (SNG) en la formulación o abusos térmicos.',
-        etapa: 'Formulación del mix / Cadena de frío.',
-        decision: 'Revisar el balance de Sólidos No Grasos de leche (SNG), concentración de azúcares y estabilidad térmica.',
-        drawType: 'ice_sandy'
-    },
-    {
-        prod: 'HELADO',
-        title: '7. Helado se derrite muy rápido',
-        dato: 'Al servirlo pierde estructura rápidamente, gotea en exceso y colapsa su espuma.',
-        causa: 'Red de grasa/aire inestable (falta de maduración del mix), bajo nivel de estabilizantes o exceso de overrun.',
-        etapa: 'Homogeneización / Maduración del mix (4–24 h) / Congelación dinámica.',
-        decision: 'Revisar dosificación de estabilizantes/emulsionantes, asegurar el tiempo de maduración en frío y ajustar el % de overrun.',
-        drawType: 'ice_melt'
-    }
+let TAB='det';
+$$('.tab').forEach(b=>b.addEventListener('click',()=>{TAB=b.dataset.t;$$('.tab').forEach(x=>x.classList.toggle('on',x===b));$$('.pane').forEach(p=>p.classList.toggle('show',p.dataset.p===TAB));if(TAB==='mic')refreshMic();}));
+
+/* ===================== 1 · CASOS ===================== */
+const PROD={crema:{n:'Crema',ic:'🥛',cls:'tag-crema'},mant:{n:'Mantequilla',ic:'🧈',cls:'tag-mant'},hel:{n:'Helado',ic:'🍦',cls:'tag-hel'}};
+const CASES=[
+{p:'crema',t:'Crema se separa en almacenamiento',draw:'sep',time:'días',
+ dato:'Después de unos días en refrigeración, la crema muestra una <b>capa de grasa arriba</b> y una fase líquida más clara abajo. El lote normal sigue uniforme.',
+ H:['Contaminación con levaduras que producen gas y empujan la grasa','Homogeneización o estandarización inadecuadas: glóbulos grandes que suben (daño de la emulsión)','Exceso de sal en la crema'],h:1,
+ hH:'Piensa en la Ley de Stokes (p. 6): ¿qué hace que un glóbulo de grasa suba más rápido?',
+ E:['Registro de presión del homogeneizador y tamaño de glóbulo al microscopio','Conteo de Salmonella del lote','Color y tamaño del envase'],e:0,
+ hE:'La hipótesis habla de glóbulos y homogeneización: busca datos de ese equipo.',
+ find:'La presión del homogeneizador estuvo por debajo de lo especificado durante dos horas del turno. Al microscopio, los glóbulos del lote son mucho más grandes que en un lote normal.',
+ D:['Revisar la composición, la temperatura y la operación del homogeneizador; retener el lote afectado','Agregar más grasa al lote para «igualarlo»','Congelar el lote para que no se separe'],d:0,
+ hD:'La acción debe corregir la causa que encontraste.',
+ etapa:'Formulación / homogeneización / frío',book:'Tabla 3 (p. 27), «Crema se separa en almacenamiento». Ley de Stokes: p. 6.'},
+{p:'crema',t:'Crema para batir no monta',draw:'whip',time:'segundos',
+ dato:'Después de varios minutos de batido, la crema <b>sigue líquida</b> y forma una espuma poco estable que se baja enseguida.',
+ H:['El envase estaba mal sellado','Hay demasiada grasa cristalizada','Contenido de grasa o temperatura no adecuados: falta grasa cristalizada que estabilice el aire'],h:2,
+ hH:'Para retener aire hace falta grasa parcialmente cristalizada alrededor de las burbujas.',
+ E:['Conteo de coliformes','Porcentaje de grasa del lote y su curva de enfriamiento hasta el batido','Fecha de caducidad de la etiqueta'],e:1,
+ hE:'Busca los dos datos de tu hipótesis: composición y temperatura.',
+ find:'El porcentaje de grasa es el correcto para una crema para batir, pero el registro muestra que se batió tibia: no tuvo reposo en frío después del llenado.',
+ D:['Batir a mayor velocidad y por más tiempo','Enfriar y dejar reposar la crema en frío antes de batir; confirmar el % de grasa y la curva de enfriamiento','Agregar agua para aligerarla'],d:1,
+ hD:'Sin grasa cristalizada, batir más no ayuda.',
+ etapa:'Composición / maduración en frío',book:'Tabla 3 (p. 27), «Crema no bate». Salida rápida, pregunta 1 (p. 30).'},
+{p:'mant',t:'Mantequilla muy blanda',draw:'soft',time:'minutos',
+ dato:'A temperatura de refrigeración, el bloque <b>pierde su forma</b> y se siente untuoso y blando; el bloque de referencia se mantiene firme.',
+ H:['Fracción sólida de grasa insuficiente: maduración física corta o batido demasiado tibio','Amasado insuficiente: quedaron bolsas de agua','Demasiada sal'],h:0,
+ hH:'La consistencia depende de la proporción entre grasa sólida y líquida (Resumen, punto 4).',
+ E:['Humedad del lote','Coliformes y S. aureus','Registros de temperatura y tiempo de maduración física y temperatura de batido'],e:2,
+ hE:'¿Dónde se decide cuánta grasa cristaliza?',
+ find:'La crema maduró mucho menos tiempo del habitual y entró tibia a la batidora: el batido «rompió» muy rápido y el suero de mantequilla salió con grasa.',
+ D:['Amasar más tiempo para endurecerla','Ajustar la temperatura y el tiempo de maduración física y la temperatura de batido según el estado de la grasa','Agregar agua fría al bloque'],d:1,
+ hD:'Corrige la etapa donde se formaron (o no) los cristales de grasa.',
+ etapa:'Maduración física / batido',book:'Tabla 3 (p. 27), «Mantequilla muy blanda». Maduración física: p. 13.'},
+{p:'mant',t:'Mantequilla con gotas de agua',draw:'water',time:'',
+ dato:'Al <b>cortar</b> el bloque aparecen gotas de agua visibles en la superficie del corte («llorado»).',
+ H:['Pasteurización insuficiente de la crema','Batido o amasado insuficientes, o mala distribución de la humedad (lavado o drenado deficiente)','Cristalización de lactosa'],h:1,
+ hH:'¿Qué etapa divide el agua en microgotas invisibles?',
+ E:['Overrun del lote','Prueba de Salmonella','Humedad del lote, tamaño de gota al microscopio y registro de amasado'],e:2,
+ hE:'Busca evidencia del agua y de la operación que la reparte.',
+ find:'Humedad 16.9 % (Codex: máx. 16 %). Al microscopio hay bolsas grandes de agua. El registro muestra que el amasado se acortó para terminar el turno.',
+ D:['Retener el lote; corregir la intensidad del amasado y el drenado o lavado; verificar humedad ≤ 16 %','Liberarlo porque es inocuo','Congelarlo para «fijar» el agua'],d:0,
+ hD:'Además, la humedad está fuera del Codex.',
+ etapa:'Amasado',book:'Tabla 3 (p. 27), «Mantequilla con gotas de agua». Salida rápida, pregunta 2 (p. 30). Simulador «Lavado, amasado y salado».'},
+{p:'hel',t:'Helado con cristales grandes',draw:'ice',time:'ciclos',
+ dato:'Un helado que salió cremoso ahora se siente <b>áspero y frío</b>, con cristales de hielo perceptibles después de varios días de almacenamiento.',
+ H:['Exceso de grasa en la fórmula','Recristalización por fluctuaciones de temperatura en el almacenamiento, o congelación/endurecimiento lentos','Overrun demasiado bajo'],h:1,
+ hH:'Los cristales crecieron después de fabricado el helado.',
+ E:['Registros de temperatura de cámara y transporte y capacidad del túnel de endurecimiento','Conteo de coliformes','Porcentaje de grasa del mix'],e:0,
+ hE:'Si la causa es la temperatura, la evidencia está en los registros de temperatura.',
+ find:'El registro de la cámara muestra subidas de temperatura cada vez que se abre la puerta para despachar, y el producto pasó por una vitrina con ciclos de descongelación.',
+ D:['Volver a congelar el lote a −40 °C para deshacer los cristales','Agregar más azúcar al lote ya congelado','Mantener una temperatura estable en almacenamiento y transporte; revisar la capacidad frigorífica y la cadena de frío'],d:2,
+ hD:'La recristalización no se revierte volviendo a congelar: hay que prevenirla.',
+ etapa:'Endurecimiento / almacenamiento',book:'Tabla 3 (p. 27), «Helado con cristales grandes». Figura 23 (p. 26). Salida rápida, pregunta 3 (p. 30).'},
+{p:'hel',t:'Helado arenoso',draw:'sandy',time:'',
+ dato:'El helado tiene una textura <b>arenosa</b> que no desaparece aunque el hielo se derrita en la boca.',
+ H:['Cristalización de lactosa favorecida por la formulación (exceso de SNG) o por el almacenamiento','Cristales de hielo grandes','Falta de aire en el producto'],h:0,
+ hH:'Si fuera hielo, se derretiría en la boca. ¿Qué cristal no se funde?',
+ E:['Presión del homogeneizador','Porcentaje de sólidos no grasos y azúcares de la fórmula, y registros de temperatura','Prueba de Listeria'],e:1,
+ hE:'La lactosa viene de los sólidos lácteos no grasos.',
+ find:'La fórmula se modificó: se subió la leche en polvo para dar «más cuerpo» y el SNG quedó muy alto. Además hubo una ruptura de la cadena de frío.',
+ D:['Batir más tiempo en el congelador','Reformular los SNG y los azúcares, y controlar las fluctuaciones térmicas','Bajar la grasa de la fórmula'],d:1,
+ hD:'Ataca las dos causas encontradas.',
+ etapa:'Formulación / cadena de frío',book:'Tabla 3 (p. 27), «Helado arenoso». Tabla 1 (p. 19): funciones de los ingredientes.'},
+{p:'hel',t:'Helado se derrite muy rápido',draw:'melt',time:'minutos',
+ dato:'Al servirlo, el helado <b>pierde su forma</b> y gotea mucho más rápido que el helado de referencia.',
+ H:['Contaminación microbiana','Cristales de lactosa','Red de grasa/aire insuficiente: maduración del mix, homogeneización o estabilización deficientes'],h:2,
+ hH:'¿Qué estructura sostiene las celdas de aire del helado? (Figura 15)',
+ E:['Tiempo de maduración del mix, dosis de estabilizante/emulsificante y overrun','Conteo de mesófilos','Color del producto'],e:0,
+ hE:'Busca datos de las etapas que forman la red de grasa.',
+ find:'Por urgencia de producción, el mix pasó al congelador sin maduración y en ese lote se omitió el emulsificante.',
+ D:['Almacenarlo a −40 °C','Asegurar la maduración del mix y la dosificación de estabilizante/emulsificante; revisar el overrun','Servirlo más frío y no cambiar nada'],d:1,
+ hD:'La red de grasa se forma en el proceso, no en el congelador del cliente.',
+ etapa:'Homogeneización / maduración / congelación',book:'Tabla 3 (p. 27), «Helado se derrite muy rápido». Maduración del mix: pp. 20–21.'}
 ];
+const ST=CASES.map(()=>({step:0,miss:0,done:false}));
+let CUR=0, caseT=0;
+function buildList(){
+  $('#clist').innerHTML=CASES.map((k,i)=>`<button class="cbtn${i===CUR?' on':''}" data-i="${i}"><span class="ic">${PROD[k.p].ic}</span><span><small class="${PROD[k.p].cls}">${PROD[k.p].n}</small>${k.t}</span><span class="chk">${ST[i].done?(ST[i].miss?'✔':'⭐'):''}</span></button>`).join('');
+  $$('.cbtn').forEach(b=>b.addEventListener('click',()=>{CUR=+b.dataset.i;caseT=0;renderCase();}));
+  const done=ST.filter(s=>s.done).length, first=ST.filter(s=>s.done&&!s.miss).length;
+  $('#dscore').innerHTML=`🕵️ Casos resueltos: ${done} de ${CASES.length}<br>⭐ A la primera: ${first}`;
+}
+function stepHTML(n,title,opts,ok,stepIdx,key,hint){
+  const s=ST[CUR];
+  const locked=s.step<stepIdx, done=s.step>stepIdx;
+  return `<h4><span class="n">${done?'✓':n}</span>${title}</h4><div class="opts">${opts.map((o,i)=>`<button class="opt${done&&i===ok?' right':''}" data-k="${key}" data-i="${i}">${o}</button>`).join('')}</div><div class="fbk" id="fb-${key}"></div>`;
+}
+function renderCase(){
+  const k=CASES[CUR], s=ST[CUR];
+  buildList();
+  $('#vtitle').innerHTML=`${PROD[k.p].ic} ${k.t}`;
+  $('#dato').innerHTML=`<b class="k">1 · Dato observado</b>${k.dato}`;
+  const S1=$('#s1'),S2=$('#s2'),S3=$('#s3');
+  S1.innerHTML=stepHTML(2,'¿Cuál es tu hipótesis?',k.H,k.h,0,'h');
+  S2.innerHTML=stepHTML(3,'¿Qué evidencia necesitas revisar?',k.E,k.e,1,'e');
+  S3.innerHTML=stepHTML(4,'¿Qué decides?',k.D,k.d,2,'d');
+  [[S1,0],[S2,1],[S3,2]].forEach(([el,i])=>{el.classList.toggle('lock',s.step<i);el.classList.toggle('done',s.step>i);});
+  const F=$('#find'); F.style.display=s.step>=2?'block':'none'; F.innerHTML=`<b class="k">🔎 Lo que encontraste en los registros</b>${k.find}`;
+  const CB=$('#chainBox'); CB.style.display=s.step>=3?'block':'none';
+  if(s.step>=3){
+    $('#chain').innerHTML=`<div style="border-top-color:#2563eb"><b style="color:#2563eb">Dato</b>${k.dato.replace(/<[^>]+>/g,'')}</div>
+      <div style="border-top-color:#d97706"><b style="color:#b45309">Hipótesis</b>${k.H[k.h]}</div>
+      <div style="border-top-color:#7c3aed"><b style="color:#7c3aed">Evidencia</b>${k.E[k.e]}<br><i>Etapa: ${k.etapa}</i></div>
+      <div style="border-top-color:#16a34a"><b style="color:#15803d">Decisión</b>${k.D[k.d]}</div>`;
+    $('#dbook').innerHTML='📘 <b>En tu CECYBOOK:</b> '+k.book;
+  }
+  $$('.opt').forEach(b=>b.addEventListener('click',()=>answer(b)));
+}
+function answer(b){
+  const k=CASES[CUR], s=ST[CUR], key=b.dataset.k, i=+b.dataset.i;
+  const idx={h:0,e:1,d:2}[key]; if(s.step!==idx) return;
+  const ok={h:k.h,e:k.e,d:k.d}[key];
+  if(i===ok){ s.step++; if(s.step===3) s.done=true; renderCase(); if(s.step===3) $('#chainBox').scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  else { s.miss++; b.classList.add('wrong'); $('#fb-'+key).innerHTML='💡 '+({h:k.hH,e:k.hE,d:k.hD}[key]); buildList(); }
+}
+$('#nextCase').addEventListener('click',()=>{const nx=ST.findIndex((s,i)=>i>CUR&&!s.done);CUR=nx>=0?nx:(ST.findIndex(s=>!s.done)>=0?ST.findIndex(s=>!s.done):(CUR+1)%CASES.length);caseT=0;renderCase();window.scrollTo({top:$('.tabs').offsetTop-10,behavior:'smooth'});});
+$('#redoCase').addEventListener('click',()=>{ST[CUR]={step:0,miss:0,done:false};renderCase();});
 
-// Variables para el simulador microbiológico NOM-243 
-let microProd = 'butter_cream'; // 'butter_cream', 'icecream', 'mix_base'
-let coliformes = 5;
-let staph = 20;
-let mesofilos = 45000;
-let salmonella = 'Ausente';
-let listeria = 'Ausente';
-let fosfatasa = 2;
+/* ---------- dibujos de los casos ---------- */
+const cv=$('#cv'), X=hiDPI(cv,760,300);
+const RND=(seed,n,f)=>{const r=mulberry32(seed);return Array.from({length:n},()=>f(r));};
+const GL_S=RND(3,90,r=>({x:r(),y:r(),r:r()})), GL_B=RND(4,26,r=>({x:r(),y:r(),r:r()}));
+function bottle(c,x,y,w,h,fill){c.save();rr(c,x,y,w,h,18);c.clip();fill();c.restore();c.strokeStyle='#94a3b8';c.lineWidth=2.5;rr(c,x,y,w,h,18);c.stroke();c.fillStyle='#cbd5e1';c.fillRect(x+w*0.3,y-16,w*0.4,16);}
+function drawSep(c,t){
+  const day=clamp((t%10)/8,0,1)*10;
+  $('#vtime').textContent=`Día ${day.toFixed(0)} en refrigeración`;
+  const fr=clamp(day/7,0,1);
+  bottle(c,70,60,130,210,()=>{c.fillStyle='#fffbeb';c.fillRect(70,80,130,190);});
+  bottle(c,260,60,130,210,()=>{const top=80, h=190, cl=70*fr;
+    c.fillStyle=mix('#fffbeb','#eef6ff',fr);c.fillRect(260,top,130,h);
+    c.fillStyle=mix('#fffbeb','#fde68a',fr);c.fillRect(260,top,130,cl);
+    if(fr>0.1){c.strokeStyle='rgba(202,138,4,.6)';c.lineWidth=1.5;c.beginPath();c.moveTo(260,top+cl);c.lineTo(390,top+cl);c.stroke();}});
+  txt(c,'Lote normal',135,290,{b:1});txt(c,'Lote observado',325,290,{b:1});
+  if(fr>0.3){txt(c,'capa de grasa',325,112,{s:11,c:'#92400e',b:1});txt(c,'fase más clara',325,230,{s:11,c:'#0369a1',b:1});}
+  // insets
+  const ins=(x,title,arr,big)=>{c.fillStyle='#fffdf7';rr(c,x,40,150,190,12);c.fill();c.strokeStyle='#dbe3ef';c.lineWidth=1.5;c.stroke();
+    txt(c,title,x+75,30,{s:11,b:1,c:'#12306b'});
+    c.save();rr(c,x,40,150,190,12);c.clip();
+    arr.forEach((g,i)=>{const rad=big?6+g.r*6:1.8+g.r*1.6;const v=big?28:3;let y=40+((g.y*190-(t*v))%190+190)%190;
+      c.fillStyle='#fcd34d';c.strokeStyle='#ca8a04';c.lineWidth=1;c.beginPath();c.arc(x+8+g.x*134,y,rad,0,7);c.fill();c.stroke();});
+    c.restore();
+    if(big){c.strokeStyle='#dc2626';c.fillStyle='#dc2626';c.lineWidth=2;for(let i=0;i<2;i++){const ax=x+40+i*70;c.beginPath();c.moveTo(ax,200);c.lineTo(ax,160);c.stroke();c.beginPath();c.moveTo(ax-6,168);c.lineTo(ax,156);c.lineTo(ax+6,168);c.fill();}}};
+  ins(430,'Glóbulos pequeños',GL_S,false);
+  ins(595,'Glóbulos grandes: suben',GL_B,true);
+  txt(c,'Velocidad de ascenso ∝ d²  (Ley de Stokes)',595,262,{s:12,b:1,c:'#b91c1c'});
+}
+function bowl(c,x,y,foam,bubbles,t,seed){
+  c.fillStyle='#e2e8f0';c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+110,y+150,x+220,y);c.closePath();c.fill();
+  c.save();c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+110,y+150,x+220,y);c.lineTo(x+220,y-200);c.lineTo(x,y-200);c.closePath();c.clip();
+  c.fillStyle='#fffbeb';c.fillRect(x,y+20-6,220,140);
+  // espuma
+  c.fillStyle='#ffffff';c.strokeStyle='#e2e8f0';
+  c.beginPath();c.moveTo(x+15,y+14);
+  for(let i=0;i<=10;i++){const px=x+15+i*19, py=y+14-foam*(0.75+0.25*Math.sin(i*1.7))-foam*0.25*Math.sin(i/10*Math.PI);c.lineTo(px,py);}
+  c.lineTo(x+205,y+14);c.closePath();c.fill();c.stroke();
+  c.restore();
+  if(bubbles){const r=mulberry32(seed);for(let i=0;i<14;i++){const ph=(t*0.9+r())%1;const bx=x+30+r()*160,by=y+8-ph*10;c.strokeStyle=`rgba(148,163,184,${1-ph})`;c.lineWidth=1.2;c.beginPath();c.arc(bx,by,2+ph*4,0,7);c.stroke();}}
+  c.strokeStyle='#64748b';c.lineWidth=2.5;c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+110,y+150,x+220,y);c.stroke();
+}
+function whisk(c,x,y,t){c.save();c.translate(x,y);c.strokeStyle='#475569';c.lineWidth=3;c.beginPath();c.moveTo(0,-90);c.lineTo(0,-30);c.stroke();c.lineWidth=1.6;for(let i=0;i<4;i++){const w=14*Math.cos(t*10+i*0.8);c.beginPath();c.moveTo(0,-30);c.bezierCurveTo(w,-10,w,15,0,20);c.bezierCurveTo(-w,15,-w,-10,0,-30);c.stroke();}c.restore();}
+function drawWhip(c,t){
+  const tt=t%9, sec=Math.round(clamp(tt/7,0,1)*300);
+  $('#vtime').textContent=`${sec} s de batido`;
+  const fRef=ss(tt/6)*80, fObs=8+4*Math.sin(t*3)*ss(tt/2);
+  bowl(c,60,170,fRef,false,t,1); bowl(c,340,170,fObs,true,t,2);
+  whisk(c,170,170-fRef*0.6,t); whisk(c,450,165,t);
+  txt(c,'Lote de referencia',170,285,{b:1});txt(c,'Lote observado',450,285,{b:1});
+  // medidor de volumen
+  const gx=630;txt(c,'Aumento de volumen',gx+50,40,{s:11,b:1,c:'#12306b'});
+  [[fRef/80,'Ref.','#16a34a'],[fObs/80,'Obs.','#dc2626']].forEach((v,i)=>{const bx=gx+10+i*50;c.fillStyle='#e2e8f0';rr(c,bx,55,34,200,8);c.fill();c.fillStyle=v[2];const h=200*clamp(v[0],0,1);rr(c,bx,255-h,34,h,8);c.fill();txt(c,v[1],bx+17,272,{s:11,b:1});});
+}
+function blockPath(c,cx,yb,w,h,sag){
+  const W=w*(1+0.28*sag), H=h*(1-0.38*sag), r=6+34*sag, bul=16*sag, xl=cx-W/2, xr=cx+W/2, yt=yb-H;
+  c.beginPath();c.moveTo(xl,yb);
+  c.quadraticCurveTo(xl-bul,(yb+yt)/2,xl+bul*0.3,yt+r);
+  c.quadraticCurveTo(xl+bul*0.3,yt,xl+r,yt);
+  c.lineTo(xr-r,yt);
+  c.quadraticCurveTo(xr-bul*0.3,yt,xr-bul*0.3,yt+r);
+  c.quadraticCurveTo(xr+bul,(yb+yt)/2,xr,yb);
+  c.closePath(); return yt;
+}
+function drawSoft(c,t){
+  const tt=t%9, m=Math.round(clamp(tt/7,0,1)*20); $('#vtime').textContent=`${m} min sobre la mesa (5 °C)`;
+  const sag=ss(tt/7)*0.75;
+  [[60,0,'Lote de referencia'],[300,sag,'Lote observado']].forEach(([x,sg,l])=>{
+    c.fillStyle='#e2e8f0';c.beginPath();c.ellipse(x+90,250,120,14,0,0,7);c.fill();
+    const g=c.createLinearGradient(0,110,0,250);g.addColorStop(0,'#fde68a');g.addColorStop(1,'#facc15');
+    c.fillStyle=g;c.strokeStyle='#ca8a04';c.lineWidth=2;const yt=blockPath(c,x+90,245,170,135,sg);c.fill();c.stroke();
+    if(sg>0.2){c.fillStyle='rgba(255,255,255,'+(0.5*sg)+')';c.beginPath();c.ellipse(x+70,yt+14,40,6,-0.1,0,7);c.fill();
+      c.fillStyle='rgba(234,179,8,.35)';c.beginPath();c.ellipse(x+90,248,110*(0.8+sg*0.3),8,0,0,7);c.fill();}
+    txt(c,l,x+90,285,{b:1});});
+  // micro
+  const ix=575;txt(c,'Cristales de grasa',ix+80,30,{s:11,b:1,c:'#12306b'});
+  [[0,'Ref.',110],[1,'Obs.',28]].forEach(([i,l,n])=>{const y=42+i*120;c.fillStyle='#fef3c7';rr(c,ix,y,160,104,10);c.fill();c.strokeStyle='#dbe3ef';c.stroke();
+    const r=mulberry32(9+i);c.strokeStyle='#a16207';c.lineWidth=1.4;for(let k=0;k<n;k++){const px=ix+6+r()*148,py=y+6+r()*92,a=r()*3;c.beginPath();c.moveTo(px,py);c.lineTo(px+Math.cos(a)*9,py+Math.sin(a)*9);c.stroke();}
+    txt(c,l,ix+14,y+16,{s:11,b:1,a:'left',c:'#0f1b33'});});
+}
+function drawWater(c,t){
+  const tt=t%9, wipe=ss((tt-0.3)/2.2), show=clamp((tt-2.6)/1.6,0,1), drip=clamp((tt-4.4)/3,0,1);
+  $('#vtime').textContent=tt<2.6?'Cortando el bloque…':'Cara del corte';
+  [[40,'Lote de referencia',false],[290,'Lote observado',true]].forEach(([x,l,bad])=>{
+    const y=50,w=210,h=180;
+    c.fillStyle='#e2e8f0';c.fillRect(x-10,y+h+4,w+20,8);
+    // bloque visto de frente: superficie exterior (oscura) y cara del corte (clara) que se revela con el cuchillo
+    c.fillStyle='#facc15';rr(c,x,y,w,h,8);c.fill();
+    c.save();rr(c,x,y,w,h,8);c.clip();
+    const cutY=y+h*wipe;
+    const g=c.createLinearGradient(0,y,0,y+h);g.addColorStop(0,'#fef9c3');g.addColorStop(1,'#fde68a');
+    c.fillStyle=g;c.fillRect(x,y,w,cutY-y);
+    if(bad&&show>0){const r=mulberry32(5);
+      for(let i=0;i<14;i++){const dx=x+15+r()*(w-30), dy=y+15+r()*(h-40), rad=(3+r()*6)*show, run=drip*r()*40;
+        c.fillStyle='rgba(56,189,248,.85)';c.strokeStyle='#0369a1';c.lineWidth=1;
+        c.beginPath();c.arc(dx,dy+run,rad,0,7);c.fill();c.stroke();
+        if(run>2){c.strokeStyle='rgba(56,189,248,.5)';c.lineWidth=rad*0.9;c.beginPath();c.moveTo(dx,dy);c.lineTo(dx,dy+run);c.stroke();}}}
+    c.restore();
+    c.strokeStyle='#ca8a04';c.lineWidth=2;rr(c,x,y,w,h,8);c.stroke();
+    if(bad&&drip>0.3){c.fillStyle='rgba(56,189,248,.45)';c.beginPath();c.ellipse(x+w/2,y+h+6,60*drip,5,0,0,7);c.fill();}
+    // cuchillo
+    if(wipe<1){const ky=y+h*wipe;c.fillStyle='#cbd5e1';c.strokeStyle='#64748b';c.lineWidth=1.5;c.beginPath();c.moveTo(x-20,ky-6);c.lineTo(x+w+10,ky-6);c.lineTo(x+w+24,ky);c.lineTo(x-20,ky);c.closePath();c.fill();c.stroke();c.fillStyle='#475569';c.fillRect(x-48,ky-9,30,10);}
+    txt(c,l,x+w/2,282,{b:1});});
+  // micro
+  const ix=575;txt(c,'Al microscopio (obs.)',ix+80,30,{s:11,b:1,c:'#12306b'});
+  c.fillStyle='#fef3c7';rr(c,ix,42,160,210,12);c.fill();c.strokeStyle='#dbe3ef';c.stroke();
+  const r=mulberry32(12);for(let i=0;i<40;i++){c.fillStyle='#7dd3fc';c.beginPath();c.arc(ix+8+r()*144,50+r()*194,1.5+r()*2,0,7);c.fill();}
+  for(let i=0;i<4;i++){const x=ix+30+r()*100,y=70+r()*150,rad=13+r()*9;c.fillStyle='rgba(125,211,252,.9)';c.beginPath();c.arc(x,y,rad,0,7);c.fill();c.setLineDash([4,3]);c.strokeStyle='#dc2626';c.lineWidth=2;c.stroke();c.setLineDash([]);}
+  txt(c,'Bolsas de agua',ix+80,272,{s:11,b:1,c:'#b91c1c'});
+}
+const ICE=RND(31,70,r=>({x:r(),y:r(),r:r(),a:r()*6,k:r()}));
+function iceCrystal(c,x,y,rad,a){c.beginPath();for(let k=0;k<6;k++){const an=a+k/6*6.283;const rk=rad*(0.75+0.25*Math.sin(k*2.3+a));c.lineTo(x+Math.cos(an)*rk,y+Math.sin(an)*rk);}c.closePath();c.fill();c.stroke();}
+function drawIce(c,t){
+  const tt=t%12, cyc=clamp(tt/10,0,1)*12;
+  $('#vtime').textContent=`${Math.floor(cyc)} subidas de temperatura`;
+  // micro
+  c.fillStyle='#fdf2f8';rr(c,20,30,340,240,12);c.fill();c.strokeStyle='#dbe3ef';c.lineWidth=1.5;c.stroke();
+  txt(c,'Al microscopio',190,22,{s:11,b:1,c:'#12306b'});
+  c.save();rr(c,20,30,340,240,12);c.clip();
+  const keep=Math.round(70-cyc*4.2);
+  ICE.forEach((g,i)=>{if(i>=Math.max(14,keep))return;const grow=1+cyc*0.16*(0.6+g.k);const rad=(5+g.r*3)*grow;
+    c.fillStyle='rgba(186,230,253,.95)';c.strokeStyle='#0284c7';c.lineWidth=1.2;iceCrystal(c,28+g.x*324,38+g.y*224,rad,g.a);});
+  c.restore();
+  const size=Math.round(30+cyc*5.2);
+  txt(c,`Tamaño medio ≈ ${size} µm`,190,288,{b:1,c:size>50?'#b91c1c':'#0f1b33'});
+  // registro de temperatura
+  const X0=420,X1=740,Y0=240,Y1=40, yT=v=>Y0-(v+30)/22*(Y0-Y1);
+  c.fillStyle='#fff';c.fillRect(X0,Y1,X1-X0,Y0-Y1);c.strokeStyle='#94a3b8';c.lineWidth=1;c.strokeRect(X0,Y1,X1-X0,Y0-Y1);
+  txt(c,'Registro de la cámara (°C)',(X0+X1)/2,30,{s:11,b:1,c:'#12306b'});
+  [-30,-25,-18,-12].forEach(v=>{txt(c,v,X0-6,yT(v)+4,{s:10,a:'right',c:'#64748b'});});
+  c.setLineDash([4,4]);c.strokeStyle='#16a34a';c.beginPath();c.moveTo(X0,yT(-25));c.lineTo(X1,yT(-25));c.stroke();c.setLineDash([]);
+  txt(c,'referencia estable',X1-6,yT(-25)+14,{s:10,a:'right',c:'#15803d'});
+  c.strokeStyle='#dc2626';c.lineWidth=2;c.beginPath();
+  const prog=clamp(tt/10,0,1);
+  for(let i=0;i<=200*prog;i++){const u=i/200;const ph=(u*12)%1;const v=-25+(ph<0.15?ss(ph/0.15)*13:ph<0.3?13*(1-ss((ph-0.15)/0.15)):0);const x=X0+u*(X1-X0);i?c.lineTo(x,yT(v)):c.moveTo(x,yT(v));}
+  c.stroke();
+  txt(c,'apertura de puerta / vitrina',(X0+X1)/2,Y0+18,{s:10.5,c:'#b91c1c'});
+}
+function tomahawk(c,x,y,s,a){c.save();c.translate(x,y);c.rotate(a);c.beginPath();c.moveTo(-s,-s*0.35);c.lineTo(s*0.6,-s*0.55);c.lineTo(s,0);c.lineTo(s*0.6,s*0.55);c.lineTo(-s,s*0.35);c.closePath();c.fillStyle='#fffbeb';c.strokeStyle='#78350f';c.lineWidth=1.5;c.fill();c.stroke();c.restore();}
+function drawSandy(c,t){
+  const tt=t%9, melt=ss((tt-1.5)/4.5);
+  $('#vtime').textContent=melt<0.05?'Helado recién servido':melt<0.95?'Derritiéndose en la boca…':'El hielo ya se derritió';
+  c.fillStyle=mix('#fdf2f8','#fff7ed',melt);rr(c,20,30,480,240,12);c.fill();c.strokeStyle='#dbe3ef';c.lineWidth=1.5;c.stroke();
+  txt(c,'Al microscopio',260,22,{s:11,b:1,c:'#12306b'});
+  c.save();rr(c,20,30,480,240,12);c.clip();
+  ICE.forEach(g=>{const rad=(5+g.r*4)*(1-melt);if(rad<0.5)return;c.fillStyle='rgba(186,230,253,.95)';c.strokeStyle='#0284c7';c.lineWidth=1;iceCrystal(c,28+g.x*464,38+g.y*224,rad,g.a);});
+  const r=mulberry32(77);for(let i=0;i<16;i++)tomahawk(c,40+r()*440,50+r()*200,9+r()*6,r()*3);
+  c.restore();
+  // leyenda
+  const lx=530;c.fillStyle='rgba(186,230,253,.95)';c.strokeStyle='#0284c7';iceCrystal(c,lx+10,90,9,0.3);
+  txt(c,'Cristal de hielo',lx+28,94,{a:'left',s:12});txt(c,'se derrite en la boca',lx+28,110,{a:'left',s:11,c:'#64748b'});
+  tomahawk(c,lx+10,160,11,0.2);txt(c,'Cristal de lactosa',lx+28,164,{a:'left',s:12});txt(c,'duro, no se derrite:',lx+28,180,{a:'left',s:11,c:'#64748b'});txt(c,'sensación arenosa',lx+28,195,{a:'left',s:11,c:'#b91c1c',b:1});
+}
+function scoop(c,x,base,R,m,t,seed){
+  // charco
+  c.fillStyle='rgba(249,168,212,.75)';c.beginPath();c.ellipse(x,base+2,R*0.9+m*70,5+m*9,0,0,7);c.fill();
+  const rx=R*(1+0.45*m), ry=R*(1-0.5*m), cy=base-ry*0.85;
+  c.fillStyle='#fbcfe8';c.strokeStyle='#db2777';c.lineWidth=1.6;
+  c.beginPath();c.ellipse(x,cy,rx,ry,0,Math.PI*0.92,Math.PI*2.08);
+  // borde inferior ondulado
+  const n=7;for(let i=0;i<=n;i++){const px=x+rx*Math.cos(Math.PI*0.08)-(i/n)*2*rx*Math.cos(Math.PI*0.08);c.lineTo(px,base-2+(i%2?5:0));}
+  c.closePath();c.fill();c.stroke();
+  c.fillStyle='rgba(255,255,255,.55)';c.beginPath();c.ellipse(x-rx*0.35,cy-ry*0.45,rx*0.22,ry*0.12,-0.5,0,7);c.fill();
+  if(m>0.15){const r=mulberry32(seed);c.fillStyle='#f472b6';
+    for(let i=0;i<4;i++){const sx=x+(r()<0.5?-1:1)*rx*(0.7+r()*0.2), ph=((t*0.6+r())%1);c.beginPath();c.ellipse(sx,base-6+ph*14,2.5,3.5,0,0,7);c.fill();}}
+}
+function drawMelt(c,t){
+  const tt=t%10, min=clamp(tt/8,0,1)*15; $('#vtime').textContent=`Minuto ${min.toFixed(0)} a temperatura ambiente`;
+  const u=min/15;
+  [[190,0.22,'Helado de referencia',1],[520,1,'Lote observado',2]].forEach(([x,k,l,sd])=>{
+    c.fillStyle='#e2e8f0';c.beginPath();c.ellipse(x,236,135,20,0,0,7);c.fill();c.strokeStyle='#cbd5e1';c.lineWidth=1.5;c.stroke();
+    scoop(c,x,228,62,ss(u*k*1.05),t,sd);
+    txt(c,l,x,285,{b:1});});
+}
+const DRAW={sep:drawSep,whip:drawWhip,soft:drawSoft,water:drawWater,ice:drawIce,sandy:drawSandy,melt:drawMelt};
 
-function switchMode(m) {
-    currentMode = m;
-    document.getElementById('m-defects').classList.toggle('active', m === 'defects');
-    document.getElementById('m-micro').classList.toggle('active', m === 'micro');
-    renderDashboard();
+/* ===================== 2 · LABORATORIO ===================== */
+const VALS={col:[0,10,20,30,40,50,60,80,100,150,300,1000],sa:[0,10,40,90,100,150,300,1000],mes:[0,1000,5000,20000,50000,80000,100000,150000,200000,250000,500000,1500000],fos:[0.5,1,2,3,4,5,6,8,10]};
+const M={col:0,sa:1,mes:4,fos:1,salm:0,lis:0,prod:'mc'};   // índices
+const LIM={
+  mc:{n:'Mantequilla y cremas',par:['col','sa','salm','fos'],col:10,sa:100},
+  hel:{n:'Helados y sorbetes',par:['col','mes','salm','lis'],col:100,mes:200000},
+  base:{n:'Bases o mezclas para helado',par:['col','mes','salm','lis'],col:50,mes:100000}
+};
+const PNAME={col:'Coliformes totales',sa:'<i>S. aureus</i>',mes:'Mesófilos aerobios',salm:'<i>Salmonella</i> spp.',lis:'<i>Listeria monocytogenes</i>',fos:'Fosfatasa residual'};
+const MEAN={col:'Indicador de higiene: recontaminación después del tratamiento térmico (agua, equipo, envasado o manipulación).',
+  sa:'Contaminación por manipulación (piel y mucosas) o materia prima; puede producir toxinas termoestables.',
+  mes:'Carga microbiana general alta: higiene del proceso, tiempos y temperaturas o materia prima.',
+  salm:'Patógeno: su ausencia es obligatoria.',lis:'Patógeno que puede crecer en refrigeración: crítico en helados y bases.',
+  fos:'La pasteurización fue insuficiente o hubo mezcla con producto crudo.'};
+function plate(V){ if(V<=0) return {k:1,n:0,v:0,rep:'< 10'}; let k=1; while(V/Math.pow(10,k)>300&&k<7)k++; const n=Math.round(V/Math.pow(10,k)); return {k,n,v:n*Math.pow(10,k),rep:n===0?'< '+fmt(Math.pow(10,k)):fmt(n*Math.pow(10,k))}; }
+function val(p){return p==='salm'?M.salm:p==='lis'?M.lis:VALS[p][M[p]];}
+function passes(p,prod){const L=LIM[prod],v=val(p);
+  if(p==='col') return v<L.col; if(p==='sa') return v<L.sa; if(p==='mes') return v<=L.mes; if(p==='fos') return v<=4; return v===0;}
+function limTxt(p,prod){const L=LIM[prod];return {col:'< '+fmt(L.col||0)+' UFC/g',sa:'< 100 UFC/g',mes:'máx. '+fmt(L.mes||0)+' UFC/g',salm:'Ausente en 25 g',lis:'Ausente en 25 g',fos:'≤ 4 UF/g'}[p];}
+function resTxt(p){const v=val(p);if(p==='salm'||p==='lis')return v?'Presente':'Ausente';if(p==='fos')return v.toLocaleString('es-MX')+' UF/g';return plate(v).rep+' UFC/g';}
+['col','sa','mes','fos'].forEach(p=>{const r=$('#r-'+p);r.max=VALS[p].length-1;r.value=M[p];r.addEventListener('input',()=>{M[p]=+r.value;$$('[data-m]').forEach(c=>c.classList.remove('on'));refreshMic();});});
+$$('.seg').forEach(s=>s.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=s.dataset.k;M[k]=k==='prod'?b.dataset.v:+b.dataset.v;s.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));if(k!=='prod')$$('[data-m]').forEach(c=>c.classList.remove('on'));refreshMic();}));
+const MP={limpio:{prod:'mc',col:0,sa:1,mes:3,fos:1,salm:0,lis:0},detona:{prod:'mc',col:4,sa:1,mes:3,fos:1,salm:0,lis:0},manip:{prod:'mc',col:3,sa:5,mes:5,fos:1,salm:0,lis:0},pasteur:{prod:'mc',col:0,sa:1,mes:3,fos:7,salm:0,lis:0},lister:{prod:'hel',col:2,sa:0,mes:5,fos:1,salm:0,lis:1}};
+$$('[data-m]').forEach(c=>c.addEventListener('click',()=>{Object.assign(M,MP[c.dataset.m]);['col','sa','mes','fos'].forEach(p=>$('#r-'+p).value=M[p]);
+  ['prod','salm','lis'].forEach(k=>$(`.seg[data-k="${k}"]`).querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v==String(M[k]))));
+  $$('[data-m]').forEach(x=>x.classList.toggle('on',x===c));refreshMic();}));
+function refreshMic(){
+  const L=LIM[M.prod];
+  ['col','sa','mes','fos'].forEach(p=>{$('#v-'+p).textContent=resTxt(p);});
+  $$('[data-par]').forEach(el=>el.classList.toggle('na',!L.par.includes(el.dataset.par)));
+  const fails=L.par.filter(p=>!passes(p,M.prod)), path=fails.some(p=>p==='salm'||p==='lis');
+  let rows=`<tr><th>Parámetro</th><th>Resultado</th><th>Límite (${L.n})</th><th></th></tr>`;
+  ['col','sa','mes','salm','lis','fos'].forEach(p=>{
+    if(L.par.includes(p)) rows+=`<tr><td>${PNAME[p]}</td><td>${resTxt(p)}</td><td>${limTxt(p,M.prod)}</td><td>${passes(p,M.prod)?'<span class="okc">✔ Cumple</span>':'<span class="badc">✖ No cumple</span>'}</td></tr>`;
+    else rows+=`<tr><td class="na">${PNAME[p]}</td><td class="na">—</td><td class="na">No aplica a este producto</td><td></td></tr>`;});
+  $('#mtable').innerHTML=rows;
+  const V=$('#mverdict');
+  if(!fails.length) V.innerHTML=`<div class="verdict good"><h4>✔ Cumple la NOM-243 para ${L.n.toLowerCase()}</h4>La parte sanitaria está bien. Antes de liberar, todavía hay que verificar la composición y la calidad del producto: una cosa no sustituye a la otra.</div>`;
+  else V.innerHTML=`<div class="verdict bad"><h4>${path?'⛔ Patógeno detectado: el lote no es apto':'✖ No cumple: el lote no se libera'}</h4><ul>${fails.map(p=>`<li><b>${PNAME[p]}:</b> ${MEAN[p]}</li>`).join('')}</ul>${M.prod==='mc'&&M.col>0&&passes('fos','mc')&&!passes('col','mc')?'<div style="margin-top:6px">La fosfatasa salió bien: la pasteurización funcionó, así que la contaminación ocurrió <b>después</b>. Aunque la mantequilla tenga 82 % de grasa, no puede liberarse (p. 15).</div>':''}</div>`;
+  // comparación
+  const cps=['col','mes'].filter(p=>true);
+  const cmp=Object.keys(LIM).map(k=>{const f=LIM[k].par.filter(p=>!passes(p,k));return `<tr><td><b>${LIM[k].n}</b></td><td>${f.length?'<span class="badc">✖ No cumple</span> · '+f.map(p=>PNAME[p]).join(', '):'<span class="okc">✔ Cumple</span>'}</td></tr>`;}).join('');
+  $('#mcompare').innerHTML=`<p style="margin:0 0 6px">Con estos mismos resultados (incluidos los parámetros en gris), el dictamen cambia según el producto:</p><table class="nt">${cmp}</table>`;
+}
+const cm=$('#cm'), XM=hiDPI(cm,760,262);
+const COL_PTS=RND(101,320,r=>({x:r(),y:r(),r:r()}));
+function petri(c,x,y,R,agar,colony,par,label){
+  const v=val(par), P=plate(v);
+  c.fillStyle='rgba(15,23,42,.08)';c.beginPath();c.ellipse(x+4,y+6,R,R*0.95,0,0,7);c.fill();
+  c.fillStyle=agar;c.beginPath();c.arc(x,y,R,0,7);c.fill();
+  c.strokeStyle='#94a3b8';c.lineWidth=3;c.stroke();
+  c.save();c.beginPath();c.arc(x,y,R-4,0,7);c.clip();
+  for(let i=0;i<P.n&&i<COL_PTS.length;i++){const g=COL_PTS[i];const a=g.x*6.283, d=Math.sqrt(g.y)*(R-8);const cx=x+Math.cos(a)*d, cy=y+Math.sin(a)*d, rad=1.8+g.r*2.6;
+    if(colony.halo){c.fillStyle=colony.halo;c.beginPath();c.arc(cx,cy,rad+2.5,0,7);c.fill();}
+    c.fillStyle=colony.c;c.beginPath();c.arc(cx,cy,rad,0,7);c.fill();}
+  c.restore();
+  txt(c,label,x,y-R-12,{s:12,b:1,c:'#12306b'});
+  txt(c,`dilución 10⁻${P.k} · ${P.n} ${P.n===1?'colonia':'colonias'}`,x,y+R+18,{s:11,c:'#475569'});
+  txt(c,`→ ${P.rep} UFC/g`,x,y+R+34,{s:12,b:1,c:'#0f1b33'});
+}
+function tube(c,x,y,pos,label,applies){
+  c.globalAlpha=applies?1:0.3;
+  c.fillStyle='#fff';c.strokeStyle='#94a3b8';c.lineWidth=2;rr(c,x,y,26,110,12);c.fill();c.stroke();
+  c.fillStyle=pos?'#1f2937':'#fda4af';c.save();rr(c,x,y,26,110,12);c.clip();c.fillRect(x,y+30,26,80);c.restore();
+  if(!pos){c.fillStyle='#fecdd3';c.fillRect(x+2,y+30,22,6);}
+  c.fillStyle='#64748b';c.fillRect(x-2,y-8,30,10);
+  txt(c,label,x+13,y+130,{s:11,b:1,c:'#12306b'});
+  txt(c,applies?(pos?'PRESENTE':'Ausente'):'no aplica',x+13,y+146,{s:11,b:1,c:applies?(pos?'#b91c1c':'#15803d'):'#94a3b8'});
+  c.globalAlpha=1;
+}
+function drawLab(t){
+  const c=XM,L=LIM[M.prod];c.clearRect(0,0,760,262);c.fillStyle='#f8fafc';c.fillRect(0,0,760,262);
+  c.fillStyle='#e2e8f0';c.fillRect(0,250,760,12);
+  const plates=L.par.filter(p=>['col','sa','mes'].includes(p));
+  const cfg={col:['#f9a8d4',{c:'#9d174d'},'Coliformes (agar rojo-violeta)'],sa:['#fcd9a8',{c:'#111827',halo:'rgba(255,255,255,.75)'},'S. aureus (Baird-Parker)'],mes:['#fef9c3',{c:'#f5f5f4',halo:'rgba(120,113,108,.35)'},'Mesófilos (agar para conteo)']};
+  plates.forEach((p,i)=>{const x=110+i*215;petri(c,x,130,78,cfg[p][0],cfg[p][1],p,cfg[p][2]);});
+  tube(c,520,60,M.salm===1,'Salmonella',true);
+  tube(c,590,60,M.lis===1,'Listeria',L.par.includes('lis'));
+  // fosfatasa
+  const fa=L.par.includes('fos'); c.globalAlpha=fa?1:0.3;
+  const fv=val('fos');c.fillStyle='#fff';c.strokeStyle='#94a3b8';c.lineWidth=2;rr(c,660,90,44,80,8);c.fill();c.stroke();
+  c.fillStyle=mix('#fefce8','#eab308',fv/8);c.fillRect(662,120,40,48);
+  txt(c,'Fosfatasa',682,190,{s:11,b:1,c:'#12306b'});txt(c,fa?fv.toLocaleString('es-MX')+' UF/g':'no aplica',682,206,{s:11,b:1,c:fa?(fv>4?'#b91c1c':'#15803d'):'#94a3b8'});
+  txt(c,'más amarillo = más enzima',682,222,{s:9.5,c:'#64748b'});
+  c.globalAlpha=1;
 }
 
-function selectDefect(idx) {
-    selectedCase = idx;
-    renderDashboard();
+/* ===================== 3 · RETO ===================== */
+const LOTS=[
+ {n:'Helado de vainilla',p:'hel',d:[['Coliformes totales','60 UFC/g'],['Mesófilos aerobios','150,000 UFC/g'],['Salmonella','Ausente'],['Listeria','Ausente']],ok:true,f:'',why:'Para helado, el límite de coliformes es &lt; 100 y el de mesófilos 200,000: cumple.'},
+ {n:'Base para helado',p:'base',d:[['Coliformes totales','60 UFC/g'],['Mesófilos aerobios','80,000 UFC/g'],['Salmonella','Ausente'],['Listeria','Ausente']],ok:false,f:'col',why:'Mismo valor que el helado de vainilla, pero para bases el límite de coliformes es &lt; 50.'},
+ {n:'Mantequilla (82 % grasa)',p:'mc',d:[['Coliformes totales','30 UFC/g'],['S. aureus','< 100 UFC/g'],['Salmonella','Ausente'],['Fosfatasa','1 UF/g']],ok:false,f:'col',why:'Pregunta detonadora: la grasa no cambia el criterio sanitario. Coliformes ≥ 10 → no se libera.'},
+ {n:'Crema',p:'mc',d:[['Coliformes totales','< 10 UFC/g'],['S. aureus','40 UFC/g'],['Salmonella','Ausente'],['Fosfatasa','2 UF/g']],ok:true,f:'',why:'Todos los resultados están dentro de los límites para crema.'},
+ {n:'Helado de fresa',p:'hel',d:[['Coliformes totales','< 10 UFC/g'],['Mesófilos aerobios','90,000 UFC/g'],['Salmonella','Ausente'],['Listeria','Presente']],ok:false,f:'lis',why:'Listeria debe estar ausente en 25 g; además puede crecer en refrigeración.'},
+ {n:'Mantequilla sin sal',p:'mc',d:[['Coliformes totales','< 10 UFC/g'],['S. aureus','< 100 UFC/g'],['Salmonella','Ausente'],['Fosfatasa','7 UF/g']],ok:false,f:'fos',why:'Fosfatasa &gt; 4 UF/g: la crema no se pasteurizó bien.'},
+ {n:'Base para helado',p:'base',d:[['Coliformes totales','20 UFC/g'],['Mesófilos aerobios','180,000 UFC/g'],['Salmonella','Ausente'],['Listeria','Ausente']],ok:false,f:'mes',why:'Para bases el máximo de mesófilos es 100,000 UFC/g (para helado sería 200,000).'},
+ {n:'Helado de chocolate',p:'hel',d:[['Coliformes totales','< 10 UFC/g'],['Mesófilos aerobios','200,000 UFC/g'],['Salmonella','Ausente'],['Listeria','Ausente']],ok:true,f:'',why:'200,000 es el máximo permitido: está justo en el límite y cumple.'},
+ {n:'Crema',p:'mc',d:[['Coliformes totales','< 10 UFC/g'],['S. aureus','150 UFC/g'],['Salmonella','Ausente'],['Fosfatasa','1 UF/g']],ok:false,f:'sa',why:'S. aureus ≥ 100 UFC/g: revisar manipulación e higiene del personal.'}
+];
+const PCLS={mc:['Mantequilla / crema','tag-mant'],hel:['Helado','tag-hel'],base:['Base para helado','tag-crema']};
+const FOPTS=[['','—'],['col','Coliformes'],['sa','S. aureus'],['mes','Mesófilos'],['salm','Salmonella'],['lis','Listeria'],['fos','Fosfatasa']];
+function buildLots(){
+  $('#lots').innerHTML=LOTS.map((l,i)=>`<div class="lot" data-i="${i}"><span class="pt ${PCLS[l.p][1]}">${PCLS[l.p][0]}</span><h4>📦 ${l.n}</h4>
+   <div class="data">${l.d.map(r=>`<div><span>${r[0]}</span><b>${r[1]}</b></div>`).join('')}</div>
+   <select data-q="v"><option value="">¿Cumple la NOM-243?</option><option value="1">✔ Cumple</option><option value="0">✖ No cumple</option></select>
+   <select data-q="f">${FOPTS.map(o=>`<option value="${o[0]}">${o[0]?'Falla: '+o[1]:'Parámetro que falla (si aplica)'}</option>`).join('')}</select>
+   <div class="fb"></div></div>`).join('');
+  $('#lotScore').textContent='';
 }
+$('#chkLots').addEventListener('click',()=>{let ok=0,done=0;
+  LOTS.forEach((l,i)=>{const el=$(`.lot[data-i="${i}"]`),v=el.querySelector('[data-q="v"]').value,f=el.querySelector('[data-q="f"]').value;
+    el.classList.remove('right','wrong');if(v==='')return;done++;
+    const right=(v==='1')===l.ok&&(l.ok||f===l.f);if(right)ok++;
+    el.classList.add(right?'right':'wrong');
+    el.querySelector('.fb').innerHTML=(right?'✔ ':'✖ ')+(right?'':l.ok?'<b>Sí cumple.</b> ':`<b>No cumple: ${FOPTS.find(o=>o[0]===l.f)[1]}.</b> `)+l.why;});
+  $('#lotScore').textContent=`${ok} de ${LOTS.length} correctos`+(done<LOTS.length?` · faltan ${LOTS.length-done}`:'');});
+$('#rstLots').addEventListener('click',buildLots);
 
-function renderDashboard() {
-    const container = document.getElementById('main-content');
-
-    if (currentMode === 'defects') {
-        const c = DEFECT_CASES[selectedCase];
-        let buttonsHtml = DEFECT_CASES.map((item, i) => `
-            <button class="case-btn ${i === selectedCase ? 'active' : ''}" onclick="selectDefect(${i})">
-                <span style="color:#fcd34d; font-size:11px;">[${item.prod}]</span><br>${item.title}
-            </button>
-        `).join('');
-
-        container.innerHTML = `
-            <div class="left-panel">
-                <div class="panel-title">📋 Selecciona el Defecto Observado</div>
-                ${buttonsHtml}
-            </div>
-            <div class="right-panel">
-                <div class="panel-title">🔬 Simulación Visual del Defecto: ${c.title}</div>
-                <canvas id="defectCanvas" width="720" height="220"></canvas>
-                <div class="chain-grid">
-                    <div class="step-box" style="border-left-color:#38bdf8;">
-                        <h4>1️⃣ Dato Observado (Evidencia en Producto)</h4>
-                        ${c.dato}
-                    </div>
-                    <div class="step-box" style="border-left-color:#f59e0b;">
-                        <h4>2️⃣ Hipótesis / Causa Técnica Probable</h4>
-                        ${c.causa}
-                    </div>
-                    <div class="step-box" style="border-left-color:#a855f7;">
-                        <h4>3️⃣ Etapa del Proceso a Investigar</h4>
-                        ${c.etapa}
-                    </div>
-                    <div class="step-box" style="border-left-color:#10b981;">
-                        <h4>4️⃣ Decisión y Acción Correctiva</h4>
-                        ${c.decision}
-                    </div>
-                </div>
-            </div>
-        `;
-        drawDefectVisual(c.drawType);
-    } 
-    else {
-        container.innerHTML = `
-            <div class="left-panel">
-                <div class="panel-title">🧪 Parámetros del Lote Analizado</div>
-                <div class="ctrl-row">
-                    <label>Producto a Dictaminar (NOM-243):</label>
-                    <select onchange="microProd=this.value; renderDashboard();">
-                        <option value="butter_cream" ${microProd==='butter_cream'?'selected':''}>Mantequilla y Cremas</option>
-                        <option value="icecream" ${microProd==='icecream'?'selected':''}>Helados y Sorbetes</option>
-                        <option value="mix_base" ${microProd==='mix_base'?'selected':''}>Bases o Mezclas para Helado</option>
-                    </select>
-                </div>
-
-                <div class="ctrl-row">
-                    <label><span>Coliformes totales:</span><span style="color:#fcd34d;" id="v-col">${coliformes} UFC/g o mL</span></label>
-                    <input type="range" min="0" max="150" step="5" value="${coliformes}" oninput="coliformes=parseInt(this.value); updateMicroVerdict();">
-                </div>
-
-                ${microProd === 'butter_cream' ? `
-                <div class="ctrl-row">
-                    <label><span>Staphylococcus aureus:</span><span style="color:#fcd34d;" id="v-sta">${staph} UFC/g o mL</span></label>
-                    <input type="range" min="0" max="200" step="10" value="${staph}" oninput="staph=parseInt(this.value); updateMicroVerdict();">
-                </div>
-                <div class="ctrl-row">
-                    <label><span>Fosfatasa residual (Pasteurización):</span><span style="color:#fcd34d;" id="v-fos">${fosfatasa} UF/g</span></label>
-                    <input type="range" min="0" max="10" step="1" value="${fosfatasa}" oninput="fosfatasa=parseInt(this.value); updateMicroVerdict();">
-                </div>
-                ` : `
-                <div class="ctrl-row">
-                    <label><span>Mesófilos aerobios:</span><span style="color:#fcd34d;" id="v-mes">${mesofilos.toLocaleString()} UFC/g</span></label>
-                    <input type="range" min="10000" max="300000" step="10000" value="${mesofilos}" oninput="mesofilos=parseInt(this.value); updateMicroVerdict();">
-                </div>
-                <div class="ctrl-row">
-                    <label>Listeria monocytogenes (en 25 g):</label>
-                    <select onchange="listeria=this.value; updateMicroVerdict();">
-                        <option value="Ausente" ${listeria==='Ausente'?'selected':''}>Ausente en 25 g</option>
-                        <option value="Presente" ${listeria==='Presente'?'selected':''}>Presente (Positivo)</option>
-                    </select>
-                </div>
-                `}
-
-                <div class="ctrl-row">
-                    <label>Salmonella spp. (en 25 g o mL):</label>
-                    <select onchange="salmonella=this.value; updateMicroVerdict();">
-                        <option value="Ausente" ${salmonella==='Ausente'?'selected':''}>Ausente en 25 g o mL</option>
-                        <option value="Presente" ${salmonella==='Presente'?'selected':''}>Presente (Positivo)</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="right-panel">
-                <div class="panel-title">📋 Dictamen Sanitario Oficial (NOM-243-SSA1-2010)</div>
-                <div id="micro-verdict" class="verdict-banner"></div>
-                <table class="norm-table" id="micro-table"></table>
-                <div class="step-box" style="border-left-color:#fcd34d;">
-                    <h4>💡 Nota Normativa Clave del CECYBOOK </h4>
-                    • <strong>Una buena composición (ej. 82% de grasa en mantequilla) NO sustituye el cumplimiento sanitario:</strong> Si excede coliformes o presenta patógenos, el lote debe retenerse.<br>
-                    • <strong>Precisión normativa:</strong> La NOM-243-SSA1-2010 exige ausencia de <em>Listeria monocytogenes</em> en helados/sorbetes/bases, para mantequilla no establece un límite específico para <em>Listeria</em> (no deben trasladarse ni inventarse límites entre productos distintos).
-                </div>
-            </div>
-        `;
-        updateMicroVerdict();
-    }
+/* ===================== bucle ===================== */
+let last=performance.now();
+function loop(now){
+  try{const dt=Math.min(0.05,(now-last)/1000);last=now;caseT+=dt;
+    if(TAB==='det'){X.clearRect(0,0,760,300);X.fillStyle='#f8fafc';X.fillRect(0,0,760,300);DRAW[CASES[CUR].draw](X,caseT);}
+    else if(TAB==='mic') drawLab(now/1000);
+  }catch(e){console.error(e);}
+  requestAnimationFrame(loop);
 }
-
-function updateMicroVerdict() {
-    if (document.getElementById('v-col')) document.getElementById('v-col').innerText = coliformes + ' UFC/g o mL';
-    if (document.getElementById('v-sta')) document.getElementById('v-sta').innerText = staph + ' UFC/g o mL';
-    if (document.getElementById('v-fos')) document.getElementById('v-fos').innerText = fosfatasa + ' UF/g';
-    if (document.getElementById('v-mes')) document.getElementById('v-mes').innerText = mesofilos.toLocaleString() + ' UFC/g';
-
-    const vBox = document.getElementById('micro-verdict');
-    const tbl = document.getElementById('micro-table');
-
-    let fails = [];
-    let rowsHtml = `<tr><th>Parámetro / Microorganismo</th><th>Resultado del Lote</th><th>Límite Máximo NOM-243</th><th>Estado</th></tr>`;
-
-    if (microProd === 'butter_cream') {
-        let okCol = coliformes < 10;
-        let okSta = staph < 100;
-        let okSal = salmonella === 'Ausente';
-        let okFos = fosfatasa <= 4;
-
-        if (!okCol) fails.push('Coliformes totales exceden < 10 UFC/g (recontaminación o falla de higiene post-pasteurización)');
-        if (!okSta) fails.push('Staphylococcus aureus excede < 100 UFC/g (contaminación por manipulación)');
-        if (!okSal) fails.push('Presencia de patógeno Salmonella spp. en 25 g');
-        if (!okFos) fails.push('Fosfatasa residual > 4 UF/g (pasteurización insuficiente o mezcla con crema cruda)');
-
-        rowsHtml += `
-            <tr><td>Coliformes totales</td><td>${coliformes} UFC/g</td><td>&lt; 10 UFC/g o mL</td><td>${okCol ? '✅ Cumple' : '❌ Excede'}</td></tr>
-            <tr><td>Staphylococcus aureus</td><td>${staph} UFC/g</td><td>&lt; 100 UFC/g o mL</td><td>${okSta ? '✅ Cumple' : '❌ Excede'}</td></tr>
-            <tr><td>Salmonella spp.</td><td>${salmonella}</td><td>Ausente en 25 g o mL</td><td>${okSal ? '✅ Cumple' : '❌ Rechazo'}</td></tr>
-            <tr><td>Fosfatasa residual</td><td>${fosfatasa} UF/g</td><td>Máx. 4 UF/g </td><td>${okFos ? '✅ Cumple' : '❌ Excede'}</td></tr>
-        `;
-    } else {
-        let maxCol = microProd === 'icecream' ? 100 : 50;
-        let maxMes = microProd === 'icecream' ? 200000 : 100000;
-
-        let okCol = coliformes < maxCol;
-        let okMes = mesofilos <= maxMes;
-        let okSal = salmonella === 'Ausente';
-        let okLis = listeria === 'Ausente';
-
-        if (!okCol) fails.push(`Coliformes totales exceden < ${maxCol} UFC/g o mL`);
-        if (!okMes) fails.push(`Mesófilos aerobios superan ${maxMes.toLocaleString()} UFC/g o mL`);
-        if (!okSal) fails.push('Presencia de Salmonella spp. en 25 g');
-        if (!okLis) fails.push('Presencia de Listeria monocytogenes en 25 g (capaz de sobrevivir en frío)');
-
-        rowsHtml += `
-            <tr><td>Coliformes totales</td><td>${coliformes} UFC/g</td><td>&lt; ${maxCol} UFC/g o mL</td><td>${okCol ? '✅ Cumple' : '❌ Excede'}</td></tr>
-            <tr><td>Mesófilos aerobios</td><td>${mesofilos.toLocaleString()} UFC/g</td><td>Máx. ${maxMes.toLocaleString()} UFC/g</td><td>${okMes ? '✅ Cumple' : '❌ Excede'}</td></tr>
-            <tr><td>Salmonella spp.</td><td>${salmonella}</td><td>Ausente en 25 g o mL</td><td>${okSal ? '✅ Cumple' : '❌ Rechazo'}</td></tr>
-            <tr><td>Listeria monocytogenes</td><td>${listeria}</td><td>Ausente en 25 g o mL</td><td>${okLis ? '✅ Cumple' : '❌ Rechazo'}</td></tr>
-        `;
-    }
-
-    tbl.innerHTML = rowsHtml;
-
-    if (fails.length === 0) {
-        vBox.style.borderColor = '#10b981';
-        vBox.style.background = 'rgba(16, 185, 129, 0.14)';
-        vBox.innerHTML = `<strong>✅ DICTAMEN: LOTE APROBADO Y LIBERADO</strong><br>Todos los indicadores de higiene, eficacia térmica y ausencia de patógenos cumplen con la NOM-243-SSA1-2010.`;
-    } else {
-        vBox.style.borderColor = '#ef4444';
-        vBox.style.background = 'rgba(239, 68, 68, 0.15)';
-        vBox.innerHTML = `<strong>❌ DICTAMEN: LOTE RETENIDO / RECHAZADO POR RIESGO SANITARIO</strong><br>• ${fails.join('<br>• ')}`;
-    }
-}
-
-function drawDefectVisual(type) {
-    const canvas = document.getElementById('defectCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    if (type === 'cream_sep') {
-        ctx.fillStyle = '#fde047';
-        ctx.fillRect(180, 35, 360, 55);
-        ctx.fillStyle = '#0c4a6e';
-        ctx.fillRect(180, 90, 360, 100);
-        ctx.strokeStyle = '#94a3b8';
-        ctx.strokeRect(180, 35, 360, 155);
-        ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 13px sans-serif';
-        ctx.fillText('Capa superior de grasa separada', 250, 68);
-        ctx.fillStyle = '#7dd3fc';
-        ctx.fillText('Fase acuosa descremada inferior (Separación de fases)', 205, 145);
-    } else if (type === 'cream_nowhip') {
-        ctx.fillStyle = '#fef9c3';
-        ctx.fillRect(180, 105, 360, 85);
-        ctx.strokeStyle = '#94a3b8';
-        ctx.strokeRect(180, 40, 360, 150);
-        ctx.fillStyle = '#ef4444';
-        ctx.font = 'bold 14px sans-serif';
-        ctx.fillText('Crema líquida sin volumen: No retiene celdas de aire', 205, 80);
-    } else if (type === 'butter_soft') {
-        ctx.fillStyle = '#eab308';
-        ctx.beginPath();
-        ctx.ellipse(360, 145, 190, 38, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#fef08a';
-        ctx.font = 'bold 13px sans-serif';
-        ctx.fillText('Bloque colapsado: Exceso de grasa líquida / Falta de cristales', 175, 70);
-    } else if (type === 'butter_water') {
-        ctx.fillStyle = '#eab308';
-        ctx.fillRect(190, 45, 340, 135);
-        [240, 310, 390, 460, 280, 420].forEach((x, i) => {
-            ctx.beginPath();
-            ctx.arc(x, 85 + (i % 2) * 50, 14, 0, Math.PI * 2);
-            ctx.fillStyle = '#38bdf8';
-            ctx.fill();
-            ctx.strokeStyle = '#ef4444';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        });
-        ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 13px sans-serif';
-        ctx.fillText('Gotas grandes de agua visibles ("Llorado" por mal amasado)', 198, 35);
-    } else if (type === 'ice_crystals') {
-        ctx.fillStyle = '#1e1b4b';
-        ctx.fillRect(160, 30, 400, 160);
-        for (let i = 0; i < 8; i++) {
-            ctx.fillStyle = '#7dd3fc';
-            ctx.strokeStyle = '#ef4444';
-            ctx.lineWidth = 2;
-            ctx.fillRect(195 + i * 45, 65 + (i % 2) * 35, 32, 32);
-            ctx.strokeRect(195 + i * 45, 65 + (i % 2) * 35, 32, 32);
-        }
-        ctx.fillStyle = '#fcd34d';
-        ctx.font = 'bold 13px sans-serif';
-        ctx.fillText('Cristales de hielo gigantes (> 50 µm) por recristalización', 195, 175);
-    } else if (type === 'ice_sandy') {
-        ctx.fillStyle = '#312e81';
-        ctx.fillRect(160, 30, 400, 160);
-        ctx.fillStyle = '#fde68a';
-        for (let i = 0; i < 45; i++) {
-            ctx.fillRect(180 + ((i * 37) % 360), 45 + ((i * 29) % 110), 6, 6);
-        }
-        ctx.fillStyle = '#fcd34d';
-        ctx.font = 'bold 13px sans-serif';
-        ctx.fillText('Cristales duros de lactosa precipitada (Textura arenosa)', 195, 178);
-    } else if (type === 'ice_melt') {
-        ctx.fillStyle = '#fef3c7';
-        ctx.beginPath();
-        ctx.ellipse(360, 155, 210, 28, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#fca5a5';
-        ctx.font = 'bold 13px sans-serif';
-        ctx.fillText('Derretimiento rápido y fuga de aire por red grasa débil', 195, 80);
-    }
-}
-
-renderDashboard();
+renderCase(); refreshMic(); buildLots(); requestAnimationFrame(loop);
 </script>
-
 </body>
 </html>

@@ -1,777 +1,647 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Microestructura del Helado, Overrun y Cadena de Frío - Semana 15</title>
-    <style>
-        :root {
-            --bg: #0b1120;
-            --panel: #1e293b;
-            --card: #0f172a;
-            --border: #334155;
-            --text: #f8fafc;
-            --muted: #94a3b8;
-            --accent: #38bdf8;
-            --gold: #fcd34d;
-            --purple: #a855f7;
-            --ok: #10b981;
-            --warn: #f59e0b;
-            --err: #ef4444;
-        }
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 18px;
-            display: flex;
-            justify-content: center;
-        }
-        .app-container {
-            max-width: 1220px;
-            width: 100%;
-            background: var(--panel);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid var(--border);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.65);
-        }
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #334155;
-            color: #f8fafc;
-            text-decoration: none;
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 13px;
-            border: 1px solid #475569;
-            transition: 0.2s;
-        }
-        .back-btn:hover {
-            background: #475569;
-            border-color: var(--accent);
-        }
-        .badge {
-            background: rgba(168, 85, 247, 0.15);
-            color: #c084fc;
-            border: 1px solid var(--purple);
-            padding: 5px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 700;
-        }
-        header {
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 16px;
-            margin-bottom: 18px;
-        }
-        h1 {
-            margin: 0 0 6px 0;
-            color: var(--gold);
-            font-size: 24px;
-        }
-        .subtitle {
-            color: var(--muted);
-            margin: 0 auto;
-            max-width: 920px;
-            font-size: 14px;
-            line-height: 1.45;
-        }
-
-        .mode-tabs {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 18px;
-        }
-        @media (max-width: 780px) {
-            .mode-tabs { grid-template-columns: 1fr; }
-        }
-        .m-btn {
-            background: var(--card);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 12px;
-            color: var(--text);
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
-        }
-        .m-btn:hover {
-            transform: translateY(-2px);
-            border-color: var(--accent);
-        }
-        .m-btn strong {
-            display: block;
-            font-size: 14.5px;
-            margin-bottom: 3px;
-            color: var(--gold);
-        }
-        .m-btn span {
-            font-size: 11.5px;
-            color: var(--muted);
-        }
-        .m-btn.active {
-            background: rgba(168, 85, 247, 0.18);
-            border-color: var(--purple);
-            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.25);
-        }
-
-        .dashboard {
-            display: grid;
-            grid-template-columns: 390px 1fr;
-            gap: 18px;
-        }
-        @media (max-width: 960px) {
-            .dashboard { grid-template-columns: 1fr; }
-        }
-
-        .controls-panel {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-        .panel-title {
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--accent);
-            border-bottom: 1px solid #1e293b;
-            padding-bottom: 6px;
-        }
-        .ctrl-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .ctrl-group label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            font-weight: 600;
-        }
-        .val-tag { color: var(--gold); font-weight: 700; }
-        input[type="range"] { width: 100%; cursor: pointer; accent-color: var(--purple); }
-        .scale-notes { display: flex; justify-content: space-between; font-size: 11px; color: #64748b; }
-
-        .formula-card {
-            background: #1e293b;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px;
-            text-align: center;
-            font-size: 13px;
-        }
-        .formula-math {
-            font-family: 'Cambria Math', Georgia, serif;
-            font-size: 15px;
-            color: var(--gold);
-            margin: 6px 0;
-            font-weight: bold;
-        }
-
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-        .kpi-box {
-            background: #1e293b;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 9px;
-            text-align: center;
-        }
-        .kpi-box small {
-            display: block;
-            font-size: 11px;
-            color: var(--muted);
-            margin-bottom: 2px;
-        }
-        .kpi-box strong {
-            font-size: 15px;
-            color: var(--gold);
-        }
-
-        .status-box {
-            background: #1e293b;
-            border-left: 4px solid var(--ok);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 12.5px;
-            line-height: 1.45;
-        }
-        .status-box h4 {
-            margin: 0 0 4px 0;
-            font-size: 13px;
-            color: var(--gold);
-        }
-
-        .shock-btn {
-            background: #dc2626;
-            color: white;
-            border: none;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 13px;
-            transition: 0.2s;
-        }
-        .shock-btn:hover { background: #b91c1c; }
-        .reset-btn {
-            background: #059669;
-            color: white;
-            border: none;
-            padding: 9px 14px;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 12.5px;
-            transition: 0.2s;
-        }
-        .reset-btn:hover { background: #047857; }
-
-        .visual-area {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .canvas-card {
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 3px solid var(--border);
-            background: #070d19;
-        }
-        canvas#iceCanvas {
-            display: block;
-            width: 100%;
-            height: 410px;
-        }
-        .hud-bar {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            right: 12px;
-            display: flex;
-            justify-content: space-between;
-            pointer-events: none;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .hud-pill {
-            background: rgba(15, 23, 42, 0.9);
-            border: 1px solid #475569;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .legend-strip {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 14px;
-            justify-content: center;
-            background: var(--card);
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            font-size: 12px;
-        }
-        .legend-item { display: flex; align-items: center; gap: 6px; color: #cbd5e1; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-
-        .bottom-grid {
-            margin-top: 16px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
-        }
-        @media (max-width: 900px) {
-            .bottom-grid { grid-template-columns: 1fr; }
-        }
-        .info-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-top: 3px solid var(--accent);
-            border-radius: 10px;
-            padding: 14px;
-            font-size: 13px;
-            line-height: 1.45;
-        }
-        .info-card h3 {
-            margin: 0 0 6px 0;
-            font-size: 14.5px;
-            color: var(--gold);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Helado: Mix, Overrun y Cadena de Frío · Semana 15</title>
+<style>
+:root{
+  --navy:#12306b; --navy-2:#1d4196; --ink:#0f1b33; --text:#22304a; --muted:#64748b;
+  --bg:#eef2f8; --card:#ffffff; --line:#dbe3ef; --soft:#f6f8fc;
+  --orange:#f05a28; --magenta:#d61f5c; --ok:#16a34a; --warn:#d97706; --bad:#dc2626;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--text);padding:18px;line-height:1.45}
+.app{max-width:1200px;margin:0 auto;background:var(--card);border-radius:18px;box-shadow:0 12px 34px rgba(15,27,51,.10);overflow:hidden}
+.topbar{height:6px;background:linear-gradient(90deg,var(--orange),var(--magenta))}
+header{padding:16px 24px 6px}
+.back{display:inline-flex;align-items:center;gap:6px;background:#334155;color:#f8fafc;text-decoration:none;padding:8px 14px;border-radius:8px;font-weight:600;font-size:13px;border:1px solid #475569;margin-bottom:12px}
+.back:hover{background:#1e293b}
+.title-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+h1{margin:0;color:var(--navy);font-size:26px;letter-spacing:-.3px}
+.subtitle{color:var(--muted);font-size:14px;margin-top:2px;max-width:820px}
+.week-tag{background:var(--navy);color:#fff;font-weight:700;font-size:12px;padding:6px 12px;border-radius:999px;white-space:nowrap}
+.week-tag b{color:#ffb38f}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 24px 0}
+@media (max-width:700px){.tabs{grid-template-columns:1fr}}
+.tab{border:2px solid var(--line);background:#fff;border-radius:12px;padding:10px 14px;text-align:left;cursor:pointer;font:inherit;color:var(--muted)}
+.tab b{display:block;font-size:15px;color:inherit}
+.tab small{font-size:12.5px}
+.tab.on{border-color:var(--navy);background:#eef3ff;color:var(--navy)}
+.lot{margin:12px 24px 0;display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:linear-gradient(90deg,#fdf2f8,#eff6ff);border:1px solid #f5d0e6;border-radius:12px;padding:8px 10px}
+.lot .lbl{font-size:11px;font-weight:800;color:var(--magenta);text-transform:uppercase;letter-spacing:.5px;margin-right:4px}
+.lot .pill{background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.lot .pill b{color:var(--navy)}
+.lot .pill.bad{border-color:#fecaca;background:#fef2f2;color:#991b1b}
+.lot .pill.warn{border-color:#fde68a;background:#fffbeb}
+.pane{display:none;padding:12px 24px 18px}
+.pane.show{display:block}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.presets .lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-right:4px}
+.chip{border:1.5px solid var(--line);background:#fff;color:var(--text);padding:6px 11px;border-radius:999px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.chip:hover{border-color:var(--navy-2)}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.lab{display:grid;grid-template-columns:310px 1fr;gap:16px}
+@media (max-width:960px){.lab{grid-template-columns:1fr}}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.card{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.card h3{margin:0 0 8px;font-size:14.5px;color:var(--navy)}
+.ctl{margin-bottom:11px}
+.ctl:last-child{margin-bottom:0}
+.ctl label{display:flex;justify-content:space-between;align-items:baseline;font-weight:600;font-size:13px;margin-bottom:3px;gap:8px}
+.ctl label .val{font-weight:800;font-size:16px;color:var(--navy);white-space:nowrap}
+.ctl input[type=range]{width:100%;cursor:pointer;accent-color:var(--navy)}
+.scale{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted)}
+.seg{display:flex;background:#e6ecf5;border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;padding:7px 4px;border-radius:8px;font-weight:600;font-size:12px;color:#475569;cursor:pointer;font-family:inherit;line-height:1.2}
+.seg button.on{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.meter{margin-top:7px}
+.meter .k{display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;gap:6px}
+.meter .k b{color:var(--ink);white-space:nowrap}
+.bar{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;margin-top:3px}
+.bar i{display:block;height:100%;border-radius:4px;transition:width .3s}
+.state{border-radius:12px;padding:10px 12px;color:#fff;font-weight:800;font-size:15px;margin-top:10px}
+.state small{display:block;font-weight:600;font-size:12px;opacity:.92}
+.views{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:640px){.views{grid-template-columns:1fr}}
+.view{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.view>b{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--navy);padding:7px 10px;border-bottom:1px solid var(--line);background:var(--soft)}
+canvas{display:block;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;font-size:11.5px;background:var(--soft);padding:7px 10px;border-radius:10px;border:1px solid var(--line)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.lg{width:11px;height:11px;border-radius:50%;display:inline-block}
+.box{padding:12px 14px;border-radius:12px;background:var(--soft);border-left:5px solid var(--navy);font-size:13.5px}
+.box h3{margin:0 0 6px;font-size:15px;color:var(--navy)}
+.box p{margin:5px 0}
+.book{font-size:12.5px;color:#475569;margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit}
+.btn-accent{background:linear-gradient(90deg,var(--orange),var(--magenta));color:#fff}
+.btn-ghost{background:#fff;border:1.5px solid var(--line);color:var(--text)}
+.btn-primary{background:var(--navy);color:#fff}
+.row-btn{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.next{display:flex;justify-content:flex-end;margin-top:12px}
+.formula{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:center;font-size:13px}
+.formula .eq{font-family:"Cambria Math",Georgia,serif;font-size:17px;color:var(--navy);font-weight:700;margin:4px 0}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:640px){.kpis{grid-template-columns:1fr 1fr}}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 10px;text-align:center}
+.kpi small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.kpi b{font-size:17px;color:var(--navy)}
+.quiz{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.quiz input{width:110px;padding:8px;border-radius:8px;border:1.5px solid var(--line);font-family:inherit;font-size:14px}
+.verdict{margin-top:8px;padding:9px 11px;border-radius:10px;font-size:13px}
+.verdict.good{background:#f0fdf4;border:1px solid #bbf7d0;color:#14532d}
+.verdict.bad{background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d}
+.verdict.mid{background:#fffbeb;border:1px solid #fde68a;color:#78350f}
+table.cmp{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:10px;overflow:hidden}
+table.cmp th{background:var(--navy);color:#fff;text-align:left;padding:7px 9px;font-size:12px}
+table.cmp td{padding:6px 9px;border-bottom:1px solid var(--line)}
+details.teacher{margin:0 24px 22px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:#fbfcfe;font-size:13.5px}
+details.teacher summary{cursor:pointer;font-weight:700;color:var(--navy)}
+details.teacher li{margin:3px 0}
+footer{padding:0 24px 18px;font-size:11.5px;color:var(--muted)}
+</style>
 </head>
 <body>
-
-<div class="app-container">
-    <div class="top-bar">
-        <a href="index.html" class="back-btn">⬅ Volver al Menú Principal</a>
-        <span class="badge">CECYBOOK SEMANA 15</span>
+<div class="app">
+  <div class="topbar"></div>
+  <header>
+    <a class="back" href="index.html">⬅ Volver al Menú Principal</a>
+    <div class="title-row">
+      <div>
+        <h1>🍨 Helado: mix, overrun y cadena de frío</h1>
+        <div class="subtitle">El helado no es «leche congelada»: es un sistema de hielo, aire, grasa y una fase líquida concentrada. Formula tu mix, congélalo con aire y llévalo por la cadena de frío. Cada decisión pasa a la siguiente etapa.</div>
+      </div>
+      <div class="week-tag">Semana 15 · <b>pp. 17–26, Figuras 15–23</b></div>
     </div>
+  </header>
 
-    <header>
-        <h1>🍨 Microestructura del Helado, Cálculo de Overrun y Cadena de Frío</h1>
-        <p class="subtitle">
-            <strong>El helado no es simplemente "leche congelada":</strong> Es un sistema multifásico donde coexisten cristales de hielo (&lt; 50 µm), celdas de aire (overrun), glóbulos de grasa parcialmente coalescidos y una fase acuosa crioconcentrada.
-        </p>
-    </header>
+  <div class="tabs">
+    <button class="tab on" data-t="mix"><b>1 · Mix y maduración</b><small>Ingredientes, curva de congelación</small></button>
+    <button class="tab" data-t="ovr"><b>2 · Congelación y overrun</b><small>Congelador continuo y balanza</small></button>
+    <button class="tab" data-t="fri"><b>3 · Endurecimiento y cadena de frío</b><small>Recristalización del hielo</small></button>
+  </div>
+  <div class="lot" id="lot"></div>
 
-    <div class="mode-tabs">
-        <button id="tab-1" class="m-btn active" onclick="setTab(1)">
-            <strong>1️⃣ Sistema Multifásico (Figura 15)</strong>
-            <span>Las 4 fases del helado y su formulación (Tabla 1)</span>
-        </button>
-        <button id="tab-2" class="m-btn" onclick="setTab(2)">
-            <strong>2️⃣ Balanza de Overrun (Figura 20)</strong>
-            <span>Cálculo por masas en recipientes de 1.0 L</span>
-        </button>
-        <button id="tab-3" class="m-btn" onclick="setTab(3)">
-            <strong>3️⃣ Endurecimiento y Cadena de Frío</strong>
-            <span>Fluctuaciones térmicas y recristalización</span>
-        </button>
+  <!-- ===================== 1 · MIX ===================== -->
+  <div class="pane show" data-p="mix">
+    <div class="presets"><span class="lbl">Fórmulas</span>
+      <button class="chip" data-f="std">🍦 Estándar</button>
+      <button class="chip" data-f="prem">⭐ Premium (más grasa)</button>
+      <button class="chip" data-f="sinmad">⏱️ Sin maduración</button>
+      <button class="chip" data-f="sng">⚠️ Exceso de SNG</button>
+      <button class="chip" data-f="dulce">🍬 Mucha azúcar</button>
     </div>
-
-    <div class="dashboard">
-        <div class="controls-panel" id="controls-panel"></div>
-
-        <div class="visual-area">
-            <div class="canvas-card">
-                <div class="hud-bar">
-                    <div class="hud-pill" id="hud-left">Vista: Microestructura Multifásica</div>
-                    <div class="hud-pill" id="hud-right" style="color:#fcd34d;">Cristales de Hielo: ~30 µm (Textura Lisa)</div>
-                </div>
-                <canvas id="iceCanvas" width="760" height="410"></canvas>
-            </div>
-            <div class="legend-strip">
-                <div class="legend-item"><span class="dot" style="background:#f8fafc; border:2px dashed #64748b;"></span> Celdas de Aire (20–100 µm)</div>
-                <div class="legend-item"><span class="dot" style="background:#7dd3fc; border-radius:2px;"></span> Cristales de Hielo (Ideal &lt; 50 µm)</div>
-                <div class="legend-item"><span class="dot" style="background:#facc15;"></span> Glóbulos Grasos (0.5–5 µm, coalescencia parcial)</div>
-                <div class="legend-item"><span class="dot" style="background:#312e81;"></span> Fase Acuosa No Congelada (Azúcares + Estabilizantes)</div>
-            </div>
+    <div class="lab">
+      <div class="col">
+        <div class="card">
+          <h3>🧾 Formulación (por 100 g de mix)</h3>
+          <div class="ctl"><label>Grasa láctea <span class="val" id="v-F"></span></label><input type="range" id="F" min="2" max="18" step="0.5"></div>
+          <div class="ctl"><label>Sólidos no grasos (SNG) <span class="val" id="v-S"></span></label><input type="range" id="S" min="6" max="14" step="0.5"></div>
+          <div class="ctl"><label>Azúcares <span class="val" id="v-Z"></span></label><input type="range" id="Z" min="8" max="24" step="0.5"></div>
+          <div class="ctl"><label>Estabilizante <span class="val" id="v-St"></span></label><input type="range" id="St" min="0" max="0.6" step="0.05"></div>
+          <div class="ctl"><label>Emulsificante <span class="val" id="v-E"></span></label><input type="range" id="E" min="0" max="0.5" step="0.05"></div>
         </div>
+        <div class="card">
+          <h3>⚙️ Proceso del mix</h3>
+          <div class="ctl"><label>Homogeneización <span class="val" id="v-P"></span></label><input type="range" id="P" min="0" max="250" step="10">
+            <div class="scale"><span>sin homogeneizar</span><span>50–200 bar</span><span>250</span></div></div>
+          <div class="ctl"><label>Maduración a 2–5 °C <span class="val" id="v-age"></span></label><input type="range" id="age" min="0" max="24" step="1">
+            <div class="scale"><span>0 h</span><span>4–24 h (Figura 17)</span><span>24 h</span></div></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="views">
+          <div class="view"><b>🔬 El mix madurado (≈ 20 µm)</b><canvas id="c1a"></canvas></div>
+          <div class="view"><b>❄️ Curva de congelación de tu mix</b><canvas id="c1b"></canvas></div>
+        </div>
+        <div class="legend">
+          <span><i class="lg" style="background:#fde68a;border:1px solid #ca8a04"></i>Glóbulo de grasa</span>
+          <span><i class="lg" style="background:#a16207"></i>Grasa cristalizada</span>
+          <span><i class="lg" style="background:#c084fc"></i>Estabilizante hidratado</span>
+          <span><i class="lg" style="background:#93c5fd"></i>Proteína en la interfaz</span>
+        </div>
+        <div class="card">
+          <h3>📊 Lo que modifica tu fórmula (Tabla 1)</h3>
+          <div class="meter"><div class="k"><span>Viscosidad del mix</span><b id="m-visc"></b></div><div class="bar"><i id="b-visc" style="background:#f97316"></i></div></div>
+          <div class="meter"><div class="k"><span>Capacidad de retener aire</span><b id="m-air"></b></div><div class="bar"><i id="b-air" style="background:#3b82f6"></i></div></div>
+          <div class="meter"><div class="k"><span>Control de cristales de hielo</span><b id="m-cc"></b></div><div class="bar"><i id="b-cc" style="background:#8b5cf6"></i></div></div>
+          <div class="meter"><div class="k"><span>Red de grasa (coalescencia parcial)</span><b id="m-pc"></b></div><div class="bar"><i id="b-pc" style="background:#eab308"></i></div></div>
+          <div class="meter"><div class="k"><span>Resistencia al derretimiento</span><b id="m-mr"></b></div><div class="bar"><i id="b-mr" style="background:#16a34a"></i></div></div>
+          <div class="state" id="state1"></div>
+        </div>
+        <div class="box" id="exp1"></div>
+      </div>
     </div>
+    <div class="next"><button class="btn btn-primary" data-go="ovr">Llevar el mix al congelador ➜</button></div>
+  </div>
 
-    <div class="bottom-grid">
-        <div class="info-card">
-            <h3>🧪 Función de los Ingredientes </h3>
-            <div>
-                • <strong>Grasa láctea:</strong> Aporta cremosidad y rodea las celdas de aire.<br>
-                • <strong>Azúcares:</strong> Endulzan y <em>disminuyen el punto de congelación</em> para que el helado no sea una piedra.<br>
-                • <strong>Estabilizantes (gomas, CMC):</strong> Aumentan la viscosidad del agua libre y frenan el crecimiento de cristales de hielo.<br>
-                • <strong>Emulsionantes:</strong> Promueven la coalescencia parcial controlada de la grasa.
-            </div>
-        </div>
-        <div class="info-card" style="border-top-color: #f59e0b;">
-            <h3>⚖️ Interpretación del Overrun </h3>
-            <div>
-                El <strong>overrun</strong> mide el aumento porcentual de volumen por incorporación de aire (típico <b>60–100%</b>).<br>
-                • <strong>Muy bajo (25%):</strong> Helado pesado, denso y frío en boca.<br>
-                • <strong>Excesivo (&gt;120%):</strong> Estructura espumosa, sin cuerpo, que colapsa o se derrite rápido.
-            </div>
-        </div>
-        <div class="info-card" style="border-top-color: #10b981;">
-            <h3>❄️ Endurecimiento y Recristalización </h3>
-            <div>
-                Al salir del congelador dinámico (<b>-4 a -6 °C</b>), el helado se lleva al túnel de endurecimiento (<b>-25 a -40 °C</b>) y se conserva a <b>≤ -18 °C</b>. Si sube a -10 °C y vuelve a congelarse, ocurre <strong>recristalización</strong>: los cristales superan los 50 µm y dan textura áspera/helada.
-            </div>
-        </div>
+  <!-- ===================== 2 · OVERRUN ===================== -->
+  <div class="pane" data-p="ovr">
+    <div class="presets"><span class="lbl">Estilos</span>
+      <button class="chip" data-o="denso">🍫 Denso (≈ 30 %)</button>
+      <button class="chip" data-o="libro">📘 Ejemplo del libro (80.3 %)</button>
+      <button class="chip" data-o="ligero">☁️ Ligero (≈ 120 %)</button>
+      <button class="chip" data-o="max">💨 Lo más que se pueda (180 %)</button>
     </div>
+    <div class="lab">
+      <div class="col">
+        <div class="card">
+          <h3>🧊 Congelador continuo</h3>
+          <div class="ctl"><label>Overrun buscado <span class="val" id="v-OR"></span></label><input type="range" id="OR" min="20" max="180" step="1">
+            <div class="scale"><span>20 %</span><span>Figura 19: 20–180 % según el producto</span><span>180 %</span></div></div>
+          <div class="ctl"><label>Temperatura de salida <span class="val" id="v-Tx"></span></label><input type="range" id="Tx" min="-7" max="-3" step="0.5">
+            <div class="scale"><span>−7 °C</span><span>−4 a −6 °C</span><span>−3 °C</span></div></div>
+        </div>
+        <div class="card">
+          <h3>📟 A la salida del congelador</h3>
+          <div class="meter"><div class="k"><span>Overrun logrado</span><b id="m-ora"></b></div><div class="bar"><i id="b-ora" style="background:#3b82f6"></i></div></div>
+          <div class="meter"><div class="k"><span>Agua ya congelada</span><b id="m-phx"></b></div><div class="bar"><i id="b-phx" style="background:#38bdf8"></i></div></div>
+          <div class="meter"><div class="k"><span>Tamaño de cristal de hielo</span><b id="m-lx"></b></div><div class="bar"><i id="b-lx" style="background:#8b5cf6"></i></div></div>
+          <div class="state" id="state2"></div>
+        </div>
+        <div class="card">
+          <h3>✍️ Practica el cálculo</h3>
+          <div id="qText" style="font-size:13px"></div>
+          <div class="quiz"><input type="number" id="qAns" step="0.1" placeholder="overrun %"><button class="btn btn-primary" id="qChk">Revisar</button><button class="btn btn-ghost" id="qNew">Otro</button></div>
+          <div id="qFb"></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="view"><b>🌀 Congelador continuo (Figura 19)</b><canvas id="c2a"></canvas></div>
+        <div class="view"><b>⚖️ La balanza del laboratorio (Figura 20)</b><canvas id="c2b"></canvas></div>
+        <div class="formula"><div>Recipientes del mismo volumen (1.0 L):</div><div class="eq" id="eq"></div><div style="font-size:12px;color:var(--muted)">Overrun (%) = (m<sub>mix</sub> − m<sub>helado</sub>) / m<sub>helado</sub> × 100. Solo es válido con el mismo volumen y el mismo llenado.</div></div>
+        <div class="box" id="exp2"></div>
+        <div class="box" style="border-left-color:#0ea5e9"><h3>🧩 Reto rápido (p. 24): mismo mix, 25 % vs. 130 % de overrun</h3><div id="reto"></div></div>
+      </div>
+    </div>
+    <div class="next"><button class="btn btn-primary" data-go="fri">Endurecer y distribuir ➜</button></div>
+  </div>
+
+  <!-- ===================== 3 · CADENA DE FRÍO ===================== -->
+  <div class="pane" data-p="fri">
+    <div class="presets"><span class="lbl">Rutas</span>
+      <button class="chip" data-r="ok">✅ Cadena de frío correcta</button>
+      <button class="chip" data-r="trans">🚚 Transporte sin control</button>
+      <button class="chip" data-r="vitr">🏪 Vitrina con descongelación</button>
+      <button class="chip" data-r="casa">🏠 Endurecido en congelador común</button>
+    </div>
+    <div class="lab">
+      <div class="col">
+        <div class="card">
+          <h3>🧭 Ruta del producto</h3>
+          <div class="ctl"><label>Endurecimiento</label><div class="seg" data-k="hard"><button data-v="tunel" class="on">Túnel −35 °C</button><button data-v="camara">Cámara −25 °C</button><button data-v="casero">Congelador −18 °C</button></div></div>
+          <div class="ctl"><label>Almacén de la planta <span class="val" id="v-Ts"></span></label><input type="range" id="Ts" min="-30" max="-12" step="1"><div class="scale"><span>−30 °C</span><span>−18 °C o menor</span><span>−12 °C</span></div></div>
+          <div class="ctl"><label>Días en almacén <span class="val" id="v-dS"></span></label><input type="range" id="dS" min="0" max="60" step="1"></div>
+          <div class="ctl"><label>Transporte</label><div class="seg" data-k="tr"><button data-v="ok" class="on">Con control</button><button data-v="mal">Sin control</button></div></div>
+          <div class="ctl"><label>Punto de venta</label><div class="seg" data-k="vt"><button data-v="estable" class="on">Estable</button><button data-v="abre">Abren seguido</button><button data-v="ciclos">Descongela</button></div></div>
+          <div class="ctl"><label>Días en punto de venta <span class="val" id="v-dV"></span></label><input type="range" id="dV" min="0" max="30" step="1"></div>
+          <div class="row-btn"><button class="btn btn-accent" id="play3">▶ Recorrer la ruta</button></div>
+        </div>
+        <div class="card">
+          <h3>📟 El helado ahora</h3>
+          <div class="meter"><div class="k"><span>Tamaño medio de cristal</span><b id="m-L"></b></div><div class="bar"><i id="b-L" style="background:#8b5cf6"></i></div></div>
+          <div class="meter"><div class="k"><span>Overrun conservado</span><b id="m-orn"></b></div><div class="bar"><i id="b-orn" style="background:#3b82f6"></i></div></div>
+          <div class="meter"><div class="k"><span>Agua congelada</span><b id="m-phn"></b></div><div class="bar"><i id="b-phn" style="background:#38bdf8"></i></div></div>
+          <div class="state" id="state3"></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="views">
+          <div class="view"><b><span>🔬 Microestructura (≈ 400 µm)</span><span id="t3" style="color:var(--muted)"></span></b><canvas id="c3a"></canvas></div>
+          <div class="view"><b>🍨 Así se ve y se siente</b><canvas id="c3b"></canvas></div>
+        </div>
+        <div class="legend">
+          <span><i class="lg" style="background:#bae6fd;border:1px solid #0284c7"></i>Cristal de hielo</span>
+          <span><i class="lg" style="background:#fff;border:1.5px dashed #94a3b8"></i>Celda de aire</span>
+          <span><i class="lg" style="background:#facc15"></i>Grasa parcialmente coalescida</span>
+          <span><i class="lg" style="background:#fce7f3;border:1px solid #f9a8d4"></i>Fase no congelada (azúcares, proteínas, sales)</span>
+        </div>
+        <div class="view"><b>📈 Temperatura del producto y tamaño de cristal</b><canvas id="c3c"></canvas></div>
+        <div class="box" id="exp3"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="teacher">
+    <summary>👩‍🏫 Notas para el docente</summary>
+    <ul>
+      <li><b>Un mismo lote recorre las tres pestañas.</b> La fórmula y la maduración (pestaña 1) fijan cuánto aire puede retener el mix y qué tan estable es. El congelador (pestaña 2) fija el overrun y el tamaño inicial del cristal. La ruta de frío (pestaña 3) decide cuánto crecen los cristales.</li>
+      <li><b>Curva de congelación:</b> se calcula con el método de equivalentes de sacarosa (lactosa = 54.5 % de los SNG) más la depresión que causan las sales de la leche (2.37 × SNG / agua). Es una aproximación didáctica: da un punto inicial cercano a −2.5 °C y alrededor de 45–50 % de agua congelada a −5 °C y 75–80 % a −18 °C, del orden de lo que reporta Goff & Hartel. Explica por qué el helado sale «blando» del congelador y necesita endurecimiento.</li>
+      <li><b>Riesgo de arenosidad:</b> se usa la regla práctica SNG máx. ≈ (100 − otros sólidos) / 7. Es orientativa y conecta con la Tabla 3 («Helado arenoso»).</li>
+      <li><b>Recristalización:</b> en cada calentamiento se funde una fracción del hielo (sobre todo los cristales pequeños). Al volver a enfriar, esa agua se deposita sobre los cristales que sobrevivieron: hay menos cristales pero más grandes. A temperatura constante también hay un crecimiento lento, mayor a temperaturas altas. El estabilizante frena ambos procesos. El proceso es <b>irreversible</b>.</li>
+      <li><b>Correcciones a la versión anterior:</b>
+        <ul>
+          <li>El CECYBOOK da dos referencias de overrun: 60–100 % (Figura 15) y 20–180 % según la categoría (Figura 19). Se eliminó el veredicto fijo «óptimo 60–100 % / excesivo &gt; 120 %», porque el valor adecuado depende del estilo de helado (p. 22).</li>
+          <li>Un overrun alto no hace por sí mismo que el helado se derrita más rápido; el aire incluso aísla. Lo que da resistencia al derretimiento es la red de grasa y la estabilización (Tabla 3). Con mucho aire el problema es un cuerpo débil y espumoso y el encogimiento.</li>
+          <li>El tamaño de cristal ya no sale de una fórmula fija: depende de la temperatura de salida, el endurecimiento, el estabilizante y la ruta de frío.</li>
+          <li>La maduración se indica a 2–5 °C durante 4–24 h, como en la Figura 17 (antes decía 4 °C).</li>
+        </ul></li>
+      <li><b>Preguntas del CECYBOOK que se responden aquí:</b> «mix sin maduración» (p. 20) con la fórmula «Sin maduración»; el Reto rápido 25 % vs. 130 % (p. 24) en la pestaña 2; y la Salida rápida 3 (p. 30) con la ruta «Vitrina con descongelación».</li>
+    </ul>
+  </details>
+  <footer>Recurso didáctico complementario · CECYBOOK Semana 15 · 7.5 Proceso para la obtención de helados.</footer>
 </div>
 
 <script>
-const canvas = document.getElementById('iceCanvas');
-const ctx = canvas.getContext('2d');
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function hiDPI(c,w,h){const d=Math.min(2,window.devicePixelRatio||1);c.width=w*d;c.height=h*d;const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return x;}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function hex(h){h=h.replace('#','');return[parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
+function mix(a,b,t){t=clamp(t,0,1);const A=hex(a),B=hex(b);return'rgb('+A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(',')+')';}
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+function txt(c,s,x,y,o={}){c.font=(o.b?'bold ':'')+(o.s||12)+'px Segoe UI';c.fillStyle=o.c||'#0f1b33';c.textAlign=o.a||'center';c.fillText(s,x,y);}
+const f1=v=>v.toFixed(1), f0=v=>Math.round(v).toString(), fmt=n=>Math.round(n).toLocaleString('es-MX');
 
-let activeTab = 1;
+/* ===================== el lote ===================== */
+const L={F:10,S:10,Z:15,St:0.3,E:0.2,P:150,age:6, OR:80,Tx:-5, hard:'tunel',Ts:-20,dS:30,tr:'ok',vt:'estable',dV:10};
 
-// Variables Modo 1 (Microestructura y Formulación)
-let stabilizerLevel = 80; // 10% a 100%
-let agingHours = 12;      // 0 h (sin madurar) a 24 h
+function fpdW(Wu,M){const x=M.SE/Wu*100;return 0.0582*x+0.000221*x*x+2.37*M.S/Wu;}
+function iceFrac(T,M){const D=-T;if(D<=fpdW(M.W,M))return 0;let lo=0.3,hi=M.W;for(let i=0;i<45;i++){const m=(lo+hi)/2;if(fpdW(m,M)>D)lo=m;else hi=m;}return 1-lo/M.W;}
+function mixModel(){
+  const W=100-L.F-L.S-L.Z-L.St-L.E, lac=0.545*L.S, M={W,S:L.S,SE:L.Z+lac};
+  const hyd=1-Math.exp(-L.age/2.5), fc=1-Math.exp(-L.age/4);
+  const stabEff=(1-Math.exp(-L.St/0.15))*(0.35+0.65*hyd);
+  const emulEff=1-Math.exp(-L.E/0.12);
+  const hq=L.P<20?0.25:L.P<50?0.6:L.P<=200?1:0.9;
+  const dG=0.6+3/(1+L.P/40);
+  const visc=clamp(0.10+0.45*stabEff+0.025*(L.S-8)+0.012*(L.F-6)+0.012*(L.Z-12)+0.10*hyd,0,1);
+  const pc=clamp((L.F/12)*(0.3+0.7*fc)*(0.35+0.65*emulEff)*(0.5+0.5*hq),0,1);
+  const air=clamp(0.12+0.45*pc+0.25*visc+0.02*(L.S-9)+0.05*hyd,0,1);
+  const cc=clamp(0.2+0.55*stabEff+0.04*(L.Z-12)+0.1*visc,0,1);
+  const mr=clamp(0.15+0.5*pc+0.35*stabEff,0,1);
+  const rho=100/(L.F/0.93+L.S/1.58+L.Z/1.59+(L.St+L.E)/1.5+W);
+  const fp=-fpdW(W,M);
+  const sngMax=(100-L.F-L.Z-L.St-L.E)/7;
+  return {W,M,hyd,fc,stabEff,emulEff,hq,dG,visc,pc,air,cc,mr,rho,fp,sngMax,TS:100-W};
+}
+function freezer(X){
+  const maxOR=30+130*X.air;
+  const stable=L.OR<=maxOR;
+  const ORa=stable?L.OR:maxOR+0.25*(L.OR-maxOR);
+  const phx=iceFrac(L.Tx,X.M);
+  const Lx=20+3.2*(L.Tx+7)+8*(1-X.cc);
+  const mMix=L.book?1100:1000*X.rho, mIce=L.book?610:mMix/(1+ORa/100);
+  return {maxOR,stable,ORa,phx,Lx,mMix,mIce};
+}
+/* ruta de frío: perfil horario */
+function buildRoute(){
+  const P=[]; // {d (días), T, seg}
+  const push=(T,seg)=>P.push({T,seg});
+  const hardT={tunel:-35,camara:-25,casero:-18}[L.hard], hardH={tunel:1,camara:4,casero:14}[L.hard];
+  for(let h=0;h<hardH;h++) push(hardT+(L.Tx-hardT)*Math.exp(-3*(h+1)/hardH),'Endurecimiento');
+  for(let h=0;h<L.dS*24;h++) push(L.Ts,'Almacén');
+  for(let h=0;h<24;h++){let T=Math.min(L.Ts,-18); if(L.tr==='mal'&&h>=6&&h<12) T=-18+10*Math.sin((h-6)/6*Math.PI); push(T,'Transporte');}
+  for(let d=0;d<L.dV;d++)for(let h=0;h<24;h++){let T=-18;
+    if(L.vt==='ciclos'&&h>=2&&h<6) T=-18+8*Math.sin((h-2)/4*Math.PI);
+    if(L.vt==='abre'&&(h%12===5)) T=-15;
+    push(T,'Punto de venta');}
+  return P;
+}
+function runRoute(X,FZ,P){
+  const hg={tunel:0.08,camara:0.22,casero:0.65}[L.hard];
+  let Lc=FZ.Lx*(1+hg), OR=FZ.ORa, prevT=L.Tx;
+  const hist=[]; const alpha=1.6*(1-0.45*X.stabEff), k0=420*(1-0.55*X.stabEff);
+  P.forEach((p,i)=>{
+    const T=p.T;
+    if(T>prevT){const a=iceFrac(prevT,X.M), b=iceFrac(T,X.M); if(a>0){const f=clamp((a-b)/a,0,0.9); Lc*=Math.pow(1/(1-clamp(f*alpha,0,0.9)),1/3); OR*=1-0.22*f*(1-0.5*X.pc);}}
+    const k=k0*Math.exp(0.22*(T+18))/24; Lc=Math.cbrt(Lc*Lc*Lc+k);
+    if(T>-6) OR*=0.995;
+    prevT=T; if(i%2===0||i===P.length-1) hist.push({i,T,L:Lc,OR});
+  });
+  return {Lc,OR,hist,L0:FZ.Lx*(1+hg)};
+}
 
-// Variables Modo 2 (Balanza de Overrun)
-let mixMass = 1100;       // g en 1.0 L
-let iceMass = 610;        // g en 1.0 L (Ejemplo exacto = 80.3%)
+/* ===================== estado global ===================== */
+let X,FZ,P,RT;
+function compute(){X=mixModel();FZ=freezer(X);P=buildRoute();RT=runRoute(X,FZ,P);}
+function lotStrip(){
+  const p=(c,t)=>`<span class="pill ${c}">${t}</span>`;
+  $('#lot').innerHTML='<span class="lbl">Tu helado</span>'+
+    p('',`🧪 Sólidos totales <b>${f1(X.TS)} %</b>`)+
+    p('',`❄️ Empieza a congelar a <b>${f1(X.fp)} °C</b>`)+
+    p(L.S>X.sngMax?'warn':'',`🥛 SNG <b>${f1(L.S)} %</b>${L.S>X.sngMax?' (riesgo de arenosidad)':''}`)+
+    p(FZ.stable?'':'bad',`💨 Overrun <b>${f0(FZ.ORa)} %</b>`)+
+    p(RT.Lc>50?'bad':RT.Lc>40?'warn':'',`🔬 Cristales al final de la ruta <b>${f0(RT.Lc)} µm</b>`);
+}
 
-// Variables Modo 3 (Cadena de Frío y Fluctuaciones Térmicas)
-let storageTemp = -18;
-let shockCycles = 0;      // Número de abusos térmicos (-18°C -> -10°C -> -18°C)
+/* ===================== controles ===================== */
+const RANGES={F:['F',v=>f1(v)+' %'],S:['S',v=>f1(v)+' %'],Z:['Z',v=>f1(v)+' %'],St:['St',v=>v.toFixed(2)+' %'],E:['E',v=>v.toFixed(2)+' %'],P:['P',v=>v?v+' bar':'no'],age:['age',v=>v+' h'],OR:['OR',v=>(Math.round(v*10)/10)+' %'],Tx:['Tx',v=>f1(v)+' °C'],Ts:['Ts',v=>v+' °C'],dS:['dS',v=>v+' d'],dV:['dV',v=>v+' d']};
+Object.keys(RANGES).forEach(id=>{const el=$('#'+id);el.value=L[id];el.addEventListener('input',()=>{L[id]=+el.value;L.book=false;$$('.presets .chip').forEach(c=>c.classList.remove('on'));if(TAB==='fri')S3.play=false;refresh();});});
+$$('.seg').forEach(s=>s.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;L[s.dataset.k]=b.dataset.v;s.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));$$('.presets .chip').forEach(c=>c.classList.remove('on'));S3.play=false;refresh();}));
+function sync(){Object.keys(RANGES).forEach(id=>$('#'+id).value=L[id]);['hard','tr','vt'].forEach(k=>$(`.seg[data-k="${k}"]`).querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v===L[k])));}
+const PF={std:{F:10,S:10,Z:15,St:0.3,E:0.2,P:150,age:6},prem:{F:15,S:9,Z:16,St:0.2,E:0.15,P:120,age:8},sinmad:{F:10,S:10,Z:15,St:0.3,E:0.2,P:150,age:0},sng:{F:10,S:13.5,Z:15,St:0.3,E:0.2,P:150,age:6},dulce:{F:10,S:10,Z:22,St:0.3,E:0.2,P:150,age:6}};
+$$('[data-f]').forEach(c=>c.addEventListener('click',()=>{Object.assign(L,PF[c.dataset.f]);L.book=false;sync();$$('.presets .chip').forEach(x=>x.classList.remove('on'));c.classList.add('on');refresh();}));
+$$('[data-o]').forEach(c=>c.addEventListener('click',()=>{const k=c.dataset.o;
+  if(k==='libro'){Object.assign(L,{F:10,S:10,Z:15,St:0.3,E:0.2,P:150,age:6,OR:80.33,Tx:-5});L.book=true;}
+  else {L.OR={denso:30,ligero:120,max:180}[k];L.book=false;}
+  sync();$$('.presets .chip').forEach(x=>x.classList.remove('on'));c.classList.add('on');refresh();}));
+const PR={ok:{hard:'tunel',Ts:-25,dS:30,tr:'ok',vt:'estable',dV:10},trans:{hard:'tunel',Ts:-25,dS:30,tr:'mal',vt:'estable',dV:10},vitr:{hard:'tunel',Ts:-25,dS:30,tr:'ok',vt:'ciclos',dV:10},casa:{hard:'casero',Ts:-18,dS:30,tr:'ok',vt:'estable',dV:10}};
+$$('[data-r]').forEach(c=>c.addEventListener('click',()=>{Object.assign(L,PR[c.dataset.r]);sync();$$('.presets .chip').forEach(x=>x.classList.remove('on'));c.classList.add('on');refresh();startRoute();}));
+let TAB='mix';
+function showTab(t){TAB=t;$$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));$$('.pane').forEach(p=>p.classList.toggle('show',p.dataset.p===t));refresh();window.scrollTo({top:$('.tabs').offsetTop-10,behavior:'smooth'});}
+$$('.tab').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.t)));
+$$('[data-go]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.go)));
 
-let airCells = [];
-let iceCrystals = [];
+function setM(id,txt,frac){$('#m-'+id).innerHTML=txt;$('#b-'+id).style.width=(clamp(frac,0,1)*100)+'%';}
+function stateBox(el,col,t,s){el.style.background=col;el.innerHTML=t+'<small>'+s+'</small>';}
+const lvl=v=>v>0.75?'alta':v>0.5?'media':v>0.3?'baja':'muy baja';
+function refresh(){
+  compute(); lotStrip();
+  Object.keys(RANGES).forEach(id=>{const e=$('#v-'+id);if(e)e.textContent=RANGES[id][1](L[id]);});
+  if(TAB==='mix') ref1(); else if(TAB==='ovr') ref2(); else ref3();
+}
 
-function initMicrostructure() {
-    airCells = [];
-    for (let i = 0; i < 16; i++) {
-        airCells.push({
-            x: 70 + Math.random() * (canvas.width - 140),
-            y: 75 + Math.random() * (canvas.height - 130),
-            vx: (Math.random() - 0.5) * 0.35,
-            vy: (Math.random() - 0.5) * 0.35,
-            r: 22 + Math.random() * 8
-        });
+/* ---------- 1 ---------- */
+function ref1(){
+  setM('visc',lvl(X.visc),X.visc); setM('air',lvl(X.air),X.air); setM('cc',lvl(X.cc),X.cc); setM('pc',lvl(X.pc),X.pc); setM('mr',lvl(X.mr),X.mr);
+  const el=$('#state1'); let exp;
+  if(L.age<2){stateBox(el,'#dc2626','Mix sin maduración','Poca hidratación y poca grasa cristalizada');
+    exp=`<h3>⏱️ Respuesta a la pregunta de la p. 20</h3><p>Sin maduración, las proteínas y los estabilizantes no terminan de hidratarse y casi no hay grasa cristalizada. El mix es menos viscoso y la grasa no podrá formar una buena red alrededor del aire: <b>retendrá menos aire</b>, el helado será menos cremoso y <b>se derretirá más rápido</b>. Compruébalo en la pestaña 2.</p>`;}
+  else if(L.S>X.sngMax){stateBox(el,'#d97706','Riesgo de helado arenoso',`SNG ${f1(L.S)} % > ≈ ${f1(X.sngMax)} % (regla práctica)`);
+    exp=`<h3>🥛 Demasiados sólidos no grasos</h3><p>Los SNG dan cuerpo, pero traen <b>lactosa</b>. Al congelarse el agua, la lactosa se concentra en la fase no congelada y puede cristalizar: aparecen cristales duros que no se derriten en la boca (Tabla 3, «Helado arenoso»).</p>`;}
+  else if(L.P<20){stateBox(el,'#d97706','Mix sin homogeneizar','Glóbulos grandes y emulsión poco estable');
+    exp='<h3>⚙️ Sin homogeneización</h3><p>Los glóbulos de grasa quedan grandes y con poca superficie: la emulsión es menos uniforme y la grasa se reparte mal alrededor del aire. La homogeneización (50–200 bar, Figura 16) reduce el tamaño de los glóbulos y aumenta el área interfacial.</p>';}
+  else if(L.St<0.05){stateBox(el,'#d97706','Sin estabilizante','Fase no congelada poco viscosa');
+    exp='<h3>🧪 Sin estabilizante</h3><p>El agua que queda sin congelar se mueve con facilidad: los cristales crecerán más rápido durante el almacenamiento y el helado resistirá menos el derretimiento. Fíjate en la pestaña 3.</p>';}
+  else if(L.Z>20){stateBox(el,'#7c3aed','Mix muy dulce','Congela a menor temperatura y queda más blando');
+    exp=`<h3>🍬 Mucho azúcar</h3><p>Los azúcares <b>deprimen el punto de congelación</b>: tu mix empieza a congelar a ${f1(X.fp)} °C y a −18 °C solo tiene ${f0(iceFrac(-18,X.M)*100)} % del agua congelada. Será más suave, pero también más sensible a las fluctuaciones de temperatura.</p>`;}
+  else {stateBox(el,'#16a34a','Mix equilibrado y madurado',`Empieza a congelar a ${f1(X.fp)} °C`);
+    exp=`<h3>✅ Un mix listo para congelar</h3><p>La maduración hidrató los estabilizantes y las proteínas y cristalizó parte de la grasa (Figura 17). Mira la curva: a la salida del congelador (≈ −5 °C) solo estará congelado ≈ ${f0(iceFrac(-5,X.M)*100)} % del agua; el resto se congela en el <b>endurecimiento</b> (a −18 °C ≈ ${f0(iceFrac(-18,X.M)*100)} %). El agua que nunca se congela es la <b>fase no congelada</b>, muy concentrada en azúcares, proteínas y sales.</p>`;}
+  $('#exp1').innerHTML=exp+'<div class="book">📘 <b>En tu CECYBOOK:</b> Tabla 1 (p. 19), Figuras 16–17 (pp. 20–21) y Figura 15 (p. 17).</div>';
+}
+const c1a=$('#c1a'),x1a=hiDPI(c1a,380,290), c1b=$('#c1b'),x1b=hiDPI(c1b,380,290);
+const G1=(()=>{const r=mulberry32(5);return Array.from({length:160},()=>({x:r(),y:r(),r:r(),a:r()*6.28}));})();
+function drawMix(t){
+  const c=x1a; c.clearRect(0,0,380,290); c.fillStyle='#fffdf7'; c.fillRect(0,0,380,290);
+  // estabilizante hidratado: hebras onduladas
+  const ns=Math.round(L.St/0.6*40*(0.3+0.7*X.hyd));
+  const r=mulberry32(9);
+  for(let i=0;i<ns;i++){const x=r()*380,y=r()*290,a=r()*6.28,len=30+r()*40,amp=2+X.hyd*4;
+    c.strokeStyle=`rgba(192,132,252,${0.35+0.4*X.hyd})`;c.lineWidth=1.6+X.hyd*1.5;c.beginPath();
+    for(let k=0;k<=12;k++){const u=k/12*len;const px=x+Math.cos(a)*u-Math.sin(a)*Math.sin(u/5+t)*amp,py=y+Math.sin(a)*u+Math.cos(a)*Math.sin(u/5+t)*amp;k?c.lineTo(px,py):c.moveTo(px,py);}c.stroke();}
+  // glóbulos de grasa
+  const rad=clamp(X.dG*6,3.5,22); const n=Math.round(clamp(L.F*16/(rad*rad)*12,6,160));
+  for(let i=0;i<n;i++){const g=G1[i];const x=g.x*380+Math.sin(t*0.7+i)*1.2,y=g.y*290+Math.cos(t*0.6+i)*1.2,rr0=rad*(0.7+0.6*g.r);
+    c.fillStyle='#fde68a';c.strokeStyle='#93c5fd';c.lineWidth=rr0>5?2:1.2;c.beginPath();c.arc(x,y,rr0,0,7);c.fill();c.stroke();
+    if(X.fc>0.1&&rr0>3){c.strokeStyle='#a16207';c.lineWidth=1;const nn=Math.round(X.fc*4);for(let k=0;k<nn;k++){const a=g.a+k*1.3;c.beginPath();c.moveTo(x-Math.cos(a)*rr0*0.6,y-Math.sin(a)*rr0*0.6);c.lineTo(x+Math.cos(a)*rr0*0.6,y+Math.sin(a)*rr0*0.6);c.stroke();}}}
+  c.fillStyle='rgba(255,255,255,.9)';rr(c,8,258,364,26,8);c.fill();
+  txt(c,`Glóbulo ≈ ${f1(X.dG)} µm · grasa cristalizada ${f0(X.fc*100)} % · hidratación ${f0(X.hyd*100)} %`,190,276,{s:11.5,b:1,c:'#12306b'});
+}
+function drawCurve(){
+  const c=x1b; c.clearRect(0,0,380,290); c.fillStyle='#fff'; c.fillRect(0,0,380,290);
+  const X0=46,X1=366,Y0=246,Y1=18, xs=T=>X0+(X1-X0)*(-T)/30, ys=v=>Y0-(Y0-Y1)*v;
+  c.strokeStyle='#e2e8f0';c.lineWidth=1;
+  for(let T=0;T>=-30;T-=5){c.beginPath();c.moveTo(xs(T),Y1);c.lineTo(xs(T),Y0);c.stroke();txt(c,T,xs(T),Y0+14,{s:10,c:'#64748b'});}
+  for(let v=0;v<=1;v+=0.25){c.beginPath();c.moveTo(X0,ys(v));c.lineTo(X1,ys(v));c.stroke();txt(c,f0(v*100)+'%',X0-6,ys(v)+4,{s:10,a:'right',c:'#64748b'});}
+  txt(c,'Temperatura (°C)',(X0+X1)/2,Y0+30,{s:11,c:'#475569'});
+  // zonas
+  c.fillStyle='rgba(56,189,248,.10)';c.fillRect(xs(-4),Y1,xs(-6)-xs(-4),Y0-Y1);
+  c.fillStyle='rgba(18,48,107,.06)';c.fillRect(xs(-18),Y1,X1-xs(-18),Y0-Y1);
+  c.strokeStyle='#0284c7';c.lineWidth=3;c.beginPath();
+  for(let T=0;T>=-30;T-=0.25){const y=ys(iceFrac(T,X.M));T===0?c.moveTo(xs(T),y):c.lineTo(xs(T),y);}c.stroke();
+  const mk=(T,l,col,dy)=>{const v=iceFrac(T,X.M);c.fillStyle=col;c.beginPath();c.arc(xs(T),ys(v),5,0,7);c.fill();txt(c,l,xs(T)+6,ys(v)+dy,{s:10.5,b:1,a:'left',c:col});};
+  c.fillStyle='#dc2626';c.beginPath();c.arc(xs(X.fp),Y0,5,0,7);c.fill();txt(c,`inicio ${f1(X.fp)} °C`,xs(X.fp)+4,Y0-8,{s:10.5,b:1,a:'left',c:'#dc2626'});
+  mk(-5,`salida −5 °C: ${f0(iceFrac(-5,X.M)*100)} %`,'#0369a1',16);
+  mk(-18,`−18 °C: ${f0(iceFrac(-18,X.M)*100)} %`,'#12306b',18);
+  txt(c,'% del agua congelada',X0,12,{s:11,b:1,a:'left',c:'#12306b'});
+  txt(c,'congelador',xs(-5),Y1+12,{s:10,c:'#0369a1'});txt(c,'almacenamiento',xs(-24),Y1+12,{s:10,c:'#12306b'});
+}
+
+/* ---------- 2 ---------- */
+let Q=null;
+function newQ(){const r=Math.random;const mm=1080+Math.round(r()*6)*10, or=25+Math.round(r()*100);const mi=Math.round(mm/(1+or/100));Q={mm,mi,ans:(mm-mi)/mi*100};
+  $('#qText').innerHTML=`Un recipiente de 1.0 L lleno de mix pesa <b>${fmt(mm)} g</b>. El mismo recipiente lleno de helado pesa <b>${fmt(mi)} g</b>. ¿Cuál es el overrun?`;$('#qAns').value='';$('#qFb').innerHTML='';}
+$('#qNew').addEventListener('click',newQ);
+$('#qChk').addEventListener('click',()=>{const v=parseFloat($('#qAns').value);if(isNaN(v)){$('#qFb').innerHTML='<div class="verdict mid">Escribe un número.</div>';return;}
+  const ok=Math.abs(v-Q.ans)<=0.6;$('#qFb').innerHTML=`<div class="verdict ${ok?'good':'bad'}">${ok?'✔ Correcto':'✖ Revisa'}: (${fmt(Q.mm)} − ${fmt(Q.mi)}) / ${fmt(Q.mi)} × 100 = <b>${f1(Q.ans)} %</b>${ok?'':' — se divide entre la masa del <b>helado</b>, no la del mix.'}</div>`;});
+function styleOf(o){return o<50?'denso, tipo súper premium':o<=100?'estándar o premium':o<=130?'ligero o económico':'muy aireado (postre congelado)';}
+function ref2(){
+  setM('ora',(L.book?f1(FZ.ORa):f0(FZ.ORa))+' %',FZ.ORa/180); setM('phx',f0(FZ.phx*100)+' %',FZ.phx); setM('lx',f0(FZ.Lx)+' µm',FZ.Lx/60);
+  $('#eq').innerHTML=`(${fmt(FZ.mMix)} − ${fmt(FZ.mIce)}) / ${fmt(FZ.mIce)} × 100 = ${f1((FZ.mMix-FZ.mIce)/FZ.mIce*100)} %`;
+  const el=$('#state2'); let exp;
+  if(!FZ.stable){stateBox(el,'#dc2626','El mix no sostiene tanto aire',`Buscabas ${L.OR} % · logras ≈ ${f0(FZ.ORa)} %`);
+    exp=`<h3>💨 Más aire del que la estructura puede sostener</h3><p>Tu mix puede retener aire de forma estable hasta ≈ <b>${f0(FZ.maxOR)} %</b>. Por encima, las celdas de aire se unen y escapan: el helado sale espumoso e inestable y se encogerá en el almacén. ${X.age<2?'Tu mix no se maduró: regresa a la pestaña 1 y dale al menos 4 h.':'Para sostener más aire necesitas una red de grasa más fuerte (grasa, maduración, emulsificante) y más viscosidad.'}</p>`;}
+  else if(L.Tx>-4){stateBox(el,'#d97706','Sale demasiado blando',`Solo ${f0(FZ.phx*100)} % del agua congelada`);
+    exp=`<h3>🌡️ Salida a ${f1(L.Tx)} °C</h3><p>Con poca agua congelada en el congelador, la mayor parte del hielo se formará después, en el endurecimiento y sin agitación, y los cristales serán más grandes. La Figura 18a indica una salida de −4 a −6 °C.</p>`;}
+  else {stateBox(el,'#16a34a',`Overrun ${f0(FZ.ORa)} %: helado ${styleOf(FZ.ORa).split(',')[0]}`,`${f0(FZ.phx*100)} % del agua congelada · cristales ≈ ${f0(FZ.Lx)} µm`);
+    exp=`<h3>✅ El aire quedó atrapado</h3><p>Las cuchillas raspan el hielo de la pared fría y forman cristales pequeños (≈ ${f0(FZ.Lx)} µm), mientras el agitador incorpora aire. La grasa parcialmente coalescida rodea las celdas de aire y las estabiliza. Con ${f0(FZ.ORa)} % de overrun, 1 L de helado pesa ${fmt(FZ.mIce)} g: es un helado ${styleOf(FZ.ORa)}. El valor «correcto» depende del producto: más aire no significa mejor helado.</p>`;}
+  $('#exp2').innerHTML=exp+'<div class="book">📘 <b>En tu CECYBOOK:</b> Figuras 18–21 (pp. 21–24) y ejemplo de cálculo (p. 23).</div>';
+  // reto
+  const m=1000*X.rho, a=m/1.25, b=m/2.3;
+  $('#reto').innerHTML=`<table class="cmp"><tr><th></th><th>25 % de overrun</th><th>130 % de overrun</th></tr>
+   <tr><td>Masa de 1.0 L</td><td>${fmt(a)} g</td><td>${fmt(b)} g</td></tr>
+   <tr><td>Aire en el volumen</td><td>${f0(25/125*100)} %</td><td>${f0(130/230*100)} %</td></tr>
+   <tr><td>Cuerpo</td><td>Denso, pesado, compacto</td><td>Ligero, espumoso, con poco cuerpo</td></tr>
+   <tr><td>En la boca</td><td>Más frío y duro; sabor intenso</td><td>Menos frío y más suave; sabor menos intenso</td></tr>
+   <tr><td>En almacén</td><td>Estable</td><td>Más riesgo de encogimiento y pérdida de aire</td></tr></table>`;
+}
+const c2a=$('#c2a'),x2a=hiDPI(c2a,760,250), c2b=$('#c2b'),x2b=hiDPI(c2b,760,250);
+function drawFreezer(t){
+  const c=x2a; c.clearRect(0,0,760,250); c.fillStyle='#f8fafc'; c.fillRect(0,0,760,250);
+  const bx=150,by=70,bw=400,bh=110;
+  // mix entrando
+  c.fillStyle='#e2e8f0';rr(c,30,40,90,90,10);c.fill();c.strokeStyle='#94a3b8';c.lineWidth=2;c.stroke();
+  c.fillStyle='#fef3c7';c.fillRect(34,70,82,56);txt(c,'Mix madurado',75,36,{s:11,b:1,c:'#12306b'});txt(c,'2–5 °C',75,145,{s:11,c:'#475569'});
+  c.fillStyle='#cbd5e1';c.fillRect(116,118,40,10);
+  // aire
+  c.fillStyle='#cbd5e1';c.fillRect(170,30,10,42);txt(c,'Aire',175,24,{s:11,b:1,c:'#12306b'});
+  const nb=Math.round(4+FZ.ORa/20);for(let i=0;i<nb;i++){const ph=((t*0.8+i/nb)%1);c.strokeStyle='#64748b';c.lineWidth=1;c.beginPath();c.arc(175+Math.sin(i)*2,30+ph*45,2.5,0,7);c.stroke();}
+  // cilindro con camisa fría
+  c.fillStyle='#bfdbfe';rr(c,bx-8,by-12,bw+16,bh+24,20);c.fill();
+  txt(c,'camisa de refrigeración',bx+bw/2,by-18,{s:10.5,c:'#1d4ed8'});
+  c.fillStyle=mix('#fef3c7','#fffbeb',0.5);rr(c,bx,by,bw,bh,14);c.fill();
+  // hielo en pared
+  const r=mulberry32(3);c.fillStyle='rgba(255,255,255,.95)';
+  for(let i=0;i<60;i++){const x=bx+6+r()*(bw-12), top=r()<0.5, y=top?by+3+r()*6:by+bh-3-r()*6;c.beginPath();c.arc(x,y,1.5+r()*1.5,0,7);c.fill();}
+  // burbujas dentro (más hacia la salida)
+  const r2=mulberry32(4);for(let i=0;i<Math.round(FZ.ORa/2.2);i++){const u=r2();const x=bx+20+u*(bw-40)+((t*30)%40);const y=by+15+r2()*(bh-30);c.fillStyle='rgba(255,255,255,.95)';c.strokeStyle='#94a3b8';c.lineWidth=0.8;c.beginPath();c.arc(x>bx+bw-10?x-(bw-30):x,y,2+u*2.5,0,7);c.fill();c.stroke();}
+  // agitador (dasher) con cuchillas
+  c.fillStyle='#64748b';c.fillRect(bx+10,by+bh/2-5,bw-20,10);
+  for(let k=0;k<6;k++){const x=bx+40+k*62, ph=t*6+k*0.9, s=Math.sin(ph);
+    c.fillStyle='#475569';c.save();c.translate(x,by+bh/2);c.fillRect(-4,-bh/2*Math.abs(s)+4,8,(bh-8)*Math.abs(s));c.restore();
+    c.fillStyle='#94a3b8';c.fillRect(x-14,by+bh/2+s*(bh/2-6)-2,28,4);}
+  txt(c,'agitador y cuchillas raspadoras',bx+bw/2,by+bh+30,{s:10.5,c:'#475569'});
+  // salida
+  c.fillStyle='#cbd5e1';c.fillRect(bx+bw+8,by+bh/2-8,60,16);c.fillRect(bx+bw+60,by+bh/2-8,16,60);
+  // helado saliendo
+  const flow=(t*20)%30;c.fillStyle='#fffbeb';c.strokeStyle='#e5d5a8';c.lineWidth=1.2;
+  for(let i=0;i<4;i++){const y=by+bh/2+52+((flow+i*8)%30);c.beginPath();c.arc(bx+bw+68+Math.sin(i+t)*2,y,7,0,7);c.fill();c.stroke();}
+  // envase
+  const ex=bx+bw+30,ey=200;c.fillStyle='#fff';c.strokeStyle='#94a3b8';c.lineWidth=2;rr(c,ex,ey-40,80,44,6);c.fill();c.stroke();
+  c.fillStyle='#fffbeb';c.fillRect(ex+3,ey-30,74,31);
+  txt(c,`Sale a ${f1(L.Tx)} °C`,ex+40,ey+20,{s:11,b:1,c:'#0369a1'});
+  // termómetro de salida y velocidad
+  txt(c,`Overrun ${f0(FZ.ORa)} %`,bx+bw/2,236,{s:12,b:1,c:FZ.stable?'#12306b':'#b91c1c'});
+}
+function scaleCup(c,cx,label,mass,air,col){
+  const w=150,h=120,x=cx-w/2,y=40;
+  txt(c,label,cx,y-10,{s:12.5,b:1,c:'#12306b'});
+  c.fillStyle=col;c.fillRect(x+4,y+16,w-8,h-20);
+  if(air>0){const r=mulberry32(8);const n=Math.round(air*1.2);for(let i=0;i<n;i++){c.fillStyle='rgba(255,255,255,.95)';c.strokeStyle='#cbd5e1';c.lineWidth=0.8;c.beginPath();c.arc(x+10+r()*(w-20),y+22+r()*(h-32),2+r()*3.5,0,7);c.fill();c.stroke();}}
+  c.strokeStyle='#94a3b8';c.lineWidth=3;c.beginPath();c.moveTo(x,y);c.lineTo(x+6,y+h);c.lineTo(x+w-6,y+h);c.lineTo(x+w,y);c.stroke();
+  txt(c,'1.0 L',cx,y+h/2+4,{s:13,b:1,c:'#475569'});
+  c.fillStyle='#94a3b8';c.fillRect(cx-90,y+h+2,180,10);c.fillStyle='#e2e8f0';rr(c,cx-80,y+h+12,160,48,8);c.fill();c.strokeStyle='#94a3b8';c.lineWidth=1.5;c.stroke();
+  c.fillStyle='#0f172a';rr(c,cx-56,y+h+20,112,32,6);c.fill();
+  c.font='bold 20px monospace';c.fillStyle='#34d399';c.textAlign='center';c.fillText(fmt(mass)+' g',cx,y+h+43);
+}
+function drawBalance(){
+  const c=x2b; c.clearRect(0,0,760,250); c.fillStyle='#f8fafc'; c.fillRect(0,0,760,250);
+  scaleCup(c,170,'1.0 L de mix',FZ.mMix,0,'#fef3c7');
+  scaleCup(c,590,'1.0 L de helado',FZ.mIce,FZ.ORa,'#fffbeb');
+  c.fillStyle='#fff7ed';c.strokeStyle='#f97316';c.lineWidth=2;rr(c,290,82,180,70,12);c.fill();c.stroke();
+  txt(c,`Diferencia: ${fmt(FZ.mMix-FZ.mIce)} g`,380,108,{s:14,b:1,c:'#c2410c'});
+  txt(c,'= aire en lugar de mix',380,128,{s:12,c:'#9a3412'});
+  txt(c,`Densidad del mix ≈ ${X.rho.toFixed(2)} g/mL`,380,200,{s:11,c:'#475569'});
+}
+
+/* ---------- 3 ---------- */
+const S3={play:false,idx:0};
+function startRoute(){S3.play=true;S3.idx=0;}
+$('#play3').addEventListener('click',()=>{if(S3.play)S3.play=false;else startRoute();ref3();});
+function curPoint(){const H=RT.hist;if(!H.length)return null;if(!S3.play&&S3.idx===0)return H[H.length-1];return H[Math.min(H.length-1,S3.idx)];}
+function ref3(){
+  const pt=curPoint(); if(!pt) return;
+  $('#play3').textContent=S3.play?'⏸ Pausa':'▶ Recorrer la ruta';
+  const ph=iceFrac(pt.T,X.M);
+  setM('L',f0(pt.L)+' µm',pt.L/80); $('#b-L').style.background=pt.L>50?'#dc2626':pt.L>40?'#f59e0b':'#8b5cf6';
+  setM('orn',f0(pt.OR)+' % (de '+f0(FZ.ORa)+' %)',pt.OR/Math.max(1,FZ.ORa));
+  setM('phn',f0(ph*100)+' %',ph);
+  const seg=P[Math.min(P.length-1,pt.i)].seg, day=pt.i/24;
+  $('#t3').textContent=`${seg} · día ${day.toFixed(1)} · ${f1(pt.T)} °C`;
+  const fin=RT.hist[RT.hist.length-1], el=$('#state3'); let exp;
+  const showFinal=!S3.play;
+  const Lf=showFinal?fin.L:pt.L;
+  if(Lf>50){stateBox(el,'#dc2626','Textura áspera y helada',`Cristales ≈ ${f0(Lf)} µm (> 50 µm)`);}
+  else if(Lf>40){stateBox(el,'#d97706','Empieza a sentirse el hielo',`Cristales ≈ ${f0(Lf)} µm`);}
+  else stateBox(el,'#16a34a','Textura cremosa',`Cristales ≈ ${f0(Lf)} µm (ideal < 50, mejor 20–40)`);
+  const causes=[];
+  if(L.hard==='casero') causes.push('el endurecimiento lento en un congelador común dejó crecer los cristales desde el inicio');
+  if(L.Ts>-18) causes.push(`el almacén a ${L.Ts} °C tiene más agua sin congelar y los cristales maduran más rápido`);
+  if(L.tr==='mal') causes.push('en el transporte el producto subió a ≈ −8 °C');
+  if(L.vt==='ciclos') causes.push('la vitrina se descongela todos los días (subidas a ≈ −10 °C)');
+  if(L.vt==='abre') causes.push('las aperturas frecuentes calientan el producto varias veces al día');
+  if(X.stabEff<0.3) causes.push('el mix casi no tiene estabilizante que frene el crecimiento');
+  exp=causes.length?`<h3>🔎 ¿Qué pasó en la ruta?</h3><p>${causes.map(s=>s[0].toUpperCase()+s.slice(1)).join('. ')}.</p><p>Cada vez que la temperatura sube, se funden los cristales pequeños; al enfriar de nuevo, esa agua se congela sobre los cristales grandes. Por eso hay <b>menos cristales pero más grandes</b>, se pierde aire (overrun ${f0(FZ.ORa)} → ${f0(fin.OR)} %) y la textura se vuelve áspera. <b>Volver a congelar no lo arregla.</b></p>`
+    :`<h3>✅ Cadena de frío estable</h3><p>El endurecimiento rápido congeló la mayor parte del agua y formó cristales pequeños; el almacenamiento a ${L.Ts} °C sin fluctuaciones los mantuvo casi del mismo tamaño (${f0(RT.L0)} → ${f0(fin.L)} µm) y el aire se conservó.</p>`;
+  $('#exp3').innerHTML=exp+'<div class="book">📘 <b>En tu CECYBOOK:</b> Figuras 22–23 (pp. 25–26). Salida rápida, pregunta 3 (p. 30). Tabla 3, «Helado con cristales grandes».</div>';
+}
+const c3a=$('#c3a'),x3a=hiDPI(c3a,380,290), c3b=$('#c3b'),x3b=hiDPI(c3b,380,290), c3c=$('#c3c'),x3c=hiDPI(c3c,760,220);
+function drawMicro(t,pt){
+  const c=x3a; c.clearRect(0,0,380,290); c.fillStyle='#fce7f3'; c.fillRect(0,0,380,290);
+  const ph=iceFrac(pt.T,X.M);
+  const r=mulberry32(21);
+  // aire
+  const airFrac=pt.OR/(100+pt.OR), ra=26;
+  const na=Math.round(clamp(airFrac*380*290/(Math.PI*ra*ra)*0.8,1,40));
+  const cells=[];for(let i=0;i<na;i++)cells.push({x:20+r()*340,y:20+r()*250,r:ra*(0.7+r()*0.6)});
+  // hielo (diámetro px ≈ 0.95·L)
+  const rad=0.95*pt.L/2*1.0; const iceArea=ph*(1-airFrac)*0.62*380*290;
+  const ni=Math.round(clamp(iceArea/(Math.PI*rad*rad*1.4),3,140));
+  const r2=mulberry32(33);
+  for(let i=0;i<ni;i++){const x=r2()*380,y=r2()*290,s=0.75+r2()*0.5,a=r2()*6;const R=rad*s;
+    c.fillStyle='rgba(186,230,253,.95)';c.strokeStyle=pt.L>50?'#0369a1':'#0284c7';c.lineWidth=1.2;
+    c.beginPath();for(let k=0;k<6;k++){const an=a+k/6*6.283, rk=R*(0.8+0.2*Math.sin(k*2.1+a));c.lineTo(x+Math.cos(an)*rk,y+Math.sin(an)*rk*0.8);}c.closePath();c.fill();c.stroke();}
+  cells.forEach((b,i)=>{c.fillStyle='rgba(255,255,255,.96)';c.beginPath();c.arc(b.x,b.y,b.r,0,7);c.fill();c.setLineDash([4,3]);c.strokeStyle='#94a3b8';c.lineWidth=1.5;c.stroke();c.setLineDash([]);
+    const ng=Math.round(6+X.pc*10);for(let g=0;g<ng;g++){const an=g/ng*6.283+i;c.fillStyle='#facc15';c.beginPath();c.arc(b.x+Math.cos(an)*(b.r+1),b.y+Math.sin(an)*(b.r+1),2.6,0,7);c.fill();}});
+  c.fillStyle='#0f1b33';c.fillRect(300,272,48,3);txt(c,'50 µm',324,266,{s:10.5});
+}
+function drawScoop(t,pt){
+  const c=x3b; c.clearRect(0,0,380,290); c.fillStyle='#f8fafc'; c.fillRect(0,0,380,290);
+  const rough=clamp((pt.L-35)/30,0,1), loss=clamp(1-pt.OR/Math.max(1,FZ.ORa),0,1);
+  // copa
+  c.fillStyle='#e2e8f0';c.beginPath();c.moveTo(110,200);c.lineTo(270,200);c.lineTo(230,250);c.lineTo(150,250);c.closePath();c.fill();
+  c.fillStyle='#cbd5e1';c.fillRect(180,250,20,20);c.fillRect(150,268,80,8);
+  // bola
+  const R=70*(1-0.25*loss);
+  c.fillStyle='#fef3c7';c.strokeStyle='#e5d5a8';c.lineWidth=2;
+  c.beginPath();const n=36;for(let i=0;i<=n;i++){const a=Math.PI+i/n*Math.PI;const k=1+(rough*0.06)*Math.sin(i*7.3)+(i%2?rough*0.03:0);c.lineTo(190+Math.cos(a)*R*1.05*k,205+Math.sin(a)*R*k);}c.closePath();c.fill();c.stroke();
+  // textura: puntos de aire o cristales brillantes
+  const r=mulberry32(6);
+  for(let i=0;i<60;i++){const a=Math.PI+r()*Math.PI, d=Math.sqrt(r())*R*0.9;const x=190+Math.cos(a)*d*1.05, y=205+Math.sin(a)*d;
+    if(r()<rough){c.fillStyle='rgba(255,255,255,.95)';c.strokeStyle='#bae6fd';c.lineWidth=0.8;c.beginPath();c.moveTo(x,y-3);c.lineTo(x+3,y);c.lineTo(x,y+3);c.lineTo(x-3,y);c.closePath();c.fill();c.stroke();}
+    else{c.fillStyle='rgba(229,213,168,.55)';c.beginPath();c.arc(x,y,1.3,0,7);c.fill();}}
+  const lab=pt.L>50?'Áspera, «helada», arenosa al paladar':pt.L>40?'Se empiezan a sentir los cristales':'Lisa y cremosa';
+  txt(c,lab,190,36,{s:13,b:1,c:pt.L>50?'#b91c1c':pt.L>40?'#b45309':'#15803d'});
+  if(loss>0.08) txt(c,`Perdió ${f0(loss*100)} % de su aire: menos volumen`,190,56,{s:11.5,c:'#475569'});
+}
+function drawRouteChart(pt){
+  const c=x3c; c.clearRect(0,0,760,220); c.fillStyle='#fff'; c.fillRect(0,0,760,220);
+  const H=RT.hist, N=P.length, X0=50,X1=710,Y0=180,Y1=22;
+  const xs=i=>X0+(X1-X0)*i/Math.max(1,N-1), yT=T=>Y0-(Y0-Y1)*(T+40)/40, yL=l=>Y0-(Y0-Y1)*clamp(l/70,0,1);
+  // segmentos
+  let s0=0;const segs=[];for(let i=1;i<=N;i++){if(i===N||P[i].seg!==P[s0].seg){segs.push([s0,i-1,P[s0].seg]);s0=i;}}
+  const cols={'Endurecimiento':'#eff6ff','Almacén':'#f8fafc','Transporte':'#fef9c3','Punto de venta':'#fdf2f8'};
+  segs.forEach(([a,b,s])=>{c.fillStyle=cols[s];c.fillRect(xs(a),Y1,Math.max(2,xs(b)-xs(a)),Y0-Y1);if(xs(b)-xs(a)>70)txt(c,s,(xs(a)+xs(b))/2,Y1+12,{s:10,b:1,c:'#475569'});});
+  c.strokeStyle='#94a3b8';c.lineWidth=1;c.strokeRect(X0,Y1,X1-X0,Y0-Y1);
+  [-40,-30,-18,-10,0].forEach(T=>txt(c,T+'°',X0-6,yT(T)+4,{s:10,a:'right',c:'#0369a1'}));
+  [0,25,50,70].forEach(l=>txt(c,l,X1+6,yL(l)+4,{s:10,a:'left',c:'#7c3aed'}));
+  txt(c,'°C',X0-14,12,{s:10,b:1,c:'#0369a1'});txt(c,'µm',X1+14,12,{s:10,b:1,c:'#7c3aed'});
+  c.setLineDash([5,4]);c.strokeStyle='#dc2626';c.beginPath();c.moveTo(X0,yL(50));c.lineTo(X1,yL(50));c.stroke();c.setLineDash([]);
+  txt(c,'50 µm',X1-4,yL(50)-4,{s:10,a:'right',c:'#dc2626'});
+  c.strokeStyle='#0ea5e9';c.lineWidth=1.6;c.beginPath();P.forEach((p,i)=>{const x=xs(i),y=yT(p.T);i?c.lineTo(x,y):c.moveTo(x,y);});c.stroke();
+  const upto=pt?pt.i:N;
+  c.strokeStyle='#7c3aed';c.lineWidth=3;c.beginPath();let first=true;H.forEach(h=>{if(h.i>upto)return;const x=xs(h.i),y=yL(h.L);first?c.moveTo(x,y):c.lineTo(x,y);first=false;});c.stroke();
+  if(pt){c.strokeStyle='#0f1b33';c.lineWidth=1.5;c.beginPath();c.moveTo(xs(pt.i),Y1);c.lineTo(xs(pt.i),Y0);c.stroke();}
+  txt(c,`Ruta total: ${(N/24).toFixed(0)} días`,X0,Y0+18,{s:11,a:'left',c:'#475569'});
+  txt(c,'— temperatura',X0+170,Y0+18,{s:11,b:1,a:'left',c:'#0ea5e9'});txt(c,'— tamaño de cristal',X0+280,Y0+18,{s:11,b:1,a:'left',c:'#7c3aed'});
+}
+
+/* ===================== bucle ===================== */
+let last=performance.now(),tt=0;
+function loop(now){
+  try{const dt=Math.min(0.05,(now-last)/1000);last=now;tt+=dt;
+    if(TAB==='mix'){drawMix(tt);drawCurve();}
+    else if(TAB==='ovr'){drawFreezer(tt);drawBalance();}
+    else{
+      if(S3.play){S3.idx+=Math.max(1,Math.round(RT.hist.length/360));if(S3.idx>=RT.hist.length-1){S3.idx=RT.hist.length-1;S3.play=false;}ref3();}
+      const pt=curPoint(); drawMicro(tt,pt); drawScoop(tt,pt); drawRouteChart(S3.play||S3.idx>0?pt:null);
     }
-
-    iceCrystals = [];
-    for (let i = 0; i < 24; i++) {
-        iceCrystals.push({
-            x: 55 + Math.random() * (canvas.width - 110),
-            y: 65 + Math.random() * (canvas.height - 110),
-            baseSize: 13 + Math.random() * 5,
-            ang: Math.random() * Math.PI
-        });
-    }
+  }catch(e){console.error(e);}
+  requestAnimationFrame(loop);
 }
-
-function setTab(t) {
-    activeTab = t;
-    [1, 2, 3].forEach(i => document.getElementById('tab-' + i).classList.toggle('active', i === t));
-    renderControls();
-    updateUI();
-}
-
-function renderControls() {
-    const panel = document.getElementById('controls-panel');
-
-    if (activeTab === 1) {
-        panel.innerHTML = `
-            <div class="panel-title">🔬 1. Formulación y Maduración del Mix</div>
-            <div class="ctrl-group">
-                <label><span>Tiempo de Maduración a 4 °C :</span><span class="val-tag" id="lbl-age">${agingHours} h</span></label>
-                <input type="range" min="0" max="24" step="2" value="${agingHours}" oninput="agingHours=parseInt(this.value); document.getElementById('lbl-age').innerText=this.value+' h'; updateUI();">
-                <div class="scale-notes"><span>0 h (Sin madurar)</span><span>4–24 h (Hidratación/Cristalización)</span></div>
-            </div>
-            <div class="ctrl-group">
-                <label><span>Nivel de Estabilizantes (Gomas/CMC):</span><span class="val-tag" id="lbl-stab">${stabilizerLevel}%</span></label>
-                <input type="range" min="10" max="100" step="10" value="${stabilizerLevel}" oninput="stabilizerLevel=parseInt(this.value); document.getElementById('lbl-stab').innerText=this.value+'%'; updateUI();">
-                <div class="scale-notes"><span>Bajo (Cristales grandes)</span><span>Óptimo (Cristales &lt; 50 µm)</span></div>
-            </div>
-            <div class="kpi-grid">
-                <div class="kpi-box">
-                    <small>Tamaño Cristal Hielo</small>
-                    <strong id="kpi-csize">28 µm (Liso)</strong>
-                </div>
-                <div class="kpi-box">
-                    <small>Celdas de Aire</small>
-                    <strong id="kpi-air">Estables (60 µm)</strong>
-                </div>
-            </div>
-            <div class="status-box" id="tab1-status"></div>
-        `;
-    } 
-    else if (activeTab === 2) {
-        panel.innerHTML = `
-            <div class="panel-title">⚖️ 2. Calculadora de Overrun </div>
-            <div class="ctrl-group">
-                <label><span>Masa de 1.0 L de Mix Líquido:</span><span class="val-tag" id="lbl-mmix">${mixMass} g</span></label>
-                <input type="range" min="1050" max="1150" step="10" value="${mixMass}" oninput="mixMass=parseInt(this.value); document.getElementById('lbl-mmix').innerText=this.value+' g'; updateUI();">
-            </div>
-            <div class="ctrl-group">
-                <label><span>Masa de 1.0 L de Helado Congelado:</span><span class="val-tag" id="lbl-mice">${iceMass} g</span></label>
-                <input type="range" min="450" max="900" step="10" value="${iceMass}" oninput="iceMass=parseInt(this.value); document.getElementById('lbl-mice').innerText=this.value+' g'; updateUI();">
-                <div class="scale-notes"><span>450 g (Mucho aire)</span><span>610 g (Ejemplo CECYBOOK)</span><span>900 g (Pesado)</span></div>
-            </div>
-            <div class="formula-card">
-                <div>Fórmula por Masas (Volumen idéntico = 1.0 L):</div>
-                <div class="formula-math" id="math-expr">[(1100 - 610) / 610] × 100 = 80.3%</div>
-            </div>
-            <div class="status-box" id="tab2-status"></div>
-        `;
-    } 
-    else if (activeTab === 3) {
-        panel.innerHTML = `
-            <div class="panel-title">❄️ 3. Cadena de Frío y Recristalización </div>
-            <div class="ctrl-group">
-                <label><span>Temperatura de Cámara:</span><span class="val-tag" id="lbl-stemp">${storageTemp} °C</span></label>
-                <input type="range" min="-24" max="-6" step="2" value="${storageTemp}" oninput="storageTemp=parseInt(this.value); document.getElementById('lbl-stemp').innerText=this.value+' °C'; updateUI();">
-                <div class="scale-notes"><span>-24 °C (Óptima)</span><span>-18 °C (Límite Cadena Frío)</span><span>-8 °C (Fusión parcial)</span></div>
-            </div>
-            <button class="shock-btn" onclick="triggerThermalShock()">🔥 Simular Fluctuación Térmica (-18 °C ➔ -10 °C ➔ -18 °C)</button>
-            <button class="reset-btn" onclick="shockCycles=0; storageTemp=-18; renderControls(); updateUI();">🔄 Restaurar Helado Recién Endurecido (-18 °C)</button>
-            <div class="kpi-grid">
-                <div class="kpi-box">
-                    <small>Ciclos de Abuso Térmico</small>
-                    <strong id="kpi-shocks">${shockCycles} ciclos</strong>
-                </div>
-                <div class="kpi-box">
-                    <small>Tamaño Cristal Hielo</small>
-                    <strong id="kpi-fsize">30 µm</strong>
-                </div>
-            </div>
-            <div class="status-box" id="tab3-status"></div>
-        `;
-    }
-}
-
-function triggerThermalShock() {
-    shockCycles = Math.min(5, shockCycles + 1);
-    updateUI();
-}
-
-function updateUI() {
-    const hudL = document.getElementById('hud-left');
-    const hudR = document.getElementById('hud-right');
-
-    if (activeTab === 1) {
-        let crystalMicrons = Math.round(62 - (stabilizerLevel * 0.32) - (agingHours * 0.4));
-        document.getElementById('kpi-csize').innerText = crystalMicrons + ' µm ' + (crystalMicrons < 50 ? '(Ideal)' : '(Grande)');
-        document.getElementById('kpi-csize').style.color = crystalMicrons < 50 ? '#10b981' : '#ef4444';
-        document.getElementById('kpi-air').innerText = agingHours >= 4 ? 'Estables (Red Grasa)' : 'Inestables (Colapso)';
-
-        hudL.innerText = '1. Microestructura de las 4 Fases (Goff & Hartel)';
-        hudR.innerText = `Cristales de Hielo: ~${crystalMicrons} µm | Maduración: ${agingHours} h`;
-
-        const st1 = document.getElementById('tab1-status');
-        if (agingHours < 4) {
-            st1.style.borderLeftColor = '#ef4444';
-            st1.innerHTML = `<h4>⚠️ Mix Sin Maduración (${agingHours} h)</h4>Respuesta a la pregunta de la pág. 20: Sin las 4–24 h de maduración en frío (2–5 °C), las proteínas y estabilizantes no se hidratan por completo y la grasa no cristaliza parcialmente. El helado retiene poco aire y se derrite rápido.`;
-        } else if (stabilizerLevel < 40) {
-            st1.style.borderLeftColor = '#f59e0b';
-            st1.innerHTML = `<h4>⚠️ Bajo Nivel de Estabilizantes</h4>El agua libre tiene demasiada movilidad y forma cristales mayores a 50 µm, dando una sensación fría y áspera en boca.`;
-        } else {
-            st1.style.borderLeftColor = '#10b981';
-            st1.innerHTML = `<h4>✅ Sistema Multifásico Equilibrado</h4>Los cristales de hielo miden <b>${crystalMicrons} µm (< 50 µm)</b> y los glóbulos de grasa parcialmente coalescidos rodean las celdas de aire dándole cremosidad y soporte.`;
-        }
-    } 
-    else if (activeTab === 2) {
-        let overrun = ((mixMass - iceMass) / iceMass) * 100;
-        let overStr = overrun.toFixed(1);
-        document.getElementById('math-expr').innerText = `[(${mixMass} - ${iceMass}) / ${iceMass}] × 100 = ${overStr}%`;
-
-        hudL.innerText = '2. Laboratorio de Control de Overrun (Balanza 1.0 L)';
-        hudR.innerText = `Overrun Calculado: ${overStr}%`;
-
-        const st2 = document.getElementById('tab2-status');
-        if (overrun < 45) {
-            st2.style.borderLeftColor = '#38bdf8';
-            st2.innerHTML = `<h4>🧊 Bajo Overrun (${overStr}%) — Helado Pesado</h4>Poca incorporación de aire. El producto tiene alta densidad, cuerpo muy compacto y sensación excesivamente fría al comerlo.`;
-        } else if (overrun <= 100) {
-            st2.style.borderLeftColor = '#10b981';
-            st2.innerHTML = `<h4>✅ Overrun Óptimo (${overStr}%)</h4>Dentro del rango comercial típico (60–100%). Aporta suavidad, cremosidad y excelente sensación en boca sin perder cuerpo.`;
-        } else {
-            st2.style.borderLeftColor = '#ef4444';
-            st2.innerHTML = `<h4>💨 Exceso de Overrun (${overStr}%) — Espumoso</h4>Demasiado aire incorporado: el helado pierde cuerpo, se siente vacío o espumoso y sufre encogimiento o derretimiento acelerado.`;
-        }
-    } 
-    else if (activeTab === 3) {
-        let sizeUm = Math.round(28 + shockCycles * 16 + (storageTemp > -18 ? (storageTemp + 18) * 3 : 0));
-        if (document.getElementById('kpi-shocks')) document.getElementById('kpi-shocks').innerText = shockCycles + ' ciclos';
-        if (document.getElementById('kpi-fsize')) {
-            document.getElementById('kpi-fsize').innerText = sizeUm + ' µm';
-            document.getElementById('kpi-fsize').style.color = sizeUm < 50 ? '#10b981' : '#ef4444';
-        }
-
-        hudL.innerText = `3. Almacenamiento (${storageTemp} °C) | Fluctuaciones: ${shockCycles}`;
-        hudR.innerText = sizeUm < 50 ? `Cristales: ${sizeUm} µm (< 50 µm, Textura Cremosa)` : `⚠️ Recristalización: ${sizeUm} µm (> 50 µm, Textura Áspera)`;
-
-        const st3 = document.getElementById('tab3-status');
-        if (sizeUm < 50 && storageTemp <= -18) {
-            st3.style.borderLeftColor = '#10b981';
-            st3.innerHTML = `<h4>✅ Cadena de Frío Estable (≤ -18 °C)</h4>Los cristales de hielo se mantienen pequeños y uniformes (${sizeUm} µm). Las celdas de aire conservan su volumen y la textura es suave y cremosa.`;
-        } else {
-            st3.style.borderLeftColor = '#ef4444';
-            st3.innerHTML = `<h4>❌ Defecto por Recristalización (${sizeUm} µm)</h4>Al subir la temperatura se funden los cristales pequeños; al volver a congelar, esa agua se une a los cristales existentes formando <b>cristales gigantes e irregulares (> 50 µm)</b> con pérdida de overrun y textura áspera/granulosa.`;
-        }
-    }
-}
-
-function drawBalanceMode() {
-    ctx.fillStyle = '#071120';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    let overrun = ((mixMass - iceMass) / iceMass) * 100;
-
-    // Balanza Izquierda: 1.0 L de Mix Líquido
-    drawScaleUnit(215, 290, '1.0 L de Mix Líquido', mixMass + ' g', '#fde68a', false, 0);
-
-    // Balanza Derecha: 1.0 L de Helado Congelado
-    drawScaleUnit(545, 290, '1.0 L de Helado Congelado', iceMass + ' g', '#fef08a', true, overrun);
-
-    // Letrero Central de Comparación (Figura 20)
-    ctx.fillStyle = '#1e293b';
-    ctx.strokeStyle = '#fcd34d';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.roundRect(canvas.width / 2 - 165, 48, 330, 54, 10);
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.fillStyle = '#fcd34d';
-    ctx.font = 'bold 14px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(`Diferencia de masa: ${mixMass - iceMass} g (Aire Incorporado)`, canvas.width / 2, 70);
-    ctx.fillStyle = '#38bdf8';
-    ctx.font = 'bold 13px sans-serif';
-    ctx.fillText(`Overrun = ${overrun.toFixed(1)}% de incremento de volumen`, canvas.width / 2, 91);
-}
-
-function drawScaleUnit(cx, baseY, title, weightText, liquidColor, isAerated, overrunVal) {
-    // Recipiente graduado de 1.0 L
-    let w = 150, h = 155;
-    let rx = cx - w / 2, ry = baseY - h;
-
-    // Contenido de 1.0 L
-    ctx.fillStyle = liquidColor;
-    ctx.fillRect(rx + 4, ry + 22, w - 8, h - 24);
-
-    // Si es helado, dibujar burbujas de aire proporcionales al overrun
-    if (isAerated) {
-        let numBubbles = Math.min(45, Math.round(overrunVal * 0.35));
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-        ctx.strokeStyle = '#94a3b8';
-        ctx.lineWidth = 1;
-        for (let i = 0; i < numBubbles; i++) {
-            let bx = rx + 18 + ((i * 29) % (w - 36));
-            let by = ry + 34 + ((i * 23) % (h - 44));
-            ctx.beginPath();
-            ctx.arc(bx, by, 5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-        }
-    }
-
-    // Vaso transparente
-    ctx.strokeStyle = '#cbd5e1';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(rx, ry, w, h);
-
-    ctx.fillStyle = '#0f172a';
-    ctx.font = 'bold 13px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('1.0 L', cx, ry + h / 2);
-
-    // Plataforma de la balanza digital
-    ctx.fillStyle = '#475569';
-    ctx.fillRect(cx - 95, baseY, 190, 12);
-    ctx.fillStyle = '#1e293b';
-    ctx.strokeStyle = '#64748b';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.roundRect(cx - 85, baseY + 12, 170, 52, 8);
-    ctx.fill();
-    ctx.stroke();
-
-    // Pantalla LCD de la balanza
-    ctx.fillStyle = '#022c22';
-    ctx.fillRect(cx - 60, baseY + 20, 120, 34);
-    ctx.fillStyle = '#34d399';
-    ctx.font = 'bold 20px monospace';
-    ctx.fillText(weightText, cx, baseY + 44);
-
-    // Título superior del vaso
-    ctx.fillStyle = '#f8fafc';
-    ctx.font = 'bold 13.5px sans-serif';
-    ctx.fillText(title, cx, ry - 10);
-}
-
-function drawMicrostructureCanvas() {
-    // Fondo: Fase acuosa no congelada concentrada en azúcares y estabilizantes
-    ctx.fillStyle = '#1e1b4b';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Escala de los cristales de hielo según el modo activo
-    let crystalGrowth = 1.0;
-    if (activeTab === 1) {
-        crystalGrowth = 1.5 - (stabilizerLevel / 120) - (agingHours / 60);
-    } else if (activeTab === 3) {
-        crystalGrowth = 1.0 + (shockCycles * 0.42) + (storageTemp > -18 ? (storageTemp + 18) * 0.08 : 0);
-    }
-
-    // 1. Dibujar Cristales de Hielo
-    iceCrystals.forEach(ic => {
-        ctx.save();
-        ctx.translate(ic.x, ic.y);
-        ctx.rotate(ic.ang);
-        let s = ic.baseSize * crystalGrowth;
-
-        ctx.fillStyle = crystalGrowth > 1.45 ? 'rgba(56, 189, 248, 0.9)' : 'rgba(125, 211, 252, 0.8)';
-        ctx.strokeStyle = crystalGrowth > 1.45 ? '#ef4444' : '#38bdf8';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(0, -s);
-        ctx.lineTo(s * 0.75, -s * 0.25);
-        ctx.lineTo(s * 0.75, s * 0.25);
-        ctx.lineTo(0, s);
-        ctx.lineTo(-s * 0.75, s * 0.25);
-        ctx.lineTo(-s * 0.75, -s * 0.25);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-    });
-
-    // 2. Dibujar Celdas de Aire (Overrun) y Glóbulos de Grasa rodeándolas
-    let visibleAirCount = activeTab === 3 ? Math.max(5, airCells.length - shockCycles * 2) : airCells.length;
-    for (let i = 0; i < visibleAirCount; i++) {
-        let b = airCells[i];
-        b.x += b.vx;
-        b.y += b.vy;
-        if (b.x < 45 || b.x > canvas.width - 45) b.vx *= -1;
-        if (b.y < 60 || b.y > canvas.height - 45) b.vy *= -1;
-
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(248, 250, 252, 0.92)';
-        ctx.fill();
-        ctx.setLineDash([4, 3]);
-        ctx.strokeStyle = '#64748b';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Glóbulos de grasa parcialmente coalescidos en la superficie de la burbuja
-        let fatCoatCount = (activeTab === 1 && agingHours < 4) ? 3 : 8;
-        for (let g = 0; g < fatCoatCount; g++) {
-            let ang = (g * Math.PI * 2) / fatCoatCount;
-            let gx = b.x + Math.cos(ang) * (b.r + 5);
-            let gy = b.y + Math.sin(ang) * (b.r + 5);
-            ctx.beginPath();
-            ctx.arc(gx, gy, 5.5, 0, Math.PI * 2);
-            ctx.fillStyle = '#facc15';
-            ctx.fill();
-            ctx.strokeStyle = '#d97706';
-            ctx.lineWidth = 1.3;
-            ctx.stroke();
-        }
-    }
-}
-
-function animate() {
-    if (activeTab === 2) {
-        drawBalanceMode();
-    } else {
-        drawMicrostructureCanvas();
-    }
-    requestAnimationFrame(animate);
-}
-
-initMicrostructure();
-setTab(1);
-animate();
+sync(); newQ(); refresh(); requestAnimationFrame(loop);
 </script>
-
 </body>
 </html>

@@ -1,523 +1,310 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entrenador Autocalificable: Ordena el Proceso de Mantequilla - Semana 15</title>
-    <style>
-        :root {
-            --bg: #0b1120;
-            --panel: #1e293b;
-            --card: #0f172a;
-            --border: #334155;
-            --text: #f8fafc;
-            --muted: #94a3b8;
-            --accent: #38bdf8;
-            --gold: #fcd34d;
-            --ok: #10b981;
-            --warn: #f59e0b;
-            --err: #ef4444;
-        }
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 18px;
-            display: flex;
-            justify-content: center;
-        }
-        .app-container {
-            max-width: 1120px;
-            width: 100%;
-            background: var(--panel);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid var(--border);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.65);
-        }
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #334155;
-            color: #f8fafc;
-            text-decoration: none;
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 13px;
-            border: 1px solid #475569;
-            transition: 0.2s;
-        }
-        .back-btn:hover {
-            background: #475569;
-            border-color: var(--accent);
-        }
-        .badge {
-            background: rgba(16, 185, 129, 0.15);
-            color: #34d399;
-            border: 1px solid var(--ok);
-            padding: 5px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 700;
-        }
-        header {
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 16px;
-            margin-bottom: 18px;
-        }
-        h1 {
-            margin: 0 0 6px 0;
-            color: var(--gold);
-            font-size: 24px;
-        }
-        .subtitle {
-            color: var(--muted);
-            margin: 0 auto;
-            max-width: 860px;
-            font-size: 14px;
-            line-height: 1.45;
-        }
-
-        /* Guía Lógica de 4 Bloques Tecnológicos */
-        .logic-chain {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 18px;
-        }
-        @media (max-width: 800px) {
-            .logic-chain { grid-template-columns: repeat(2, 1fr); }
-        }
-        .logic-pill {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-top: 3px solid var(--accent);
-            border-radius: 10px;
-            padding: 10px;
-            text-align: center;
-        }
-        .logic-pill strong {
-            display: block;
-            font-size: 13px;
-            color: var(--gold);
-            margin-bottom: 2px;
-        }
-        .logic-pill span {
-            font-size: 11.5px;
-            color: var(--muted);
-        }
-
-        .action-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-            flex-wrap: wrap;
-            gap: 10px;
-            background: var(--card);
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-        }
-        .score-display {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--text);
-        }
-        .btn-group {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .btn-action {
-            border: none;
-            padding: 9px 15px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn-check { background: var(--ok); color: #052e16; }
-        .btn-check:hover { background: #059669; color: white; }
-        .btn-shuffle { background: #0284c7; color: white; }
-        .btn-shuffle:hover { background: #0369a1; }
-        .btn-solve { background: #475569; color: #f8fafc; }
-        .btn-solve:hover { background: #64748b; }
-
-        /* Lista Ordenable */
-        .steps-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .step-item {
-            background: var(--card);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 12px 16px;
-            display: grid;
-            grid-template-columns: 42px 44px 1fr auto;
-            align-items: center;
-            gap: 12px;
-            cursor: grab;
-            transition: transform 0.15s, border-color 0.2s, background 0.2s;
-        }
-        .step-item:active { cursor: grabbing; }
-        .step-item.dragging {
-            opacity: 0.55;
-            border-color: var(--gold);
-            transform: scale(0.99);
-        }
-        .step-item.correct {
-            border-color: var(--ok);
-            background: rgba(16, 185, 129, 0.1);
-        }
-        .step-item.wrong {
-            border-color: var(--err);
-            background: rgba(239, 68, 68, 0.1);
-        }
-        @media (max-width: 680px) {
-            .step-item {
-                grid-template-columns: 34px 38px 1fr;
-            }
-            .move-controls {
-                grid-column: 1 / -1;
-                justify-content: flex-end;
-            }
-        }
-
-        .pos-badge {
-            width: 34px;
-            height: 34px;
-            border-radius: 8px;
-            background: #1e293b;
-            border: 1px solid #475569;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 14px;
-            color: var(--muted);
-        }
-        .key-badge {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: rgba(56, 189, 248, 0.15);
-            border: 2px solid var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 15px;
-            color: var(--accent);
-        }
-        .step-content {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .step-text {
-            font-size: 14px;
-            font-weight: 600;
-            color: #f1f5f9;
-            line-height: 1.35;
-        }
-        .step-feedback {
-            font-size: 12px;
-            line-height: 1.4;
-            display: none;
-            padding-top: 4px;
-        }
-        .move-controls {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .phase-tag {
-            font-size: 11px;
-            padding: 3px 8px;
-            border-radius: 6px;
-            background: #1e293b;
-            color: #cbd5e1;
-            border: 1px solid #334155;
-            margin-right: 4px;
-            white-space: nowrap;
-        }
-        .arrow-btn {
-            background: #1e293b;
-            border: 1px solid #475569;
-            color: #f8fafc;
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            transition: 0.15s;
-        }
-        .arrow-btn:hover:not(:disabled) {
-            background: var(--accent);
-            color: #0f172a;
-            border-color: var(--accent);
-        }
-        .arrow-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .summary-banner {
-            margin-top: 16px;
-            padding: 15px;
-            border-radius: 12px;
-            background: var(--card);
-            border-left: 5px solid var(--gold);
-            font-size: 13.5px;
-            line-height: 1.5;
-            display: none;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ordena los Procesos: Mantequilla, Crema y Helado · Semana 15</title>
+<style>
+:root{
+  --navy:#12306b; --navy-2:#1d4196; --ink:#0f1b33; --text:#22304a; --muted:#64748b;
+  --bg:#eef2f8; --card:#ffffff; --line:#dbe3ef; --soft:#f6f8fc;
+  --orange:#f05a28; --magenta:#d61f5c; --ok:#16a34a; --warn:#d97706; --bad:#dc2626;
+  --mp:#0ea5e9; --ac:#f59e0b; --tr:#eab308; --es:#16a34a;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--text);padding:18px;line-height:1.45}
+.app{max-width:1100px;margin:0 auto;background:var(--card);border-radius:18px;box-shadow:0 12px 34px rgba(15,27,51,.10);overflow:hidden}
+.topbar{height:6px;background:linear-gradient(90deg,var(--orange),var(--magenta))}
+header{padding:16px 24px 6px}
+.back{display:inline-flex;align-items:center;gap:6px;background:#334155;color:#f8fafc;text-decoration:none;padding:8px 14px;border-radius:8px;font-weight:600;font-size:13px;border:1px solid #475569;margin-bottom:12px}
+.back:hover{background:#1e293b}
+.title-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+h1{margin:0;color:var(--navy);font-size:26px;letter-spacing:-.3px}
+.subtitle{color:var(--muted);font-size:14px;margin-top:2px;max-width:780px}
+.week-tag{background:var(--navy);color:#fff;font-weight:700;font-size:12px;padding:6px 12px;border-radius:999px;white-space:nowrap}
+.week-tag b{color:#ffb38f}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 24px 0}
+@media (max-width:860px){.tabs{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:480px){.tabs{grid-template-columns:1fr}}
+.tab{border:2px solid var(--line);background:#fff;border-radius:12px;padding:10px 14px;text-align:left;cursor:pointer;font:inherit;color:var(--muted);position:relative}
+.tab b{display:block;font-size:15px;color:inherit}
+.tab small{font-size:12.5px}
+.tab.on{border-color:var(--navy);background:#eef3ff;color:var(--navy)}
+.tab .st{position:absolute;top:8px;right:10px;font-size:13px}
+.pane{display:none;padding:12px 24px 18px}
+.pane.show{display:block}
+.box{padding:12px 14px;border-radius:12px;background:var(--soft);border-left:5px solid var(--navy);font-size:13.5px}
+.box h3{margin:0 0 6px;font-size:15px;color:var(--navy)}
+.box p{margin:5px 0}
+.logic{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:10px 0}
+.logic span{border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:700;color:#fff}
+.logic i{color:var(--muted);font-style:normal;font-weight:800}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:10px 0}
+.bar .msg{font-size:13.5px;font-weight:600}
+.btn{border:0;border-radius:10px;padding:9px 13px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+.btn-primary{background:var(--navy);color:#fff}
+.btn-ghost{background:#fff;border:1.5px solid var(--line);color:var(--text)}
+.btn-accent{background:linear-gradient(90deg,var(--orange),var(--magenta));color:#fff}
+.btns{display:flex;gap:6px;flex-wrap:wrap}
+.list{display:flex;flex-direction:column;gap:8px}
+.item{display:grid;grid-template-columns:38px 40px 1fr auto;gap:10px;align-items:center;background:#fff;border:2px solid var(--line);border-radius:14px;padding:9px 12px;cursor:pointer;user-select:none;transition:border-color .15s,background .15s,transform .15s;touch-action:manipulation}
+.item:hover{border-color:#b9c7dd}
+.item.sel{border-color:var(--orange);background:#fff7ed;transform:scale(1.01)}
+.item.ok{border-color:var(--ok);background:#f0fdf4}
+.item.bad{border-color:var(--bad);background:#fef2f2}
+.item.drag{opacity:.5}
+.item.over{border-style:dashed;border-color:var(--navy-2)}
+.pos{width:32px;height:32px;border-radius:8px;background:var(--soft);border:1px solid var(--line);display:grid;place-items:center;font-weight:800;font-size:13px;color:var(--muted)}
+.key{width:36px;height:36px;border-radius:50%;background:#eef3ff;border:2px solid var(--navy-2);display:grid;place-items:center;font-weight:800;color:var(--navy)}
+.txt{font-size:14px;font-weight:600;color:var(--ink)}
+.txt small{display:block;font-weight:500;color:#475569;font-size:12.5px;margin-top:3px}
+.txt .ph{display:inline-block;font-size:11px;font-weight:800;color:#fff;border-radius:999px;padding:1px 8px;margin-right:6px;vertical-align:1px}
+.arrows{display:flex;gap:4px}
+.arrows button{width:32px;height:32px;border-radius:8px;border:1.5px solid var(--line);background:#fff;font-weight:800;cursor:pointer;color:var(--navy)}
+.arrows button:disabled{opacity:.3;cursor:default}
+@media (max-width:620px){.item{grid-template-columns:30px 34px 1fr}.arrows{grid-column:1/-1;justify-content:flex-end}}
+.fb{display:none}
+.item.ok .fb,.item.bad .fb{display:block}
+.result{margin-top:12px}
+.verdict{padding:10px 12px;border-radius:12px;font-size:13.5px}
+.verdict.good{background:#f0fdf4;border:1px solid #bbf7d0;color:#14532d}
+.verdict.bad{background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d}
+.verdict.mid{background:#fffbeb;border:1px solid #fde68a;color:#78350f}
+.verdict h4{margin:0 0 4px;font-size:15px}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+.flow span{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:4px 9px;font-size:12px;font-weight:700}
+.flow i{color:var(--muted);font-style:normal}
+/* reto de inicio */
+.pool{display:flex;flex-wrap:wrap;gap:8px;min-height:52px;padding:10px;border:2px dashed var(--line);border-radius:12px;background:#fff}
+.chipv{background:#fff;border:1.5px solid #cbd5e1;border-radius:10px;padding:7px 11px;font-weight:700;font-size:13px;cursor:pointer;user-select:none;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.chipv.sel{outline:3px solid var(--orange)}
+.chipv.right{border-color:var(--ok);background:#f0fdf4}
+.chipv.wrong{border-color:var(--bad);background:#fef2f2}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+@media (max-width:760px){.cols{grid-template-columns:1fr}}
+.colp{border:2px solid var(--line);border-radius:14px;background:var(--soft);padding:10px;min-height:200px;display:flex;flex-direction:column;gap:6px;cursor:pointer}
+.colp.over{border-color:var(--orange);background:#fff7ed}
+.colp h4{margin:0;font-size:15px;color:var(--ink)}
+.colp select{padding:6px;border-radius:8px;border:1.5px solid var(--line);font-family:inherit;font-size:13px;font-weight:700;background:#fff}
+.colp select.right{border-color:var(--ok);background:#f0fdf4}
+.colp select.wrong{border-color:var(--bad);background:#fef2f2}
+.colp .drop{display:flex;flex-direction:column;gap:6px;flex:1}
+details.teacher{margin:0 24px 22px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:#fbfcfe;font-size:13.5px}
+details.teacher summary{cursor:pointer;font-weight:700;color:var(--navy)}
+details.teacher li{margin:3px 0}
+footer{padding:0 24px 18px;font-size:11.5px;color:var(--muted)}
+</style>
 </head>
 <body>
-
-<div class="app-container">
-    <div class="top-bar">
-        <a href="index.html" class="back-btn">⬅ Volver al Menú Principal</a>
-        <span class="badge">CECYBOOK SEMANA 15 </span>
+<div class="app">
+  <div class="topbar"></div>
+  <header>
+    <a class="back" href="index.html">⬅ Volver al Menú Principal</a>
+    <div class="title-row">
+      <div>
+        <h1>🧩 Ordena los procesos</h1>
+        <div class="subtitle">No memorices letras: usa la lógica <b>materia prima → acondicionamiento → transformación → estabilización</b>. Si te equivocas, verás qué pasaría en la planta con ese orden.</div>
+      </div>
+      <div class="week-tag">Semana 15 · <b>Actividad I (p. 32) y Reto de inicio (p. 5)</b></div>
     </div>
+  </header>
 
-    <header>
-        <h1>🧩 Entrenador Autocalificable: Ordena el Proceso de Mantequilla</h1>
-        <p class="subtitle">
-            <strong>No memorices letras:</strong> Ordena los 8 pasos oficiales (Claves A–H) aplicando la secuencia lógica de ingeniería de alimentos: <em>Materia prima ➔ Acondicionamiento ➔ Transformación ➔ Estabilización</em>.
-        </p>
-    </header>
+  <div class="tabs">
+    <button class="tab on" data-t="man"><span class="st" id="st-man"></span><b>1 · Mantequilla</b><small>Actividad I, claves A–H</small></button>
+    <button class="tab" data-t="cre"><span class="st" id="st-cre"></span><b>2 · Crema</b><small>Figura 8</small></button>
+    <button class="tab" data-t="hel"><span class="st" id="st-hel"></span><b>3 · Helado</b><small>Figuras 16–22</small></button>
+    <button class="tab" data-t="ret"><span class="st" id="st-ret"></span><b>4 · Reto de inicio</b><small>Separar, invertir, congelar</small></button>
+  </div>
 
-    <!-- Bloques de Lógica Tecnológica -->
-    <div class="logic-chain">
-        <div class="logic-pill">
-            <strong>1. Materia Prima (Pasos 1–2)</strong>
-            <span>Recepción, descremado y estandarización (35–42% grasa)</span>
-        </div>
-        <div class="logic-pill" style="border-top-color: #f59e0b;">
-            <strong>2. Acondicionamiento (Pasos 3–4)</strong>
-            <span>Pasteurización (85 °C/15 s) y maduración física en frío</span>
-        </div>
-        <div class="logic-pill" style="border-top-color: #eab308;">
-            <strong>3. Transformación (Pasos 5–6)</strong>
-            <span>Batido (inversión O/W a W/O), drenado de suero y lavado</span>
-        </div>
-        <div class="logic-pill" style="border-top-color: #10b981;">
-            <strong>4. Estabilización (Pasos 7–8)</strong>
-            <span>Amasado (working), salado (1–2%) y envasado en frío</span>
-        </div>
-    </div>
+  <div class="pane show" data-p="man"></div>
+  <div class="pane" data-p="cre"></div>
+  <div class="pane" data-p="hel"></div>
 
-    <div class="action-bar">
-        <div class="score-display" id="score-text">Arrastra las tarjetas o usa las flechas (↑ / ↓) para ordenar los pasos del 1° al 8°.</div>
-        <div class="btn-group">
-            <button class="btn-action btn-check" onclick="evaluateOrder()">✅ Verificar Orden</button>
-            <button class="btn-action btn-shuffle" onclick="shuffleSteps()">🔀 Revolver de Nuevo</button>
-            <button class="btn-action btn-solve" onclick="showSolution()">💡 Mostrar Orden Correcto</button>
-        </div>
-    </div>
+  <div class="pane" data-p="ret">
+    <div class="box"><h3>🧭 Reto de inicio (p. 5)</h3>«Dibuja tres flechas desde “leche”. En cada una escribe una palabra que resuma el cambio dominante: <b>separar, invertir o congelar/airear</b>. Al final de la semana vuelve al dibujo y complétalo con las <b>variables críticas</b>.» Elige el verbo de cada producto y lleva cada variable a su columna (en celular: toca la variable y luego la columna).</div>
+    <div class="pool" id="vpool" style="margin-top:12px"></div>
+    <div class="cols" id="vcols"></div>
+    <div class="bar"><span class="msg" id="vmsg">Coloca las 9 variables y elige los 3 verbos.</span><div class="btns"><button class="btn btn-primary" id="vchk">✅ Revisar</button><button class="btn btn-ghost" id="vrst">↺ Volver a empezar</button></div></div>
+    <div class="result" id="vres"></div>
+  </div>
 
-    <div class="steps-list" id="steps-container"></div>
-
-    <div class="summary-banner" id="summary-banner"></div>
+  <details class="teacher">
+    <summary>👩‍🏫 Notas para el docente</summary>
+    <ul>
+      <li><b>Cómo se ordena:</b> se puede arrastrar (computadora), usar las flechas ↑ ↓, o <b>tocar dos tarjetas para intercambiarlas</b>. Esto último funciona en celular; el arrastre de la versión anterior no funcionaba en pantallas táctiles.</li>
+      <li><b>Sin pistas antes de calificar:</b> la versión anterior mostraba en cada tarjeta su etapa («1. Materia prima», etc.) y en la guía superior qué número de paso correspondía a cada etapa, lo que regalaba la respuesta. Ahora la etapa aparece solo al revisar.</li>
+      <li><b>Retroalimentación por dependencias:</b> además de marcar cada posición como correcta o incorrecta, se revisa si algún paso quedó <b>antes de otro que necesita</b>. En ese caso se muestra la consecuencia en planta (por ejemplo, madurar antes de pasteurizar: el calor funde los cristales).</li>
+      <li><b>Crema:</b> la secuencia es la de la Figura 8 (p. 10). La clarificación y la homogeneización están marcadas como opcionales, igual que en el CECYBOOK.</li>
+      <li><b>Helado:</b> la secuencia une las Figuras 16, 18a, 19 y 22: mezcla → pasteurización → homogeneización → enfriamiento y maduración → congelación dinámica → envasado → endurecimiento → almacenamiento → distribución.</li>
+      <li><b>Valores:</b> los números que aparecen en las explicaciones (85 °C/15 s, 2–5 °C, 4–24 h, −25 a −40 °C, ≤ −18 °C) son los del CECYBOOK y se presentan como referencias de proceso, no como límites legales únicos.</li>
+    </ul>
+  </details>
+  <footer>Recurso didáctico complementario · CECYBOOK Semana 15 · 7.4 Crema y mantequilla · 7.5 Helados.</footer>
 </div>
 
 <script>
-// Los 8 pasos oficiales de la página 32 del CECYBOOK Semana 15
-const CORRECT_STEPS = [
-    {
-        order: 1,
-        key: 'C',
-        phase: '1. Materia Prima',
-        text: 'Recibir y evaluar la leche o crema base.',
-        rationale: 'Todo proceso lácteo inicia verificando calidad fisicoquímica (acidez, densidad, grasa) e inocuidad de la materia prima en recepción (2–4 °C).'
-    },
-    {
-        order: 2,
-        key: 'E',
-        phase: '1. Materia Prima',
-        text: 'Separar la crema y estandarizar su contenido de grasa según el producto objetivo.',
-        rationale: 'Mediante centrifugación se concentra la fracción grasa y se estandariza típicamente entre 35 y 42% m/m para alimentar la línea de mantequilla.'
-    },
-    {
-        order: 3,
-        key: 'F',
-        phase: '2. Acondicionamiento',
-        text: 'Pasteurizar la crema mediante el proceso establecido y enfriar.',
-        rationale: 'La crema estandarizada se pasteuriza (ej. 85 °C por 15 s) para eliminar patógenos e inactivar enzimas lipolíticas que causarían rancidez.'
-    },
-    {
-        order: 4,
-        key: 'G',
-        phase: '2. Acondicionamiento',
-        text: 'Madurar físicamente la crema en frío para desarrollar la fracción sólida de grasa requerida.',
-        rationale: 'Antes de batir, el reposo en frío permite cristalizar parcialmente los triglicéridos. Sin este equilibrio sólido/líquido el batido falla.'
-    },
-    {
-        order: 5,
-        key: 'A',
-        keyColor: '#fcd34d',
-        phase: '3. Transformación',
-        text: 'Batir la crema hasta observar formación de gránulos y separación del suero de mantequilla.',
-        rationale: 'La energía mecánica rompe la membrana MFGM, une los glóbulos por coalescencia e invierte la emulsión de O/W a W/O (8–15 °C).'
-    },
-    {
-        order: 6,
-        key: 'H',
-        phase: '3. Transformación',
-        text: 'Drenar el suero de mantequilla y efectuar lavado si forma parte del procedimiento.',
-        rationale: 'Una vez formados los gránulos amarillentos, se separa el buttermilk y se lava con agua fría (8–15 °C) para remover lactosa y solubles residuales.'
-    },
-    {
-        order: 7,
-        key: 'D',
-        phase: '4. Estabilización',
-        text: 'Amasar para distribuir humedad y lograr textura uniforme; salar si corresponde.',
-        rationale: 'El amasado (working) une los gránulos en una masa plástica, microdistribuye el agua (≤ 16%, evitando el "llorado") e incorpora 1–2% de sal.'
-    },
-    {
-        order: 8,
-        key: 'B',
-        phase: '4. Estabilización',
-        text: 'Envasar y mantener el producto bajo las condiciones de conservación establecidas.',
-        rationale: 'El bloque plástico con ≥ 80% de grasa se moldea, envasa higiénicamente y se almacena en refrigeración protegida de la luz y el oxígeno.'
-    }
-];
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const PH={mp:['Materia prima','var(--mp)'],ac:['Acondicionamiento','var(--ac)'],tr:['Transformación','var(--tr)'],es:['Estabilización','var(--es)']};
 
-let currentList = [];
-let draggedIdx = null;
+/* ===================== datos ===================== */
+const SETS={
+ man:{title:'🧈 Elaboración de mantequilla',intro:'Ordena los 8 pasos de la Actividad I (p. 32). Las letras son las claves del CECYBOOK.',
+  steps:[
+   {k:'C',t:'Recibir y evaluar la leche o crema base.',ph:'mp',why:'Todo empieza verificando la calidad (acidez, densidad, grasa) e inocuidad de la materia prima.'},
+   {k:'E',t:'Separar la crema y estandarizar su contenido de grasa según el producto objetivo.',ph:'mp',why:'La centrífuga concentra la grasa; para mantequilla, la crema suele estandarizarse a 35–42 % (Figura 14).',need:{C:'No puedes separar la crema de una leche que todavía no has recibido ni evaluado.'}},
+   {k:'F',t:'Pasteurizar la crema mediante el proceso establecido y enfriar.',ph:'ac',why:'Reduce microorganismos y controla enzimas lipolíticas (referencia industrial: 85 °C por 15 s o más intenso).',need:{E:'En la línea de mantequilla se pasteuriza la crema ya separada y estandarizada.'}},
+   {k:'G',t:'Madurar físicamente la crema en frío para desarrollar la fracción sólida de grasa requerida.',ph:'ac',why:'El reposo en frío cristaliza parte de la grasa: sin esa mezcla de grasa sólida y líquida, el batido falla.',need:{F:'Si maduras antes de pasteurizar, el calentamiento funde todos los cristales: se pierde la maduración.'}},
+   {k:'A',t:'Batir la crema hasta observar formación de gránulos y separación del suero de mantequilla.',ph:'tr',why:'Los choques rompen la membrana de los glóbulos, ocurre coalescencia parcial y se separan gránulos y buttermilk.',need:{G:'Sin maduración, la grasa está casi líquida: batido descontrolado, pérdidas en el buttermilk y mantequilla blanda.',F:'Batir crema sin pasteurizar compromete la inocuidad y deja activas las enzimas que enrancian.'}},
+   {k:'H',t:'Drenar el suero de mantequilla y efectuar lavado si forma parte del procedimiento.',ph:'tr',why:'Se retira el buttermilk; el lavado con agua fría quita el suero que queda entre los gránulos.',need:{A:'No hay buttermilk que drenar si todavía no se ha batido.'}},
+   {k:'D',t:'Amasar para distribuir humedad y lograr textura uniforme; salar si corresponde.',ph:'es',why:'El amasado une los gránulos y reparte el agua en microgotas (evita el «llorado»); la sal se incorpora aquí.',need:{H:'Si amasas con el buttermilk dentro, la mantequilla queda con exceso de suero y humedad.',A:'Sin batido no hay gránulos que amasar.'}},
+   {k:'B',t:'Envasar y mantener el producto bajo las condiciones de conservación establecidas.',ph:'es',why:'Envasado higiénico y refrigeración: la mantequilla no es estéril.',need:{D:'Envasar gránulos sin amasar deja bolsas de agua, «llorado» y textura no uniforme.'}}
+  ]},
+ cre:{title:'🥛 Elaboración de crema',intro:'Ordena las 10 operaciones del diagrama industrial de la Figura 8 (p. 10).',
+  steps:[
+   {k:'1',t:'Recepción de la leche: verificar calidad y almacenar en frío (2–4 °C).',ph:'mp',why:'Se revisan acidez, densidad e inocuidad antes de procesar.'},
+   {k:'2',t:'Filtración y acondicionamiento de temperatura.',ph:'mp',why:'Se eliminan impurezas y se lleva la leche a la temperatura de proceso.',need:{1:'No se puede filtrar una leche que no se ha recibido.'}},
+   {k:'3',t:'Clarificación (opcional): remover partículas finas con un clarificador centrífugo.',ph:'mp',why:'Quita sedimentos finos antes de separar.',need:{2:'La clarificación fina va después de la filtración gruesa.'}},
+   {k:'4',t:'Separación de la grasa por centrifugación: crema (35–45 %) y descremada (≤ 0.5 %).',ph:'ac',why:'La centrífuga redistribuye la grasa en dos corrientes.',need:{2:'Las impurezas sin filtrar ensucian y desgastan la descremadora.'}},
+   {k:'5',t:'Estandarización: ajustar el % de grasa al tipo de crema.',ph:'ac',why:'Se mezcla crema y descremada para llegar al valor objetivo.',need:{4:'No puedes estandarizar una crema que todavía no has separado.'}},
+   {k:'6',t:'Homogeneización (opcional): reducir el tamaño de los glóbulos.',ph:'tr',why:'Mejora la estabilidad y evita que la crema se separe.',need:{5:'Si homogeneizas antes de estandarizar, la mezcla posterior queda con glóbulos de distinto tamaño y la grasa final no está ajustada.'}},
+   {k:'7',t:'Pasteurización (85–95 °C por 15–30 s).',ph:'tr',why:'Inactiva microorganismos y prolonga la vida de anaquel.',need:{5:'Si pasteurizas y después estandarizas, la descremada que agregas al final no queda tratada junto con la crema.'}},
+   {k:'8',t:'Enfriamiento a 2–6 °C.',ph:'es',why:'Detiene el crecimiento microbiano después del tratamiento térmico.',need:{7:'Enfriar antes de pasteurizar no sirve: el producto se calentaría después.'}},
+   {k:'9',t:'Envasado en condiciones higiénicas.',ph:'es',why:'Evita la recontaminación después de pasteurizar.',need:{8:'Envasar caliente acelera el deterioro y puede separar la crema.',7:'Envasar sin pasteurizar: el producto no es inocuo.'}},
+   {k:'10',t:'Almacenamiento en refrigeración (2–6 °C) hasta su distribución.',ph:'es',why:'La cadena de frío conserva la calidad.',need:{9:'Se almacena el producto ya envasado.'}}
+  ]},
+ hel:{title:'🍨 Elaboración de helado',intro:'Ordena las 9 operaciones del helado (Figuras 16, 18a, 19 y 22).',
+  steps:[
+   {k:'1',t:'Mezclar los ingredientes del mix (leche, SNG, azúcares, grasa, estabilizantes, emulsificantes).',ph:'mp',why:'La formulación define cuánta agua se congela, el dulzor y la textura (Tabla 1).'},
+   {k:'2',t:'Pasteurizar el mix (> 80 °C por > 25 s).',ph:'ac',why:'Inactiva microorganismos patógenos y enzimas; requisito sanitario (NOM-243).',need:{1:'Lo que agregues después de pasteurizar no queda tratado térmicamente.'}},
+   {k:'3',t:'Homogeneizar (50–200 bar, entrada > 75 °C).',ph:'ac',why:'Reduce los glóbulos de grasa y aumenta el área interfacial.',need:{1:'No hay nada que homogeneizar sin el mix.'}},
+   {k:'4',t:'Enfriar a 2–5 °C y madurar 4–24 h.',ph:'ac',why:'Se hidratan estabilizantes y proteínas y cristaliza parte de la grasa.',need:{2:'Si maduras y después pasteurizas, el calor deshace la cristalización de la grasa.',3:'La homogeneización se hace en caliente; si homogeneizas después de madurar, pierdes la grasa cristalizada.'}},
+   {k:'5',t:'Congelación dinámica: congelar parte del agua mientras se incorpora aire (overrun).',ph:'tr',why:'Se forman cristales pequeños y celdas de aire estabilizadas por la grasa.',need:{4:'Sin maduración, el mix retiene menos aire y se derrite más rápido (p. 20).'}},
+   {k:'6',t:'Envasar el helado al salir del congelador (−4 a −6 °C).',ph:'es',why:'Sale blando y se envasa así, antes de endurecerlo.',need:{5:'Primero hay que congelar e incorporar aire.'}},
+   {k:'7',t:'Endurecimiento rápido en túnel o cámara (−25 a −40 °C).',ph:'es',why:'Congela más agua rápido y forma cristales pequeños.',need:{6:'El endurecimiento se hace con el helado ya envasado; si lo endureces antes, ya no se puede llenar el envase.'}},
+   {k:'8',t:'Almacenar a −18 °C o menos, sin fluctuaciones.',ph:'es',why:'Evita la recristalización del hielo.',need:{7:'Almacenar sin endurecer rápido: el hielo se forma lento y los cristales crecen.'}},
+   {k:'9',t:'Distribuir y vender manteniendo la cadena de frío (≤ −18 °C).',ph:'es',why:'Las subidas de temperatura dan textura áspera (Figura 23).',need:{8:'El producto llega al cliente desde el almacén.'}}
+  ]}
+};
 
-function shuffleSteps() {
-    currentList = [...CORRECT_STEPS];
-    // Mezclar garantizando que no quede ordenado de inicio
-    for (let i = currentList.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [currentList[i], currentList[j]] = [currentList[j], currentList[i]];
-    }
-    document.getElementById('score-text').innerHTML = 'Arrastra las tarjetas o usa las flechas (↑ / ↓) para ordenar los pasos del 1° al 8°.';
-    document.getElementById('summary-banner').style.display = 'none';
-    renderList(false);
+/* claves con letras que no revelan el orden */
+function remap(id,letters){const m={};SETS[id].steps.forEach((s,i)=>m[s.k]=letters[i]);SETS[id].steps.forEach(s=>{s.k=m[s.k];if(s.need){const n={};Object.keys(s.need).forEach(k=>n[m[k]]=s.need[k]);s.need=n;}});}
+remap('cre',['K','R','B','T','F','M','D','P','J','S']);
+remap('hel',['N','G','W','C','L','Y','E','Q','H']);
+/* ===================== componente de ordenamiento ===================== */
+const STATE={};
+function shuffle(a){a=[...a];do{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}while(a.every((x,i)=>x.idx===i));return a;}
+function buildSet(id){
+  const S=SETS[id], pane=$(`.pane[data-p="${id}"]`);
+  const steps=S.steps.map((s,i)=>({...s,idx:i}));
+  STATE[id]={list:shuffle(steps),checked:false,sel:null,tries:0,solved:false};
+  pane.innerHTML=`<div class="box"><h3>${S.title}</h3>${S.intro}
+    <div class="logic"><span style="background:var(--mp)">Materia prima</span><i>→</i><span style="background:var(--ac)">Acondicionamiento</span><i>→</i><span style="background:var(--tr)">Transformación</span><i>→</i><span style="background:var(--es)">Estabilización</span></div>
+    <div style="font-size:12.5px;color:#475569">Arrastra las tarjetas, usa ↑ ↓ o <b>toca dos tarjetas para intercambiarlas</b>.</div></div>
+   <div class="bar"><span class="msg" id="msg-${id}">Ordena del primero al último paso.</span><div class="btns"><button class="btn btn-primary" data-a="chk">✅ Revisar</button><button class="btn btn-ghost" data-a="shf">🔀 Revolver</button><button class="btn btn-ghost" data-a="sol">💡 Ver solución</button></div></div>
+   <div class="list" id="list-${id}"></div><div class="result" id="res-${id}"></div>`;
+  pane.querySelector('[data-a="chk"]').onclick=()=>check(id);
+  pane.querySelector('[data-a="shf"]').onclick=()=>{STATE[id].list=shuffle(steps);STATE[id].checked=false;STATE[id].sel=null;$('#res-'+id).innerHTML='';$('#msg-'+id).textContent='Ordena del primero al último paso.';render(id);};
+  pane.querySelector('[data-a="sol"]').onclick=()=>{STATE[id].list=[...steps];STATE[id].shown=true;check(id,true);};
+  render(id);
 }
-
-function moveItem(index, direction) {
-    const targetIdx = index + direction;
-    if (targetIdx < 0 || targetIdx >= currentList.length) return;
-    const temp = currentList[index];
-    currentList[index] = currentList[targetIdx];
-    currentList[targetIdx] = temp;
-    renderList(false);
-}
-
-function renderList(showValidation) {
-    const container = document.getElementById('steps-container');
-    container.innerHTML = '';
-
-    currentList.forEach((item, idx) => {
-        const pos = idx + 1;
-        const isRight = item.order === pos;
-
-        const row = document.createElement('div');
-        row.className = 'step-item' + (showValidation ? (isRight ? ' correct' : ' wrong') : '');
-        row.draggable = true;
-
-        row.addEventListener('dragstart', () => {
-            draggedIdx = idx;
-            row.classList.add('dragging');
-        });
-        row.addEventListener('dragend', () => {
-            row.classList.remove('dragging');
-        });
-        row.addEventListener('dragover', (e) => e.preventDefault());
-        row.addEventListener('drop', () => {
-            if (draggedIdx === null || draggedIdx === idx) return;
-            const moved = currentList.splice(draggedIdx, 1)[0];
-            currentList.splice(idx, 0, moved);
-            draggedIdx = null;
-            renderList(false);
-        });
-
-        let feedbackHtml = '';
-        if (showValidation) {
-            if (isRight) {
-                feedbackHtml = `<div class="step-feedback" style="display:block; color:#34d399;">✅ <strong>¡Posición ${pos}° Correcta! (${item.phase}):</strong> ${item.rationale}</div>`;
-            } else {
-                feedbackHtml = `<div class="step-feedback" style="display:block; color:#fca5a5;">❌ <strong>Desviación de secuencia:</strong> La clave <b>${item.key}</b> pertenece a la etapa de <em>${item.phase}</em>. ${item.rationale}</div>`;
-            }
-        }
-
-        row.innerHTML = `
-            <div class="pos-badge">${pos}°</div>
-            <div class="key-badge">${item.key}</div>
-            <div class="step-content">
-                <div class="step-text">${item.text}</div>
-                ${feedbackHtml}
-            </div>
-            <div class="move-controls">
-                <span class="phase-tag">${item.phase}</span>
-                <button class="arrow-btn" onclick="moveItem(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} title="Subir paso">↑</button>
-                <button class="arrow-btn" onclick="moveItem(${idx}, 1)" ${idx === currentList.length - 1 ? 'disabled' : ''} title="Bajar paso">↓</button>
-            </div>
-        `;
-        container.appendChild(row);
+function render(id){
+  const st=STATE[id], L=$('#list-'+id), S=SETS[id];
+  const viol=st.checked?violations(id):{};
+  L.innerHTML=st.list.map((s,i)=>{
+    const ok=s.idx===i, cls=st.checked?(ok?'ok':'bad'):'';
+    let fb='';
+    if(st.checked){fb=`<small class="fb"><span class="ph" style="background:${PH[s.ph][1]}">${PH[s.ph][0]}</span>${ok?'✔ ':'✖ Va en la posición '+(s.idx+1)+'. '}${s.why}${viol[s.k]?`<br><b style="color:#b91c1c">⚠ ¿Qué pasaría? ${viol[s.k]}</b>`:''}</small>`;}
+    return `<div class="item ${cls}${st.sel===i?' sel':''}" draggable="true" data-i="${i}"><div class="pos">${i+1}°</div><div class="key">${s.k}</div><div class="txt">${s.t}${fb}</div>
+      <div class="arrows"><button data-m="-1" ${i===0?'disabled':''} aria-label="Subir">↑</button><button data-m="1" ${i===st.list.length-1?'disabled':''} aria-label="Bajar">↓</button></div></div>`;}).join('');
+  L.querySelectorAll('.item').forEach(el=>{
+    const i=+el.dataset.i;
+    el.addEventListener('click',e=>{
+      const m=e.target.closest('button[data-m]');
+      if(m){e.stopPropagation();move(id,i,i+ +m.dataset.m);return;}
+      if(st.sel===null){st.sel=i;render(id);}
+      else if(st.sel===i){st.sel=null;render(id);}
+      else{const a=st.sel;st.sel=null;swap(id,a,i);}
     });
+    el.addEventListener('dragstart',e=>{st.drag=i;el.classList.add('drag');try{e.dataTransfer.setData('text/plain',String(i));}catch(_){}});
+    el.addEventListener('dragend',()=>el.classList.remove('drag'));
+    el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('over');});
+    el.addEventListener('dragleave',()=>el.classList.remove('over'));
+    el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('over');if(st.drag==null||st.drag===i)return;const it=st.list.splice(st.drag,1)[0];st.list.splice(i,0,it);st.drag=null;afterMove(id);});
+  });
+}
+function afterMove(id){const st=STATE[id];if(st.checked){st.checked=false;$('#res-'+id).innerHTML='';}render(id);}
+function move(id,a,b){const st=STATE[id];if(b<0||b>=st.list.length)return;[st.list[a],st.list[b]]=[st.list[b],st.list[a]];st.sel=null;afterMove(id);}
+function swap(id,a,b){const st=STATE[id];[st.list[a],st.list[b]]=[st.list[b],st.list[a]];afterMove(id);}
+function violations(id){
+  const st=STATE[id], pos={};st.list.forEach((s,i)=>pos[s.k]=i);const v={};
+  st.list.forEach((s,i)=>{if(!s.need)return;for(const k of Object.keys(s.need)){if(pos[k]>i){v[s.k]=s.need[k];break;}}});
+  return v;
+}
+function check(id,sol){
+  const st=STATE[id];st.checked=true;st.sel=null;if(!sol)st.tries++;
+  const hits=st.list.filter((s,i)=>s.idx===i).length, n=st.list.length, v=violations(id), nv=Object.keys(v).length;
+  render(id);
+  const flow=SETS[id].steps.map(s=>`<span style="border-color:${PH[s.ph][1]}">${s.k}</span>`).join('<i>→</i>');
+  let html;
+  if(hits===n){ if(!sol&&!st.shown){st.solved=true;$('#st-'+id).textContent=st.tries===1?'⭐':'✔️';}
+    html=`<div class="verdict good"><h4>${sol?'💡 Este es el orden correcto':`🏆 ¡${n} de ${n}!${st.tries===1?' A la primera.':''}`}</h4>Observa cómo cada etapa prepara la siguiente: primero se asegura la <b>materia prima</b>, luego se <b>acondiciona</b>, después se <b>transforma</b> y al final se <b>estabiliza</b> para conservarla.<div class="flow">${flow}</div></div>`;}
+  else html=`<div class="verdict ${hits>=n/2?'mid':'bad'}"><h4>📊 ${hits} de ${n} en su lugar${nv?` · ${nv} paso${nv>1?'s':''} antes de lo que necesita${nv>1?'n':''}`:''}</h4>Lee las tarjetas en rojo: te dicen a qué posición van y, con ⚠, qué pasaría en la planta con ese orden. Corrige y vuelve a revisar.</div>`;
+  $('#res-'+id).innerHTML=html;
+  $('#msg-'+id).textContent=`Intento ${st.tries||1}: ${hits} de ${n} correctos.`;
 }
 
-function evaluateOrder() {
-    let hits = 0;
-    currentList.forEach((item, idx) => {
-        if (item.order === idx + 1) hits++;
-    });
-
-    renderList(true);
-
-    const scoreEl = document.getElementById('score-text');
-    const banner = document.getElementById('summary-banner');
-    banner.style.display = 'block';
-
-    if (hits === 8) {
-        scoreEl.innerHTML = `🏆 ¡Excelente! 8 / 8 pasos en el orden tecnológico correcto (C ➔ E ➔ F ➔ G ➔ A ➔ H ➔ D ➔ B).`;
-        scoreEl.style.color = '#34d399';
-        banner.style.borderLeftColor = '#10b981';
-        banner.innerHTML = `
-            <strong>🎉 ¡Dominio Completo de la Línea de Mantequilla!</strong><br>
-            Has ordenado con precisión las 4 etapas: <b>1) Materia prima (C, E)</b> obteniendo crema al 35–42% de grasa; <b>2) Acondicionamiento (F, G)</b> pasteurizando y madurando físicamente en frío; <b>3) Transformación (A, H)</b> batiendo para invertir la emulsión (O/W a W/O) y drenando el buttermilk; y <b>4) Estabilización (D, B)</b> mediante el amasado (working), salado y envasado.
-        `;
-    } else {
-        scoreEl.innerHTML = `📊 Resultado: ${hits} de 8 pasos en la posición correcta. Revisa las pistas técnicas en rojo.`;
-        scoreEl.style.color = '#fcd34d';
-        banner.style.borderLeftColor = '#f59e0b';
-        banner.innerHTML = `
-            <strong>💡 Tip de Ingeniería de Procesos:</strong> Recuerda que no puedes <b>batir (A)</b> sin antes haber <b>pasteurizado (F)</b> y <b>madurado físicamente en frío (G)</b> la crema, ni puedes <b>amasar (D)</b> sin haber <b>drenado primero el suero de mantequilla (H)</b>.
-        `;
-    }
+/* ===================== reto de inicio ===================== */
+const PRODS=[['cre','🥛 Crema','separar'],['man','🧈 Mantequilla','invertir'],['hel','🍨 Helado','congelar y airear']];
+const VARS=[
+ ['% de grasa en la leche descremada','cre'],['Velocidad y temperatura del separador','cre'],['Grasa objetivo de la estandarización','cre'],
+ ['Temperatura y tiempo de maduración física','man'],['Tamaño de gránulo al detener el batido','man'],['Humedad (≤ 16 %) y distribución de la sal','man'],
+ ['Overrun (aire incorporado)','hel'],['Temperatura de salida del congelador','hel'],['Fluctuaciones de temperatura en el almacén','hel']];
+const R={place:{},sel:null,verb:{}};
+function buildRet(){
+  R.place={};R.sel=null;R.verb={};
+  const order=[...VARS.keys()].sort(()=>Math.random()-0.5);
+  $('#vpool').innerHTML=order.map(i=>`<div class="chipv" data-v="${i}" draggable="true">${VARS[i][0]}</div>`).join('');
+  $('#vcols').innerHTML=PRODS.map(([k,n])=>`<div class="colp" data-c="${k}"><h4>${n}</h4><select data-verb="${k}"><option value="">Cambio dominante…</option><option>separar</option><option>invertir</option><option>congelar y airear</option></select><div class="drop"></div></div>`).join('');
+  $('#vres').innerHTML='';$('#vmsg').textContent='Coloca las 9 variables y elige los 3 verbos.';
+  bindRet();
 }
-
-function showSolution() {
-    currentList = [...CORRECT_STEPS];
-    evaluateOrder();
+function placeChip(chip,colKey){const target=colKey?$(`.colp[data-c="${colKey}"] .drop`):$('#vpool');target.appendChild(chip);chip.classList.remove('sel','right','wrong');R.sel=null;}
+function bindRet(){
+  $$('.chipv').forEach(ch=>{
+    ch.addEventListener('click',e=>{e.stopPropagation();if(R.sel===ch){ch.classList.remove('sel');R.sel=null;return;}$$('.chipv').forEach(x=>x.classList.remove('sel'));R.sel=ch;ch.classList.add('sel');});
+    ch.addEventListener('dragstart',e=>{R.drag=ch;try{e.dataTransfer.setData('text/plain','x');}catch(_){}});
+  });
+  $$('.colp').forEach(col=>{
+    col.addEventListener('click',e=>{if(e.target.tagName==='SELECT'||e.target.tagName==='OPTION')return;if(R.sel)placeChip(R.sel,col.dataset.c);});
+    col.addEventListener('dragover',e=>{e.preventDefault();col.classList.add('over');});
+    col.addEventListener('dragleave',()=>col.classList.remove('over'));
+    col.addEventListener('drop',e=>{e.preventDefault();col.classList.remove('over');if(R.drag)placeChip(R.drag,col.dataset.c);R.drag=null;});
+  });
+  const pool=$('#vpool');
+  pool.addEventListener('click',()=>{if(R.sel&&R.sel.parentElement!==pool)placeChip(R.sel,null);});
+  pool.addEventListener('dragover',e=>e.preventDefault());
+  pool.addEventListener('drop',e=>{e.preventDefault();if(R.drag)placeChip(R.drag,null);R.drag=null;});
 }
+$('#vchk').addEventListener('click',()=>{
+  let ok=0,placed=0,vok=0;
+  $$('.colp').forEach(col=>{
+    const k=col.dataset.c, sel=col.querySelector('select'), want=PRODS.find(p=>p[0]===k)[2];
+    sel.classList.remove('right','wrong');if(sel.value){sel.classList.add(sel.value===want?'right':'wrong');if(sel.value===want)vok++;}
+    col.querySelectorAll('.chipv').forEach(ch=>{placed++;const r=VARS[+ch.dataset.v][1]===k;ch.classList.toggle('right',r);ch.classList.toggle('wrong',!r);if(r)ok++;});
+  });
+  const done=ok===9&&vok===3;
+  $('#vmsg').textContent=`Variables: ${ok} de 9 · Verbos: ${vok} de 3`+(placed<9?` · faltan ${9-placed} por colocar`:'');
+  if(done)$('#st-ret').textContent='✔️';
+  $('#vres').innerHTML=`<div class="verdict ${done?'good':'mid'}"><h4>${done?'🏆 ¡Tu mapa de la semana está completo!':'Revisa las marcadas en rojo'}</h4>
+   <b>Crema → separar:</b> la centrífuga redistribuye la grasa; se controla la grasa de la descremada, el separador y la estandarización.<br>
+   <b>Mantequilla → invertir:</b> el batido cambia la fase continua; se controla la maduración, el punto de batido, la humedad y la sal.<br>
+   <b>Helado → congelar y airear:</b> hielo, aire y grasa deben quedar organizados; se controla el overrun, la congelación y la cadena de frío.</div>`;
+});
+$('#vrst').addEventListener('click',buildRet);
 
-shuffleSteps();
+/* ===================== pestañas ===================== */
+$$('.tab').forEach(b=>b.addEventListener('click',()=>{$$('.tab').forEach(x=>x.classList.toggle('on',x===b));$$('.pane').forEach(p=>p.classList.toggle('show',p.dataset.p===b.dataset.t));}));
+['man','cre','hel'].forEach(buildSet); buildRet();
 </script>
-
 </body>
 </html>

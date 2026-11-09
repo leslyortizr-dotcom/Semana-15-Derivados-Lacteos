@@ -1,667 +1,454 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Layout Industrial: Planta de Crema, Mantequilla y Helado - Semana 15</title>
-    <style>
-        :root {
-            --bg: #0b1120;
-            --panel: #1e293b;
-            --card: #0f172a;
-            --border: #334155;
-            --text: #f8fafc;
-            --muted: #94a3b8;
-            --accent: #38bdf8;
-            --gold: #fcd34d;
-            --ok: #10b981;
-            --warn: #f59e0b;
-            --err: #ef4444;
-            --purple: #a855f7;
-        }
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 18px;
-            display: flex;
-            justify-content: center;
-        }
-        .app-container {
-            max-width: 1260px;
-            width: 100%;
-            background: var(--panel);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid var(--border);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.65);
-        }
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #334155;
-            color: #f8fafc;
-            text-decoration: none;
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 13px;
-            border: 1px solid #475569;
-            transition: 0.2s;
-        }
-        .back-btn:hover { background: #475569; border-color: var(--accent); }
-        .badge {
-            background: rgba(16, 185, 129, 0.15);
-            color: #34d399;
-            border: 1px solid var(--ok);
-            padding: 5px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 700;
-        }
-        header {
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 16px;
-            margin-bottom: 16px;
-        }
-        h1 { margin: 0 0 6px 0; color: var(--gold); font-size: 24px; }
-        .subtitle { color: var(--muted); margin: 0 auto; max-width: 920px; font-size: 14px; line-height: 1.45; }
-
-        /* Barra de Filtros de Flujo */
-        .flow-toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 10px 14px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .route-group {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .route-btn {
-            background: #1e293b;
-            border: 1px solid #475569;
-            color: #e2e8f0;
-            padding: 8px 13px;
-            border-radius: 8px;
-            font-size: 12.5px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .route-btn:hover { border-color: var(--accent); }
-        .route-btn.active-all { background: #0284c7; border-color: var(--accent); color: white; }
-        .route-btn.active-cream { background: #d97706; border-color: var(--gold); color: white; }
-        .route-btn.active-butter { background: #ca8a04; border-color: #fde047; color: #0f172a; }
-        .route-btn.active-ice { background: #7e22ce; border-color: #c084fc; color: white; }
-
-        .zone-legend {
-            display: flex;
-            gap: 12px;
-            font-size: 12px;
-            flex-wrap: wrap;
-        }
-        .z-item { display: flex; align-items: center; gap: 5px; color: #cbd5e1; }
-        .z-box { width: 13px; height: 13px; border-radius: 3px; display: inline-block; }
-
-        .layout-grid {
-            display: grid;
-            grid-template-columns: 1fr 390px;
-            gap: 18px;
-        }
-        @media (max-width: 1024px) {
-            .layout-grid { grid-template-columns: 1fr; }
-        }
-
-        .canvas-container {
-            background: #070d19;
-            border: 3px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-            position: relative;
-        }
-        canvas#plantCanvas {
-            display: block;
-            width: 100%;
-            height: 520px;
-            cursor: pointer;
-        }
-        .canvas-hint {
-            background: var(--card);
-            border-top: 1px solid var(--border);
-            padding: 8px 14px;
-            font-size: 12px;
-            color: var(--muted);
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        /* Panel Inspector Derecho */
-        .inspector-panel {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .area-header {
-            border-bottom: 1px solid #1e293b;
-            padding-bottom: 10px;
-        }
-        .area-zone-tag {
-            display: inline-block;
-            font-size: 11px;
-            font-weight: 700;
-            padding: 3px 9px;
-            border-radius: 6px;
-            margin-bottom: 5px;
-        }
-        .area-header h2 {
-            margin: 0;
-            font-size: 18px;
-            color: var(--gold);
-        }
-        .info-section {
-            background: #1e293b;
-            border-left: 4px solid var(--accent);
-            border-radius: 8px;
-            padding: 11px 12px;
-            font-size: 12.5px;
-            line-height: 1.45;
-        }
-        .info-section h4 {
-            margin: 0 0 4px 0;
-            font-size: 13px;
-            color: var(--gold);
-        }
-        .param-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-        .param-card {
-            background: #1e293b;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 8px 10px;
-        }
-        .param-card small {
-            display: block;
-            font-size: 10.5px;
-            color: var(--muted);
-        }
-        .param-card strong {
-            font-size: 12.5px;
-            color: #f8fafc;
-        }
-
-        .area-quick-btns {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            margin-top: 4px;
-        }
-        .q-btn {
-            background: #1e293b;
-            border: 1px solid var(--border);
-            color: #cbd5e1;
-            padding: 6px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-        .q-btn.active {
-            background: var(--accent);
-            color: #0f172a;
-            border-color: var(--accent);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planta de Crema, Mantequilla y Helado · Semana 15</title>
+<style>
+:root{
+  --navy:#12306b; --navy-2:#1d4196; --ink:#0f1b33; --text:#22304a; --muted:#64748b;
+  --bg:#eef2f8; --card:#ffffff; --line:#dbe3ef; --soft:#f6f8fc;
+  --orange:#f05a28; --magenta:#d61f5c; --ok:#16a34a; --warn:#d97706; --bad:#dc2626;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--text);padding:18px;line-height:1.45}
+.app{max-width:1240px;margin:0 auto;background:var(--card);border-radius:18px;box-shadow:0 12px 34px rgba(15,27,51,.10);overflow:hidden}
+.topbar{height:6px;background:linear-gradient(90deg,var(--orange),var(--magenta))}
+header{padding:16px 24px 6px}
+.back{display:inline-flex;align-items:center;gap:6px;background:#334155;color:#f8fafc;text-decoration:none;padding:8px 14px;border-radius:8px;font-weight:600;font-size:13px;border:1px solid #475569;margin-bottom:12px}
+.back:hover{background:#1e293b}
+.title-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+h1{margin:0;color:var(--navy);font-size:26px;letter-spacing:-.3px}
+.subtitle{color:var(--muted);font-size:14px;margin-top:2px;max-width:820px}
+.week-tag{background:var(--navy);color:#fff;font-weight:700;font-size:12px;padding:6px 12px;border-radius:999px;white-space:nowrap}
+.week-tag b{color:#ffb38f}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 24px 4px}
+@media (max-width:600px){.modes{grid-template-columns:1fr}}
+.mode{border:2px solid var(--line);background:#fff;border-radius:12px;padding:10px 14px;text-align:left;cursor:pointer;font:inherit;color:var(--muted)}
+.mode b{font-size:15px;display:block;color:inherit}
+.mode small{font-size:12.5px}
+.mode.on{border-color:var(--navy);background:#eef3ff;color:var(--navy)}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:10px 24px 0}
+.toolbar .grp{display:flex;gap:6px;align-items:center;flex-wrap:wrap;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:6px 10px;font-size:12.5px}
+.toolbar .grp>span{font-weight:700;color:var(--muted);text-transform:uppercase;font-size:11px;letter-spacing:.5px;margin-right:2px}
+.lay{display:inline-flex;align-items:center;gap:5px;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:4px 10px;font-weight:600;cursor:pointer;font-size:12.5px;font-family:inherit;color:var(--muted)}
+.lay i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.lay.on{color:var(--ink);border-color:#9fb3e0;background:#f8faff}
+.lay:not(.on) i{opacity:.3}
+.rt{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:4px 10px;font-weight:700;cursor:pointer;font-size:12.5px;font-family:inherit;color:var(--muted)}
+.rt.on{color:#fff;border-color:transparent}
+.main{display:grid;grid-template-columns:1fr 370px;gap:18px;padding:12px 24px 16px}
+@media (max-width:1040px){.main{grid-template-columns:1fr}}
+.plan{border:1px solid var(--line);border-radius:14px;background:#f8fafc;overflow:hidden;position:relative}
+svg{display:block;width:100%;height:auto;user-select:none}
+.room{cursor:pointer}
+.room rect.bg{transition:fill .25s,opacity .25s}
+.audit .room{cursor:crosshair}
+.legend{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;font-size:12px;background:var(--soft);padding:8px 10px;border-radius:10px;border:1px solid var(--line);margin-top:10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:10px;border-radius:3px;display:inline-block}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:13px 15px;font-size:13.5px}
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px}
+.card h2{margin:6px 0 4px;font-size:18px;color:var(--navy)}
+.card h4{margin:10px 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--navy-2)}
+.card ul{margin:0;padding-left:18px}
+.card li{margin:3px 0}
+.card .book{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);font-size:12.5px;color:#475569}
+.rtags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.rtags span{font-size:11px;font-weight:800;color:#fff;border-radius:999px;padding:2px 8px}
+.pills{display:flex;flex-wrap:wrap;gap:5px}
+.pill{border:1px solid var(--line);background:#fff;border-radius:999px;padding:3px 9px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--muted)}
+.pill.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.bal{padding:0 24px 16px}
+.bal .ctl{display:flex;gap:14px;flex-wrap:wrap;align-items:center;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13px;margin-bottom:8px}
+.bal .ctl label{display:flex;flex-direction:column;font-weight:700;font-size:12px;color:#475569;min-width:170px}
+.bal .ctl input{accent-color:var(--navy)}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+@media (max-width:1040px){.kpis{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 11px}
+.kpi .k{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.kpi .v{font-size:19px;font-weight:800;color:var(--ink)}
+.kpi .s{font-size:11.5px;color:var(--muted)}
+.score{display:flex;gap:8px}
+.score div{flex:1;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}
+.score b{display:block;font-size:22px;color:var(--navy)}
+.score span{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase}
+.finding{background:#fff;border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:10px;padding:8px 10px;margin:8px 0;font-size:12.5px}
+.finding.missed{border-left-color:var(--bad)}
+.finding .t{font-weight:800;font-size:13px}
+.finding b{color:var(--ink)}
+.btn{border:0;border-radius:10px;padding:9px 12px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+.btn-ghost{background:#fff;border:1.5px solid var(--line);color:var(--text)}
+.btn-primary{background:var(--navy);color:#fff}
+.toast{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:#0f1b33;color:#fff;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90%;text-align:center}
+.toast.show{opacity:.95}
+details.teacher{margin:0 24px 22px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:#fbfcfe;font-size:13.5px}
+details.teacher summary{cursor:pointer;font-weight:700;color:var(--navy)}
+details.teacher li{margin:3px 0}
+footer{padding:0 24px 18px;font-size:11.5px;color:var(--muted)}
+@keyframes pulse{0%{r:18;opacity:.9}100%{r:34;opacity:0}}
+.pulse{animation:pulse 1.2s ease-out infinite}
+</style>
 </head>
 <body>
-
-<div class="app-container">
-    <div class="top-bar">
-        <a href="index.html" class="back-btn">⬅ Volver al Menú Principal</a>
-        <span class="badge">CECYBOOK SEMANA 15 • LAYOUT INDUSTRIAL MULTIPRODUCTO</span>
+<div class="app">
+  <div class="topbar"></div>
+  <header>
+    <a class="back" href="index.html">⬅ Volver al Menú Principal</a>
+    <div class="title-row">
+      <div>
+        <h1>🏭 Planta de crema, mantequilla y helado</h1>
+        <div class="subtitle">Una sola recepción de leche y tres líneas de proceso. Sigue cada ruta, revisa las áreas y sus temperaturas, calcula el balance del día y pon a prueba tu ojo de inspector sanitario.</div>
+      </div>
+      <div class="week-tag">Semana 15 · <b>Figuras 2, 6, 8, 14, 16–22</b></div>
     </div>
+  </header>
 
-    <header>
-        <h1>🗺️ Plano Interactivo de Distribución de Planta (Crema, Mantequilla y Helado)</h1>
-        <p class="subtitle">
-            <strong>Una misma recepción láctea, tres líneas de proceso:</strong> Haz clic sobre cualquiera de las salas operativas del plano o filtra por ruta tecnológica para explorar equipos, parámetros críticos, flujos de tubería y zonificación sanitaria BPM.
-        </p>
-    </header>
+  <div class="modes">
+    <button class="mode on" data-m="explore"><b>🗺️ Explorar la planta</b><small>Rutas, flujos, zonas sanitarias y mapa de temperaturas.</small></button>
+    <button class="mode" data-m="audit"><b>🕵️ Auditoría sanitaria</b><small>Encuentra las 8 no conformidades escondidas en el plano.</small></button>
+  </div>
 
-    <div class="flow-toolbar">
-        <div class="route-group">
-            <button id="r-all" class="route-btn active-all" onclick="setRouteFilter('all')">🔄 Ver las 3 Rutas</button>
-            <button id="r-cream" class="route-btn" onclick="setRouteFilter('cream')">🥣 Ruta 1: Crema</button>
-            <button id="r-butter" class="route-btn" onclick="setRouteFilter('butter')">🧈 Ruta 2: Mantequilla</button>
-            <button id="r-ice" class="route-btn" onclick="setRouteFilter('ice')">🍨 Ruta 3: Helado</button>
-        </div>
+  <div class="toolbar" id="tbExplore">
+    <div class="grp"><span>Ruta</span><div id="routes" style="display:flex;gap:5px;flex-wrap:wrap"></div></div>
+    <div class="grp"><span>Flujos</span><div id="layers" style="display:flex;gap:5px;flex-wrap:wrap"></div></div>
+    <div class="grp"><span>Vista</span><button class="lay" id="zoneBtn"><i style="background:linear-gradient(90deg,#ef4444,#f59e0b,#10b981)"></i>Zonas sanitarias</button><button class="lay" id="tempBtn"><i style="background:linear-gradient(90deg,#7c3aed,#3b82f6,#e2e8f0,#ef4444)"></i>Temperaturas</button></div>
+  </div>
 
-        <div class="zone-legend">
-            <div class="z-item"><span class="z-box" style="background:rgba(245, 158, 11, 0.25); border:1.5px solid #f59e0b;"></span> Zona Gris (Recepción/Servicios)</div>
-            <div class="z-item"><span class="z-box" style="background:rgba(56, 189, 248, 0.2); border:1.5px solid #38bdf8;"></span> Zona Blanca (Proceso Húmedo)</div>
-            <div class="z-item"><span class="z-box" style="background:rgba(16, 185, 129, 0.22); border:1.5px solid #10b981;"></span> Zona Alta Higiene (Post-Pasteurización)</div>
-            <div class="z-item"><span class="z-box" style="background:rgba(168, 85, 247, 0.22); border:1.5px solid #a855f7;"></span> Cadena de Frío / Congelación</div>
-        </div>
+  <div class="main">
+    <div>
+      <div class="plan" id="planBox"><svg id="svg" viewBox="0 0 1000 640"></svg><div class="toast" id="toast"></div></div>
+      <div class="legend" id="legend"></div>
     </div>
+    <div class="side" id="side"></div>
+  </div>
 
-    <div class="layout-grid">
-        <!-- Plano Arquitectónico en Canvas -->
-        <div class="canvas-container">
-            <canvas id="plantCanvas" width="800" height="520"></canvas>
-            <div class="canvas-hint">
-                <span>💡 <strong>Interactivo:</strong> Haz clic directo en cualquier sala del plano para inspeccionar equipos y controles PCC.</span>
-                <span>Flujo unidireccional sin cruces sanitarios</span>
-            </div>
-        </div>
-
-        <!-- Panel Inspector de Área -->
-        <div class="inspector-panel">
-            <div class="area-quick-btns" id="quick-btns"></div>
-            <div id="inspector-content"></div>
-        </div>
+  <div class="bal" id="balBox">
+    <div class="ctl">
+      <label>Leche recibida por día <span id="v-L"></span><input type="range" id="L" min="2000" max="30000" step="1000" value="10000"></label>
+      <label>Crema para mantequilla <span id="v-pb"></span><input type="range" id="pb" min="0" max="100" step="5" value="40"></label>
+      <label>Crema para helado <span id="v-ph"></span><input type="range" id="ph" min="0" max="100" step="5" value="30"></label>
+      <span style="font-size:12px;color:var(--muted)">El resto de la crema se envasa. Supuestos: leche 3.6 % grasa, crema 40 %, descremada 0.06 %, mix de helado con 10 % de grasa y 80 % de overrun.</span>
     </div>
+    <div class="kpis" id="kpis"></div>
+  </div>
+
+  <details class="teacher">
+    <summary>👩‍🏫 Notas para el docente</summary>
+    <ul>
+      <li><b>Uso sugerido (25–30 min):</b> en «Explorar», recorrer cada ruta por separado (crema, mantequilla, helado) y ubicar en el plano las operaciones de las Figuras 8, 14 y 16–22. Activar «Temperaturas» para ver que una misma planta va de −35 °C a 85 °C, y discutir por qué las cámaras de congelados y de refrigerados no se comparten. Después, «Auditoría sanitaria» por equipos.</li>
+      <li><b>Principios del plano:</b> flujo hacia adelante, sin regresar de lo pasteurizado a lo crudo; acceso del personal solo por el filtro sanitario; insumos por almacén intermedio; subproductos (descremada y buttermilk) y residuos con salida propia; CIP y refrigeración como servicios. Entre salas, el producto viaja por <b>tuberías cerradas</b>, que es lo que muestran las líneas de flujo.</li>
+      <li><b>Correcciones a la versión anterior:</b>
+        <ul>
+          <li>Presión de homogeneización del mix: <b>50–200 bar (5–20 MPa)</b>, como en la Figura 16 (antes decía 100–250 bar).</li>
+          <li>Velocidad del agitador del congelador: <b>230–350 rpm</b> (Figura 19; antes decía 100–300).</li>
+          <li>Overrun: <b>20–180 % según la categoría</b> (Figura 19), no un valor fijo de 60–100 %.</li>
+          <li>Se separaron la cámara de refrigeración (crema y mantequilla, 2–6 °C) y la de congelación (helado, ≤ −18 °C); antes compartían un área.</li>
+          <li>Se agregaron vestidores/filtro sanitario, almacén de insumos, área de subproductos (descremada y buttermilk), residuos y sala de servicios.</li>
+          <li>Se quitó la cita de la NOM-155-SCFI-2012 como norma de crema: corresponde a la leche. Para crema: NMX-F-731-COFOCALEC-2017 y NOM-243-SSA1-2010 (p. 9).</li>
+        </ul></li>
+      <li><b>Simplificaciones:</b> plano esquemático, sin escala. El balance usa los supuestos indicados y sirve para comparar escenarios, no para dimensionar una planta.</li>
+    </ul>
+  </details>
+  <footer>Recurso didáctico complementario · CECYBOOK Semana 15 · 7.4 Crema y mantequilla · 7.5 Helados.</footer>
 </div>
 
 <script>
-const canvas = document.getElementById('plantCanvas');
-const ctx = canvas.getContext('2d');
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const NS='http://www.w3.org/2000/svg';
+const ZONE={
+  gris:{name:'Zona gris (sucia / exterior)',c:'#ef4444',fill:'#fee2e2'},
+  inter:{name:'Zona intermedia',c:'#f59e0b',fill:'#fef3c7'},
+  blanca:{name:'Zona blanca (después de pasteurizar)',c:'#10b981',fill:'#d1fae5'},
+  ext:{name:'Área administrativa',c:'#94a3b8',fill:'#e2e8f0'}
+};
+const RT={cre:{n:'Crema',c:'#0891b2'},man:{n:'Mantequilla',c:'#ca8a04'},hel:{n:'Helado',c:'#db2777'}};
 
-let activeRoute = 'all'; // 'all', 'cream', 'butter', 'ice'
-let selectedAreaId = 1;
-let animTick = 0;
-
-// Definición de las salas operativas con texto compacto (tempCanvas) para evitar empalmes en el lienzo
-const PLANT_AREAS = [
-    {
-        id: 1,
-        code: 'ÁREA 1',
-        name: 'Recepción, Filtración y Enfriamiento',
-        short: 'Recepción Leche',
-        x: 25, y: 30, w: 230, h: 135,
-        zone: 'Zona Gris / Recepción',
-        zoneColor: '#f59e0b',
-        routes: ['cream', 'butter', 'ice'],
-        equip: 'Filtro sanitario en línea, Clarificador centrífugo, Tanques isotérmicos (2–4 °C).',
-        tempCanvas: 'Leche cruda: 2 a 4 °C',
-        temp: '2 – 4 °C (Refrigeración)',
-        pcc: 'Acidez titulable, densidad, antibióticos e inocuidad inicial.',
-        process: 'Se recibe la leche cruda, se filtra/clarifica para eliminar partículas finas y se almacena refrigerada antes de pasar a descremado (Figura 8, Pasos 1–3).',
-        norm: 'Materia prima común para las tres líneas (Clave C en secuencia de mantequilla).'
-    },
-    {
-        id: 2,
-        code: 'ÁREA 2',
-        name: 'Separación Centrífuga y Estandarización',
-        short: 'Centrífuga / Estand.',
-        x: 285, y: 30, w: 245, h: 135,
-        zone: 'Zona Blanca / Proceso Primario',
-        zoneColor: '#38bdf8',
-        routes: ['cream', 'butter', 'ice'],
-        equip: 'Descremadora centrífuga de discos, Tanques de estandarización automática en línea.',
-        tempCanvas: 'Separación: 50–55 °C',
-        temp: '50 – 55 °C (Descremado)',
-        pcc: '% Grasa: Ligera (10–18%), Mesa (20–30%), Para batir / Mantequilla (35–42%).',
-        process: 'La fuerza centrífuga envía los glóbulos grasos (menos densos, con MFGM intacta) al centro como crema y desplaza la leche descremada (≤ 0.5% grasa) a la periferia (Figuras 3, 5 y 8).',
-        norm: 'NMX-F-731-COFOCALEC-2017 y NOM-155-SCFI-2012.'
-    },
-    {
-        id: 3,
-        code: 'ÁREA 3',
-        name: 'Pasteurización HTST, Homogeneización y Crema',
-        short: 'Pasteuriz. / Crema',
-        x: 560, y: 30, w: 215, h: 135,
-        zone: 'Zona Alta Higiene (PCC Térmico)',
-        zoneColor: '#10b981',
-        routes: ['cream', 'butter', 'ice'],
-        equip: 'Pasteurizador de placas HTST, Homogeneizador de alta presión, Envasadora de crema.',
-        tempCanvas: 'HTST: 85–95 °C / 15–30 s',
-        temp: '85–95 °C / 15–30 s (Enf. 2–6 °C)',
-        pcc: 'Fosfatasa residual ≤ 4 UF/g (NOM-243) y presión de homogeneización.',
-        process: 'Inactiva patógenos y lipasas. En crema para batir se evita sobre-homogeneizar para no perder capacidad de batido. Desde aquí la crema pasteurizada se envasa o se envía a Mantequilla / Helados (Figuras 6 y 8).',
-        norm: 'NOM-243-SSA1-2010: Coliformes < 10 UFC/g, S. aureus < 100 UFC/g, Salmonella ausente.'
-    },
-    {
-        id: 4,
-        code: 'ÁREA 4',
-        name: 'Maduración Física y Batido (Churning)',
-        short: 'Batido Mantequilla',
-        x: 25, y: 200, w: 230, h: 140,
-        zone: 'Zona Alta Higiene (Línea Mantequilla)',
-        zoneColor: '#10b981',
-        routes: ['butter'],
-        equip: 'Tanques de maduración física en frío y Mantequillera rotatoria / continua (Churn).',
-        tempCanvas: 'Batido: 8–15 °C (20–40 min)',
-        temp: 'Batido: 8 – 15 °C (20–40 min)',
-        pcc: 'Proporción grasa sólida/líquida y pérdidas de grasa en buttermilk.',
-        process: 'La crema (35–42% grasa) reposa en frío para cristalizar parcialmente la grasa. Luego el batido mecánico rompe la MFGM e invierte la emulsión de O/W a W/O, formando gránulos y separando el buttermilk (Figuras 9, 10, 11 y 14).',
-        norm: 'Si se bate muy tibia (>16 °C) da masa blanda; muy fría (<6 °C) da textura quebradiza.'
-    },
-    {
-        id: 5,
-        code: 'ÁREA 5',
-        name: 'Lavado, Amasado (Working), Salado y Moldeo',
-        short: 'Amasado y Salado',
-        x: 285, y: 200, w: 245, h: 140,
-        zone: 'Zona Alta Higiene (Estabilización W/O)',
-        zoneColor: '#10b981',
-        routes: ['butter'],
-        equip: 'Drenador de suero, Tornillos sinfín de amasado (Working), Dosificador de sal fina y Moldeadora.',
-        tempCanvas: 'Agua lavado: 8 a 15 °C',
-        temp: 'Agua lavado: 8 – 15 °C',
-        pcc: 'Microdistribución de agua (evitar "llorado") y dosificación de sal (1–2%).',
-        process: 'Se drena el buttermilk, se lavan los gránulos con agua fría (8–15 °C) y se amasa (working) para unir la masa y dispersar el agua en microgotas uniformes. Se incorpora 1–2% de sal fina y se envasa (Figura 12).',
-        norm: 'Codex CXS 279-1971 / NMX-F-729: Mín. 80% grasa, máx. 16% agua, máx. 2% SNG.'
-    },
-    {
-        id: 6,
-        code: 'ÁREA 6',
-        name: 'Formulación, Pasteurización y Homogeneización del Mix',
-        short: 'Mix de Helado',
-        x: 560, y: 200, w: 215, h: 140,
-        zone: 'Zona Blanca / Preparación Mix',
-        zoneColor: '#38bdf8',
-        routes: ['ice'],
-        equip: 'Tanque mezclador, Intercambiador de placas HTST (80–85 °C/15–30 s), Homogeneizador 2 etapas.',
-        tempCanvas: 'Past: 80–85°C | Hom: 70°C',
-        temp: 'Past: 80–85 °C | Homog: 65–75 °C',
-        pcc: 'Presión homogeneización: 10–25 MPa (100–250 bar) para glóbulos de 0.2–2 µm.',
-        process: 'Se integran crema/leche, SNG, azúcares (bajan punto de congelación), estabilizantes (viscosidad) y emulsionantes. Se pasteuriza y homogeneiza en caliente para afinar la emulsión (Tabla 1 y Figura 16).',
-        norm: 'NOM-243 para bases de helado: Coliformes < 50 UFC/g, Mesófilos ≤ 100,000 UFC/g.'
-    },
-    {
-        id: 7,
-        code: 'ÁREA 7',
-        name: 'Maduración del Mix y Congelación Dinámica (Overrun)',
-        short: 'Freezer y Overrun',
-        x: 285, y: 370, w: 245, h: 125,
-        zone: 'Zona Alta Higiene / Frío Dinámico',
-        zoneColor: '#a855f7',
-        routes: ['ice'],
-        equip: 'Tanques de maduración (2–5 °C) y Congelador continuo con cuchillas raspadoras (100–300 rpm).',
-        tempCanvas: 'Mad: 2–5 °C | Salida: -5 °C',
-        temp: 'Maduración: 2–5 °C (4–24 h) | Salida: -4 a -6 °C',
-        pcc: 'Overrun (60–100% aire) y cristales de hielo pequeños (< 50 µm).',
-        process: 'En la maduración (4–24 h) se hidratan proteínas/gomas y cristaliza parcialmente la grasa. En el freezer se inyecta aire (overrun) mientras se raspa hielo fino y la grasa coalescida rodea las burbujas (Figuras 17–20).',
-        norm: 'Fórmula Overrun por masa (1.0 L): [(M_mix - M_helado) / M_helado] × 100.'
-    },
-    {
-        id: 8,
-        code: 'ÁREA 8',
-        name: 'Túnel de Endurecimiento y Cámaras de Cadena de Frío',
-        short: 'Túnel y Cámaras Frías',
-        x: 25, y: 370, w: 230, h: 125,
-        zone: 'Cadena de Frío y Despacho Final',
-        zoneColor: '#a855f7',
-        routes: ['cream', 'butter', 'ice'],
-        equip: 'Túnel de endurecimiento rápido (-25 a -40 °C), Cámara de congelación (≤ -18 °C) y Cámara de refrigeración (2–6 °C).',
-        tempCanvas: 'Túnel: -30°C | Cám: ≤ -18°C',
-        temp: 'Túnel: -25 a -40 °C | Conservación: ≤ -18 °C (Helado) y 2–6 °C (Crema/Mant.)',
-        pcc: 'Estabilidad térmica estricta para impedir recristalización de hielo (> 50 µm).',
-        process: 'El helado semiblando (-5 °C) se endurece en 15–60 min a -25/-40 °C y se almacena a ≤ -18 °C. Crema y mantequilla se conservan a 2–6 °C listas para distribución (Figuras 22 y 23).',
-        norm: 'NOM-243 Helados: Coliformes < 100 UFC/g, Mesófilos ≤ 200,000 UFC/g, Listeria y Salmonella ausentes en 25 g.'
-    },
-    {
-        id: 9,
-        code: 'LAB / CIP',
-        name: 'Laboratorio de Control de Calidad y Central CIP',
-        short: 'Lab Calidad / CIP',
-        x: 560, y: 370, w: 215, h: 125,
-        zone: 'Zona de Soporte y Auditoría Sanitaria',
-        zoneColor: '#f59e0b',
-        routes: ['cream', 'butter', 'ice'],
-        equip: 'Balanza analítica de overrun, butirómetros Gerber, incubadoras microbiológicas y central CIP.',
-        tempCanvas: '20 °C (Lab Climatizado)',
-        temp: '20 °C (Laboratorio Climatizado)',
-        pcc: 'Liberación de lotes bajo lógica: Dato observado ➔ Causa ➔ Etapa ➔ Decisión.',
-        process: 'Audita fosfatasa residual, % de grasa, humedad en mantequilla (≤ 16%), overrun en helado y microbiología NOM-243 antes de liberar cualquier lote (Tablas 3 y 4).',
-        norm: 'Garantiza que ningún lote con desviación sanitaria salga al mercado aunque cumpla en grasa.'
-    }
+/* ===================== Áreas ===================== */
+const ROOMS=[
+ {id:'lab',p:'Laboratorio de calidad',s:'Laboratorio',n:'Laboratorio de calidad',x:40,y:50,w:170,h:120,z:'inter',T:20,r:['cre','man','hel'],
+  what:'Analiza la leche antes de recibirla y libera cada lote de crema, mantequilla y helado.',
+  eq:['Butirómetros (grasa) y acidímetro','Balanza y recipiente de 1 L para overrun','Incubadoras para microbiología','Prueba de fosfatasa'],
+  ctl:['Leche: acidez, densidad, antibióticos','Crema: grasa, acidez, viscosidad, fosfatasa (Figura 7)','Mantequilla: grasa ≥ 80 %, agua ≤ 16 % (Codex)','Helado: overrun y NOM-243 (coliformes, mesófilos, Listeria, Salmonella)'],
+  dis:'Junto a la recepción y con ventanilla pasamuestras, para que el personal no cruce a otras zonas.',book:'Figura 7 (p. 9), Figura 13 (p. 15), Tablas 3 y 4 (pp. 27–29).'},
+ {id:'ofi',p:'Oficina y comedor',s:'Oficina',n:'Oficina y comedor',x:210,y:50,w:170,h:120,z:'ext',T:22,r:[],
+  what:'Área administrativa y de descanso; entrada del personal.',eq:['Registro de entrada','Comedor separado del proceso'],ctl:['No se consumen alimentos en las áreas de proceso'],
+  dis:'Sin comunicación directa con las salas: desde aquí solo se pasa a los vestidores.',book:'Buenas prácticas de higiene (NOM-251-SSA1-2009).'},
+ {id:'ves',p:'Vestidores y filtro sanitario',s:'Vestidores',n:'Vestidores y filtro sanitario',x:380,y:50,w:190,h:120,z:'inter',T:22,r:[],
+  what:'Paso obligatorio para cambiarse y lavarse las manos antes de entrar a las salas.',eq:['Casilleros separados (calle / trabajo)','Lavamanos de accionamiento no manual','Lavabotas','Cofia, cubrebocas, bata y botas'],
+  ctl:['Lavado de manos al entrar','Cabello cubierto, sin joyería','Personal enfermo no manipula producto'],
+  dis:'Es la única entrada del personal a las salas de proceso.',book:'S. aureus: higiene del personal (Tabla 4, p. 29).'},
+ {id:'alm',p:'Almacén de insumos y empaque',s:'Almacén',n:'Almacén de insumos y empaque',x:570,y:50,w:390,h:120,z:'inter',T:20,r:['cre','man','hel'],
+  what:'Guarda azúcar, leche en polvo, estabilizantes, emulsificantes, sal, saborizantes y material de empaque.',eq:['Estantería sanitaria separada del piso','Pasamateriales hacia las salas'],
+  ctl:['Primeras entradas, primeras salidas','Insumos con lote para trazabilidad','Cartón y madera se quedan aquí; no entran a las salas'],
+  dis:'Los insumos entran por su propia puerta y pasan desempacados a las salas de mix y de envasado.',book:'Tabla 1 (p. 19): ingredientes del mix.'},
+ {id:'rec',p:'Recepción de leche',s:'Recepción',n:'Recepción y enfriamiento de leche',x:40,y:180,w:170,h:130,z:'gris',T:4,r:['cre','man','hel'],
+  what:'Llega la pipa; se toma muestra, se filtra, se enfría y se almacena la leche cruda.',eq:['Andén para pipa','Filtro de línea y clarificador (opcional)','Silo isotérmico'],
+  ctl:['Leche cruda a 2–4 °C','Muestra liberada por el laboratorio antes de descargar'],
+  dis:'Zona gris en contacto con el exterior. La leche cruda solo avanza por tubería.',book:'Figura 8, pasos 1–3 (p. 10).'},
+ {id:'sep',p:'Separación y estandarización',s:'Separación',n:'Separación y estandarización',x:210,y:180,w:170,h:130,z:'inter',T:50,r:['cre','man','hel'],
+  what:'La descremadora separa la crema (35–45 %) de la leche descremada (≤ 0.5 %); después se estandariza la crema.',eq:['Descremadora centrífuga de discos','Tanque de estandarización con medición en línea'],
+  ctl:['Temperatura de separación (≈ 45–55 °C)','% de grasa de la crema y de la descremada','Grasa objetivo: 35–40 % (para batir) o 10–18 % (menor contenido)'],
+  dis:'La descremada sale por tubería al área de subproductos; la crema sigue hacia la pasteurización.',book:'Figuras 3, 5 y 6 (pp. 5–8). Simulador «MFGM y separación».'},
+ {id:'pas',p:'Pasteurización de crema',s:'Pasteurización',n:'Pasteurización y homogeneización de crema',x:380,y:180,w:190,h:130,z:'inter',T:85,r:['cre','man','hel'],
+  what:'La crema se pasteuriza y se enfría; para crema de mesa puede homogeneizarse.',eq:['Pasteurizador de placas con tubo de retención y válvula de desviación','Homogeneizador (opcional)','Registrador de temperatura'],
+  ctl:['Crema: 85–95 °C por 15–30 s (Figura 8)','Crema para mantequilla: referencia 85 °C por 15 s o más (p. 16)','Fosfatasa residual negativa'],
+  dis:'Divide lo crudo (antes) de lo pasteurizado (después). Ninguna conexión debe saltarse este equipo.',book:'Figura 8, pasos 6–7 (p. 10) y p. 16.'},
+ {id:'cre',p:'Envasado de crema',s:'Envasado crema',n:'Envasado de crema',x:570,y:180,w:190,h:130,z:'blanca',T:6,r:['cre'],
+  what:'La crema pasteurizada y enfriada se envasa en condiciones higiénicas.',eq:['Llenadora y cerradora','Codificador de lote y caducidad'],
+  ctl:['Producto a 2–6 °C','Envase íntegro y bien sellado','Coliformes < 10 UFC/g (NOM-243)'],
+  dis:'Zona blanca: después de pasteurizar, el riesgo principal es la recontaminación.',book:'Figura 8, pasos 8–9 (p. 10).'},
+ {id:'camR',p:'Cámara 2–6 °C y embarque',s:'Cámara 2–6 °C',n:'Cámara de refrigeración y embarque',x:760,y:180,w:200,h:270,z:'blanca',T:4,r:['cre','man'],
+  what:'Conserva crema y mantequilla envasadas hasta su distribución.',eq:['Cámara con registro continuo de temperatura','Anaqueles sanitarios','Andén de embarque refrigerado'],
+  ctl:['2–6 °C','Primeras entradas, primeras salidas','Mantequilla protegida de la luz y de olores'],
+  dis:'Separada de la cámara de congelados: temperaturas y productos distintos.',book:'Figura 8, paso 10 (p. 10).'},
+ {id:'sub',p:'Descremada y buttermilk',s:'Subproductos',n:'Descremada y buttermilk',x:40,y:320,w:170,h:130,z:'gris',T:4,r:['man','hel'],
+  what:'Recibe la leche descremada y el suero de mantequilla para venderlos, aprovecharlos o tratarlos.',eq:['Tanques refrigerados de descremada y buttermilk'],
+  ctl:['Enfriar y dar destino a cada corriente','No verterlos al drenaje sin tratamiento'],
+  dis:'Llegan por tubería y salen por su propia puerta, sin cruzar las salas blancas.',book:'Balance de materia (p. 6). Figura 10 (p. 12).'},
+ {id:'mix',p:'Mix de helado',s:'Mix de helado',n:'Preparación del mix de helado',x:210,y:320,w:170,h:130,z:'inter',T:82,r:['hel'],
+  what:'Se mezclan los ingredientes; el mix se pasteuriza, se homogeneiza, se enfría y se madura.',eq:['Tanque mezclador','Pasteurizador (> 80 °C por > 25 s)','Homogeneizador (50–200 bar, entrada > 75 °C)','Tanques de maduración (2–5 °C, 4–24 h)'],
+  ctl:['Formulación (grasa, SNG, azúcares, estabilizantes)','Bases para helado: coliformes < 50 UFC/g, mesófilos ≤ 100,000 (NOM-243)','Tiempo y temperatura de maduración'],
+  dis:'Los ingredientes secos entran desde el almacén; el mix pasteurizado avanza por tubería a la sala de congelación.',book:'Tabla 1 (p. 19), Figuras 16–17 (pp. 20–21).'},
+ {id:'mad',p:'Maduración y batido',s:'Batido',n:'Maduración física y batido',x:380,y:320,w:190,h:130,z:'blanca',T:10,r:['man'],
+  what:'La crema pasteurizada reposa en frío para cristalizar parte de la grasa y después se bate.',eq:['Tanques de maduración con camisa','Batidora (por lotes o continua)'],
+  ctl:['Temperatura y tiempo de maduración','Batido: 8–15 °C, 35–42 % de grasa, 20–40 min (Figura 14)','Grasa perdida en el buttermilk'],
+  dis:'El buttermilk sale por tubería al área de subproductos.',book:'Figuras 10, 11 y 14 (pp. 12–16). Simulador «Maduración y batido».'},
+ {id:'ama',p:'Amasado, salado y envasado',s:'Amasado',n:'Lavado, amasado, salado y envasado de mantequilla',x:570,y:320,w:190,h:130,z:'blanca',T:12,r:['man'],
+  what:'Se drena y lava la mantequilla, se amasa, se sala si corresponde y se envasa.',eq:['Amasadora (working)','Dosificador de sal fina','Moldeadora y envolvedora'],
+  ctl:['Agua de lavado potable y fría (8–15 °C)','Humedad ≤ 16 %, grasa ≥ 80 % (Codex)','Coliformes < 10 UFC/g y S. aureus < 100 UFC/g (NOM-243)'],
+  dis:'Contigua a la batidora y a la cámara de refrigeración: recorridos cortos y hacia adelante.',book:'Figuras 12–13 (pp. 14–15). Simulador «Lavado, amasado y salado».'},
+ {id:'ser',p:'Servicios: CIP, caldera, frío',s:'Servicios',n:'Servicios: CIP, caldera y refrigeración',x:40,y:460,w:170,h:140,z:'gris',T:30,r:[],
+  what:'Genera vapor, agua helada, refrigerante para túnel y cámaras, y soluciones de limpieza.',eq:['Central CIP','Caldera','Sala de compresores de refrigeración','Tratamiento de agua potable'],
+  ctl:['Concentración, temperatura y tiempo del CIP','Agua potable para proceso y lavado'],
+  dis:'Fuera de las salas de proceso; solo llegan tuberías.',book:'Higiene de equipos e inocuidad (p. 28).'},
+ {id:'res',p:'Residuos',s:'Residuos',n:'Residuos y lavado de contenedores',x:210,y:460,w:170,h:140,z:'gris',T:22,r:[],
+  what:'Concentra residuos sólidos y empaques dañados.',eq:['Contenedores con tapa','Área de lavado'],ctl:['Retiro frecuente','Control de plagas'],
+  dis:'Salida propia, nunca por la puerta de producto terminado.',book:'Inocuidad (p. 28).'},
+ {id:'frz',p:'Congelación y envasado',s:'Congelación',n:'Congelación continua y envasado de helado',x:380,y:460,w:190,h:140,z:'blanca',T:-5,r:['hel'],
+  what:'El mix madurado se congela mientras se incorpora aire y se envasa al salir.',eq:['Congelador continuo con agitador (230–350 rpm) y cuchillas raspadoras','Dosificador de aire','Llenadora de envases'],
+  ctl:['Overrun según la categoría (20–180 %, Figura 19)','Salida a −4 a −6 °C','Cristales pequeños (< 50 µm)'],
+  dis:'El helado envasado pasa de inmediato al túnel: no debe esperar en el pasillo.',book:'Figuras 18–21 (pp. 21–24). Simulador «Helado y cadena de frío».'},
+ {id:'tun',p:'Túnel de endurecimiento',s:'Túnel',n:'Túnel de endurecimiento',x:570,y:460,w:190,h:140,z:'blanca',T:-35,r:['hel'],
+  what:'El helado envasado se congela rápidamente para estabilizar su estructura.',eq:['Túnel de aire forzado (−25 a −40 °C)'],
+  ctl:['Tiempo de endurecimiento (15–60 min)','Temperatura del aire'],
+  dis:'Entre la sala de congelación y la cámara de congelados, con puertas de cierre rápido.',book:'Figura 22 (p. 25).'},
+ {id:'camC',p:'Cámara de congelados',s:'Cámara congelados',n:'Cámara de congelados y embarque',x:760,y:460,w:200,h:140,z:'blanca',T:-25,r:['hel'],
+  what:'Conserva el helado hasta su distribución.',eq:['Cámara a −18 °C o menos con registro y alarma','Andén con cortina de aire'],
+  ctl:['−18 °C o menos, sin fluctuaciones','Helados: coliformes < 100, mesófilos ≤ 200,000 UFC/g; Listeria y Salmonella ausentes (NOM-243)'],
+  dis:'Separada de la cámara de refrigerados; puertas de cierre rápido para evitar subidas de temperatura.',book:'Figura 23 (p. 26).'}
 ];
 
-const PIPELINES = [
-    { from: 1, to: 2, route: 'cream', color: '#38bdf8' },
-    { from: 2, to: 3, route: 'cream', color: '#fcd34d' },
-    { from: 3, to: 8, route: 'cream', color: '#38bdf8' },
-    { from: 1, to: 2, route: 'butter', color: '#38bdf8' },
-    { from: 2, to: 3, route: 'butter', color: '#fde047' },
-    { from: 3, to: 4, route: 'butter', color: '#eab308' },
-    { from: 4, to: 5, route: 'butter', color: '#eab308' },
-    { from: 5, to: 8, route: 'butter', color: '#facc15' },
-    { from: 1, to: 2, route: 'ice', color: '#38bdf8' },
-    { from: 2, to: 3, route: 'ice', color: '#c084fc' },
-    { from: 3, to: 6, route: 'ice', color: '#c084fc' },
-    { from: 6, to: 7, route: 'ice', color: '#a855f7' },
-    { from: 7, to: 8, route: 'ice', color: '#38bdf8' }
+/* ===================== Flujos ===================== */
+const FLOWS={
+  cre:{n:'Ruta crema',c:'#0891b2',w:6,paths:[[[8,245],[125,245],[295,245],[475,245],[665,245],[860,245],[992,245]]]},
+  man:{n:'Ruta mantequilla',c:'#ca8a04',w:6,paths:[[[8,262],[125,262],[295,262],[460,262],[460,385],[665,385],[860,385],[992,385]]]},
+  hel:{n:'Ruta helado',c:'#db2777',w:6,paths:[[[8,228],[125,228],[295,228],[420,228],[420,300],[295,300],[295,385],[295,445],[475,445],[475,530],[665,530],[860,530],[992,530]]]},
+  sub:{n:'Subproductos',c:'#84cc16',w:4,paths:[[[295,290],[125,290],[125,385]],[[520,420],[520,452],[160,452],[160,420]]]},
+  per:{n:'Personal',c:'#7c3aed',w:4,paths:[[[295,8],[295,110],[475,110],[475,200]]]},
+  ins:{n:'Insumos',c:'#f97316',w:4,paths:[[[935,8],[935,110],[665,110],[665,200]],[[700,110],[700,170],[240,170],[240,340]]]},
+  cip:{n:'Limpieza CIP',c:'#0ea5e9',w:3,paths:[[[125,530],[125,470],[330,470],[330,420]],[[125,530],[200,530],[200,600],[520,600],[520,560]]]},
+  res:{n:'Residuos',c:'#78716c',w:3,paths:[[[295,560],[295,632]]]}
+};
+const activeLayers=new Set(['cre','man','hel']);
+
+/* ===================== Hallazgos ===================== */
+const HAZ=[
+ {id:1,x:595,y:438,room:'ama',t:'Manguera de agua sin control sanitario para lavar la mantequilla',risk:'El lavado ocurre después de pasteurizar: agua no potable recontamina con coliformes. La mantequilla no es estéril.',fix:'Agua potable (clorada) y fría, con registro; tomas identificadas.',ref:'p. 14 y Figura 13 (p. 15). NOM-243: coliformes < 10 UFC/g.'},
+ {id:2,x:915,y:505,room:'camC',t:'La cámara de congelados marca −12 °C',risk:'Por arriba de −18 °C hay más agua sin congelar: los cristales crecen y el helado se vuelve áspero (recristalización).',fix:'Mantener −18 °C o menos, alarma de temperatura y puertas de cierre rápido.',ref:'Figuras 22–23 (pp. 25–26).'},
+ {id:3,x:540,y:585,room:'frz',t:'Cajas de helado esperando en la sala, fuera del túnel',risk:'El helado sale blando (−5 °C); si espera, se calienta y luego se endurece lento: cristales grandes y pérdida de aire.',fix:'Pasar de inmediato al túnel de endurecimiento; banda continua.',ref:'Figura 22 (p. 25).'},
+ {id:4,x:395,y:300,room:'pas',t:'Manguera que lleva crema cruda directo a la batidora',risk:'La crema se salta la pasteurización: mezcla de crudo con pasteurizado, riesgo de patógenos y fosfatasa positiva.',fix:'Eliminar cualquier conexión que evite el pasteurizador; flujo siempre hacia adelante.',ref:'p. 16. Fosfatasa ≤ 4 UF/g (Figura 13).'},
+ {id:5,x:742,y:372,room:'ama',t:'Operario sin cofia ni cubrebocas en la sala de amasado',risk:'Fuente de Staphylococcus aureus, que puede producir toxinas termoestables.',fix:'Entrar solo por el filtro sanitario con cofia, cubrebocas y manos lavadas.',ref:'Tabla 4 (p. 29): S. aureus < 100 UFC/g en mantequilla.'},
+ {id:6,x:238,y:440,room:'mix',t:'Sacos de azúcar abiertos sobre el piso de la sala de mix',risk:'Polvo, humedad y plagas; el saco abierto puede contaminarse y contaminar el mix.',fix:'Insumos en tarimas sanitarias en el almacén; pasar solo lo necesario, en contenedores cerrados.',ref:'Buenas prácticas de higiene (NOM-251-SSA1-2009).'},
+ {id:7,x:540,y:338,room:'mad',t:'Lámpara sin protección sobre la batidora',risk:'Si el foco se rompe, cae vidrio en la crema: peligro físico.',fix:'Luminarias con cubierta protectora.',ref:'NOM-251-SSA1-2009 (iluminación).'},
+ {id:8,x:405,y:585,room:'frz',t:'Coladera sin rejilla ni sello en la sala de congelación',risk:'Reservorio de Listeria monocytogenes, que puede crecer en frío; en helados y bases debe estar ausente.',fix:'Coladeras sanitarias con rejilla y trampa; limpieza y desinfección diarias.',ref:'Tabla 4 (p. 29): Listeria ausente en 25 g.'}
 ];
 
-function setRouteFilter(route) {
-    activeRoute = route;
-    document.getElementById('r-all').className = 'route-btn' + (route === 'all' ? ' active-all' : '');
-    document.getElementById('r-cream').className = 'route-btn' + (route === 'cream' ? ' active-cream' : '');
-    document.getElementById('r-butter').className = 'route-btn' + (route === 'butter' ? ' active-butter' : '');
-    document.getElementById('r-ice').className = 'route-btn' + (route === 'ice' ? ' active-ice' : '');
+/* ===================== Estado y construcción ===================== */
+const S={mode:'explore',sel:'sep',zones:false,temps:false,route:'all',found:new Set(),misses:0,t0:null,ended:false};
+const svg=$('#svg');
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);(parent||svg).appendChild(e);return e;}
+function txt(x,y,s,attrs,parent){const t=el('text',Object.assign({x,y,'font-family':'Segoe UI, system-ui, sans-serif'},attrs),parent);t.textContent=s;return t;}
+function tempColor(T){if(T<=-10)return'#ddd6fe';if(T<0)return'#e0e7ff';if(T<=8)return'#dbeafe';if(T<=25)return'#f1f5f9';if(T<=55)return'#fed7aa';return'#fecaca';}
+let gRooms,gEquip,gFlows,gHaz,gMarks,gTemp;
+function build(){
+  svg.innerHTML='';
+  const defs=el('defs',{});const pat=el('pattern',{id:'grid',width:20,height:20,patternUnits:'userSpaceOnUse'},defs);el('path',{d:'M20 0H0V20',fill:'none',stroke:'#e2e8f0','stroke-width':1},pat);
+  el('rect',{x:0,y:0,width:1000,height:640,fill:'url(#grid)'});
+  txt(4,214,'Pipa',{'font-size':11,fill:'#64748b','font-weight':700});
+  el('rect',{x:4,y:222,width:34,height:22,rx:4,fill:'#cbd5e1',stroke:'#64748b'});
+  txt(268,22,'Acceso personal',{'font-size':11,fill:'#64748b','font-weight':700});
+  txt(890,22,'Acceso insumos',{'font-size':11,fill:'#64748b','font-weight':700});
+  txt(964,236,'Embarque',{'font-size':10.5,fill:'#64748b','font-weight':700});txt(964,250,'refrig.',{'font-size':10.5,fill:'#64748b','font-weight':700});
+  txt(964,522,'Embarque',{'font-size':10.5,fill:'#64748b','font-weight':700});txt(964,536,'congel.',{'font-size':10.5,fill:'#64748b','font-weight':700});
+  gRooms=el('g',{});
+  ROOMS.forEach(r=>{
+    const g=el('g',{class:'room','data-id':r.id},gRooms);
+    el('rect',{class:'bg',x:r.x,y:r.y,width:r.w,height:r.h,fill:'#ffffff',stroke:'#334155','stroke-width':4},g);
+    const mx=Math.floor((r.w-62)/7.4);const words=r.p.split(' ');let line='',lines=[];words.forEach(w=>{if((line+' '+w).trim().length>mx){lines.push(line.trim());line=w;}else line+=' '+w;});lines.push(line.trim());
+    lines.slice(0,3).forEach((l,i)=>txt(r.x+9,r.y+19+i*14,l,{'font-size':12,'font-weight':800,fill:'#12306b'},g));
+    const tg=el('g',{class:'ttag'},g);el('rect',{x:r.x+r.w-56,y:r.y+7,width:50,height:18,rx:9,fill:'#0f1b33',opacity:.85},tg);txt(r.x+r.w-31,r.y+20,r.T+' °C',{'font-size':10.5,'font-weight':800,fill:'#fff','text-anchor':'middle'},tg);
+    g.addEventListener('click',ev=>onRoomClick(r.id,ev));
+  });
+  const doors=[[40,245,'v'],[210,245,'v'],[380,245,'v'],[570,245,'v'],[760,245,'v'],[960,245,'v'],[760,385,'v'],[960,385,'v'],[570,385,'v'],[960,530,'v'],[760,530,'v'],[570,530,'v'],[295,50,'h'],[475,170,'h'],[665,170,'h'],[935,50,'h'],[125,180,'h'],[240,320,'h'],[295,600,'h']];
+  doors.forEach(d=>{if(d[2]==='v')el('rect',{x:d[0]-3,y:d[1]-14,width:6,height:28,fill:'#f8fafc'},gRooms);else el('rect',{x:d[0]-14,y:d[1]-3,width:28,height:6,fill:'#f8fafc'},gRooms);});
+  for(let i=0;i<4;i++){el('line',{x1:960,y1:236+i*6,x2:968,y2:236+i*6,stroke:'#93c5fd','stroke-width':2},gRooms);el('line',{x1:960,y1:521+i*6,x2:968,y2:521+i*6,stroke:'#93c5fd','stroke-width':2},gRooms);}
+  gEquip=el('g',{'pointer-events':'none'});drawEquip();
+  gFlows=el('g',{'pointer-events':'none'});
+  gHaz=el('g',{'pointer-events':'none'});drawHazCues();
+  gMarks=el('g',{'pointer-events':'none'});
+  paint();drawFlows();
+}
+function drawEquip(){
+  const g=gEquip,lab=(x,y,s)=>txt(x,y,s,{'font-size':9,fill:'#64748b','text-anchor':'middle'},g);
+  const tank=(x,y,r,l)=>{el('circle',{cx:x,cy:y,r,fill:'#e2e8f0',stroke:'#64748b','stroke-width':1.5},g);if(l)lab(x,y+r+10,l);};
+  const box=(x,y,w,h,l,f='#e2e8f0')=>{el('rect',{x,y,width:w,height:h,rx:4,fill:f,stroke:'#64748b','stroke-width':1.5},g);if(l)lab(x+w/2,y+h+10,l);};
+  box(60,100,60,22,'Análisis');box(135,100,55,22,'Incubadora');
+  box(230,100,60,30,'Comedor','#f1f5f9');box(305,100,60,30,'Oficina','#f1f5f9');
+  for(let i=0;i<5;i++)el('rect',{x:398+i*13,y:92,width:11,height:28,fill:'#e2e8f0',stroke:'#64748b'},g);lab(430,132,'Casilleros');box(510,96,44,20,'Lavamanos','#e0f2fe');
+  ['Azúcar','Leche polvo','Estabiliz.','Sal','Empaque'].forEach((l,i)=>box(590+i*72,96,60,26,l,'#f1f5f9'));
+  box(55,275,40,22,'Filtro');tank(160,285,15,'Silo');
+  tank(260,280,17,'Descremadora');box(320,270,44,26,'Estand.');
+  box(400,272,72,26,'Pasteurizador');box(490,272,62,26,'Homog.');
+  box(590,272,60,26,'Llenadora');box(670,272,70,26,'Codificador');
+  for(let i=0;i<3;i++)el('rect',{x:780+i*58,y:300,width:44,height:110,fill:'#f1f5f9',stroke:'#64748b'},g);lab(860,422,'Anaqueles');
+  tank(90,400,15,'Descremada');tank(160,400,15,'Buttermilk');
+  tank(250,404,14,'Mezcla');box(285,392,42,22,'Past.');tank(355,404,14,'Madur.');
+  tank(420,405,16,'Madur.');el('ellipse',{cx:505,cy:405,rx:38,ry:20,fill:'#fef3c7',stroke:'#64748b','stroke-width':1.5},g);lab(505,436,'Batidora');
+  box(590,392,62,26,'Amasadora');box(670,392,70,26,'Envolvedora');
+  [65,100,135].forEach((x,i)=>tank(x,560,12,['Alcalina','Ácida','Sanit.'][i]));box(160,540,40,28,'Caldera');
+  box(230,540,45,28,'Orgánicos');box(290,540,45,28,'Reciclab.');
+  box(400,530,90,32,'Congelador continuo','#ede9fe');box(500,530,55,32,'Llenadora');
+  box(590,520,150,50,'Túnel −35 °C','#ede9fe');
+  for(let i=0;i<3;i++)el('rect',{x:780+i*58,y:530,width:44,height:55,fill:'#ede9fe',stroke:'#64748b'},g);
+  // persona correcta
+  person(g,588,384,true);
+}
+function person(g,x,y,ok){el('circle',{cx:x,cy:y-14,r:6,fill:'#fcd34d',stroke:'#92400e'},g);
+  if(ok){el('path',{d:`M${x-7} ${y-17} Q${x} ${y-27} ${x+7} ${y-17} Z`,fill:'#fff',stroke:'#64748b'},g);el('rect',{x:x-5,y:y-13,width:10,height:4,fill:'#bfdbfe'},g);}
+  else el('path',{d:`M${x-6} ${y-18} q3 -5 6 -3 q3 -4 6 2`,fill:'none',stroke:'#78350f','stroke-width':2},g);
+  el('rect',{x:x-6,y:y-7,width:12,height:16,rx:3,fill:ok?'#fff':'#60a5fa',stroke:'#64748b'},g);}
+function drawHazCues(){
+  const g=gHaz;
+  el('path',{d:'M585 449 C 598 440, 580 436, 600 430',fill:'none',stroke:'#16a34a','stroke-width':4,'stroke-linecap':'round'},g);el('circle',{cx:600,cy:430,r:3,fill:'#0ea5e9'},g);
+  el('rect',{x:895,y:494,width:42,height:20,rx:3,fill:'#0f172a'},g);txt(916,509,'−12°C',{'font-size':11,'font-weight':700,fill:'#f87171','text-anchor':'middle',style:'font-family:monospace'},g);
+  for(let i=0;i<3;i++)el('rect',{x:522+i*12,y:578,width:11,height:14,fill:'#fbcfe8',stroke:'#9d174d','stroke-width':.8},g);
+  el('path',{d:'M345 300 C 380 310, 410 315, 440 345 S 470 380, 480 395',fill:'none',stroke:'#78716c','stroke-width':4,'stroke-linecap':'round'},g);
+  person(g,742,384,false);
+  el('rect',{x:222,y:434,width:26,height:13,rx:3,fill:'#f5f5f4',stroke:'#a8a29e'},g);[[254,442],[260,445],[251,446]].forEach(p=>el('circle',{cx:p[0],cy:p[1],r:2,fill:'#fff',stroke:'#d6d3d1'},g));
+  el('line',{x1:540,y1:322,x2:540,y2:332,stroke:'#475569'},g);el('circle',{cx:540,cy:338,r:6,fill:'#fde047',stroke:'#a16207'},g);
+  el('rect',{x:397,y:577,width:16,height:16,fill:'#1f2937',stroke:'#475569'},g);
+}
+function paint(){
+  if(gHaz)gHaz.style.display=S.mode==='audit'?'':'none';
+  $$('.room').forEach(g=>{const r=ROOMS.find(x=>x.id===g.dataset.id),bg=g.querySelector('rect.bg');
+    let fill='#ffffff';if(S.zones)fill=ZONE[r.z].fill;else if(S.temps)fill=tempColor(r.T);else if(S.mode==='explore'&&S.sel===r.id)fill='#eef3ff';
+    bg.setAttribute('fill',fill);
+    const dim=S.mode==='explore'&&S.route!=='all'&&!r.r.includes(S.route)&&!['ves','ser','alm','lab'].includes(r.id);
+    g.style.opacity=dim?0.35:1;
+    const sel=S.mode==='explore'&&S.sel===r.id;bg.setAttribute('stroke',sel?'#f05a28':'#334155');bg.setAttribute('stroke-width',sel?5:4);
+    g.querySelector('.ttag').style.display=S.temps&&S.mode==='explore'?'':'none';});
+  renderLegend();
+}
+let dots=[];
+function polyLen(p){let L=0;for(let i=1;i<p.length;i++)L+=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);return L;}
+function pointAt(p,d){for(let i=1;i<p.length;i++){const s=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);if(d<=s){const f=d/s;return[p[i-1][0]+(p[i][0]-p[i-1][0])*f,p[i-1][1]+(p[i][1]-p[i-1][1])*f];}d-=s;}return p[p.length-1];}
+function drawFlows(){
+  gFlows.innerHTML='';dots=[];if(S.mode!=='explore')return;
+  for(const k of activeLayers){if(['cre','man','hel'].includes(k)&&S.route!=='all'&&S.route!==k)continue;const F=FLOWS[k];
+    F.paths.forEach(p=>{el('polyline',{points:p.map(q=>q.join(',')).join(' '),fill:'none',stroke:F.c,'stroke-width':F.w,'stroke-opacity':.35,'stroke-linejoin':'round','stroke-linecap':'round'},gFlows);
+      const L=polyLen(p),n=Math.max(2,Math.round(L/60));for(let i=0;i<n;i++){const c=el('circle',{r:F.w>4?4.5:3.5,fill:F.c,stroke:'#fff','stroke-width':1},gFlows);dots.push({c,p,L,d:i*L/n});}});}
+}
+let last=performance.now();
+function loop(now){requestAnimationFrame(loop);const dt=Math.min(0.05,(now-last)/1000);last=now;
+  dots.forEach(o=>{o.d=(o.d+dt*45)%o.L;const q=pointAt(o.p,o.d);o.c.setAttribute('cx',q[0]);o.c.setAttribute('cy',q[1]);});
+  if(S.mode==='audit'&&!S.ended&&$('#aTime'))$('#aTime').textContent=fmtTime((Date.now()-S.t0)/1000);}
+const fmtTime=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+
+/* ===================== interacción ===================== */
+function svgPoint(ev){const pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;return pt.matrixTransform(svg.getScreenCTM().inverse());}
+function onRoomClick(id,ev){if(S.mode==='explore'){S.sel=id;paint();renderSide();return;}auditClick(svgPoint(ev));}
+svg.addEventListener('click',ev=>{if(S.mode==='audit'&&!ev.target.closest('.room'))auditClick(svgPoint(ev));});
+function auditClick(p){if(S.ended)return;const h=HAZ.find(h=>!S.found.has(h.id)&&Math.hypot(h.x-p.x,h.y-p.y)<32);
+  if(h){S.found.add(h.id);mark(h,true);toast('✅ ¡Hallazgo! '+h.t);if(S.found.size===HAZ.length)endAudit();}
+  else{S.misses++;const c=el('circle',{cx:p.x,cy:p.y,r:10,fill:'none',stroke:'#94a3b8','stroke-width':2},gMarks);setTimeout(()=>c.remove(),700);toast('Aquí no hay una no conformidad. Sigue buscando.');}
+  renderSide();}
+function mark(h,ok){const g=el('g',{},gMarks);el('circle',{cx:h.x,cy:h.y,r:20,fill:ok?'rgba(22,163,74,.15)':'rgba(220,38,38,.15)',stroke:ok?'#16a34a':'#dc2626','stroke-width':2.5},g);
+  el('circle',{cx:h.x+16,cy:h.y-16,r:10,fill:ok?'#16a34a':'#dc2626'},g);txt(h.x+16,h.y-12,String(h.id),{'font-size':11,'font-weight':800,fill:'#fff','text-anchor':'middle'},g);}
+let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2200);}
+function endAudit(){S.ended=true;S.tEnd=(Date.now()-S.t0)/1000;HAZ.forEach(h=>{if(!S.found.has(h.id)){mark(h,false);el('circle',{cx:h.x,cy:h.y,r:18,fill:'none',stroke:'#dc2626','stroke-width':2,class:'pulse'},gMarks);}});renderSide();}
+function startAudit(){S.found=new Set();S.misses=0;S.t0=Date.now();S.ended=false;S.hintTxt='';gMarks.innerHTML='';renderSide();}
+
+/* ===================== panel lateral ===================== */
+function renderSide(){
+  const side=$('#side');
+  if(S.mode==='explore'){
+    const r=ROOMS.find(x=>x.id===S.sel),Z=ZONE[r.z];
+    side.innerHTML=`<div class="card"><div class="pills">${ROOMS.map(x=>`<button class="pill ${x.id===S.sel?'on':''}" data-r="${x.id}">${x.s}</button>`).join('')}</div></div>
+     <div class="card"><span class="badge" style="background:${Z.fill};color:${Z.c};border:1px solid ${Z.c}">${Z.name}</span> <span class="badge" style="background:${tempColor(r.T)};color:#0f1b33;border:1px solid #cbd5e1">🌡️ ≈ ${r.T} °C</span>
+     <h2>${r.n}</h2><div>${r.what}</div>
+     ${r.r.length?`<div class="rtags">${r.r.map(k=>`<span style="background:${RT[k].c}">${RT[k].n}</span>`).join('')}</div>`:''}
+     <h4>🔧 Equipos</h4><ul>${r.eq.map(e=>`<li>${e}</li>`).join('')}</ul>
+     <h4>🔬 Controles</h4><ul>${r.ctl.map(e=>`<li>${e}</li>`).join('')}</ul>
+     <h4>📐 Diseño sanitario</h4><div>${r.dis}</div>
+     <div class="book">📘 <b>En tu CECYBOOK:</b> ${r.book}</div></div>`;
+    side.querySelectorAll('.pill').forEach(b=>b.addEventListener('click',()=>{S.sel=b.dataset.r;paint();renderSide();}));
+  }else{
+    const found=HAZ.filter(h=>S.found.has(h.id)),missed=S.ended?HAZ.filter(h=>!S.found.has(h.id)):[];const pct=Math.round(S.found.size/HAZ.length*100);
+    side.innerHTML=`<div class="card"><h2 style="margin-top:0">🕵️ Auditoría sanitaria</h2><div>Haz clic donde veas una <b>no conformidad</b>. Hay <b>${HAZ.length}</b>, relacionadas con crema, mantequilla y helado.</div>
+     <div class="score" style="margin-top:10px"><div><b>${S.found.size}/${HAZ.length}</b><span>Hallazgos</span></div><div><b>${S.misses}</b><span>Clics fallidos</span></div><div><b id="aTime">${S.ended?fmtTime(S.tEnd):'0:00'}</b><span>Tiempo</span></div></div>
+     <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="btn btn-ghost" id="hint" ${S.ended?'disabled':''}>💡 Pista</button><button class="btn btn-ghost" id="finish" ${S.ended?'disabled':''}>🏁 Terminar</button><button class="btn btn-primary" id="restartA">↺ Reiniciar</button></div>
+     ${S.hintTxt&&!S.ended?`<div style="margin-top:8px;font-size:12.5px;color:#9a3412">${S.hintTxt}</div>`:''}
+     ${S.ended?`<div style="margin-top:10px;font-weight:700;color:${pct===100?'#166534':'#9a3412'}">${pct===100?'🏆 ¡Auditoría perfecta!':`Encontraste ${S.found.size} de ${HAZ.length}. Revisa los marcados en rojo.`}</div>`:''}</div>
+     <div class="card"><h4 style="margin-top:0">📋 Informe de hallazgos</h4>${found.length+missed.length===0?'<div style="color:var(--muted)">Aún no registras hallazgos.</div>':''}
+     ${[...found.map(h=>[h,false]),...missed.map(h=>[h,true])].map(([h,m])=>`<div class="finding ${m?'missed':''}"><div class="t">${h.id}. ${h.t}${m?' (no detectado)':''}</div><div><b>Riesgo:</b> ${h.risk}</div><div><b>Acción correctiva:</b> ${h.fix}</div><div style="color:#64748b"><b>Referencia:</b> ${h.ref}</div></div>`).join('')}</div>`;
+    $('#hint').onclick=()=>{const rem=HAZ.filter(h=>!S.found.has(h.id));if(!rem.length)return;const h=rem[Math.floor(Math.random()*rem.length)];S.hintTxt=`💡 Hay algo que revisar en: <b>${ROOMS.find(x=>x.id===h.room).n}</b>.`;renderSide();};
+    $('#finish').onclick=endAudit;$('#restartA').onclick=startAudit;
+  }
 }
 
-function selectArea(id) {
-    selectedAreaId = id;
-    renderInspector();
+/* ===================== balance ===================== */
+function renderKPIs(){
+  let L=+$('#L').value,pb=+$('#pb').value,ph=+$('#ph').value;
+  if(pb+ph>100){ph=100-pb;$('#ph').value=ph;}
+  $('#v-L').textContent=L.toLocaleString('es-MX')+' L';$('#v-pb').textContent=pb+' %';$('#v-ph').textContent=ph+' %';
+  const M=L*1.03,C=M*(3.6-0.06)/(40-0.06),Sk=M-C;
+  const Cb=C*pb/100,Ch=C*ph/100,Cc=C-Cb-Ch;
+  const loss=0.4,butter=Cb*(40-loss)/(82-loss),bm=Cb-butter;
+  const mix=Ch*0.40/0.10,hel=mix/1.1*1.8;
+  const f=n=>Math.round(n).toLocaleString('es-MX');
+  $('#kpis').innerHTML=`
+   <div class="kpi"><div class="k">Leche</div><div class="v">${f(M)} kg</div><div class="s">${f(L)} L al 3.6 %</div></div>
+   <div class="kpi"><div class="k">Crema (40 %)</div><div class="v">${f(C)} kg</div><div class="s">envasada: ${f(Cc)} kg</div></div>
+   <div class="kpi"><div class="k">Leche descremada</div><div class="v">${f(Sk)} kg</div><div class="s">≈ ${Math.round(Sk/M*100)} % de la leche</div></div>
+   <div class="kpi"><div class="k">Mantequilla</div><div class="v">${f(butter)} kg</div><div class="s">de ${f(Cb)} kg de crema</div></div>
+   <div class="kpi"><div class="k">Buttermilk</div><div class="v">${f(bm)} kg</div><div class="s">subproducto</div></div>
+   <div class="kpi"><div class="k">Helado</div><div class="v">${f(hel)} L</div><div class="s">${f(mix)} kg de mix · overrun 80 %</div></div>`;
 }
+['L','pb','ph'].forEach(id=>$('#'+id).addEventListener('input',renderKPIs));
 
-function renderInspector() {
-    const area = PLANT_AREAS.find(a => a.id === selectedAreaId);
-    const qContainer = document.getElementById('quick-btns');
-
-    qContainer.innerHTML = PLANT_AREAS.map(a => `
-        <button class="q-btn ${a.id === selectedAreaId ? 'active' : ''}" onclick="selectArea(${a.id})">
-            ${a.id === 9 ? 'Lab / CIP' : 'Área ' + a.id}
-        </button>
-    `).join('');
-
-    const content = document.getElementById('inspector-content');
-    content.innerHTML = `
-        <div class="area-header">
-            <span class="area-zone-tag" style="background:${area.zoneColor}25; color:${area.zoneColor}; border:1px solid ${area.zoneColor};">
-                ${area.zone}
-            </span>
-            <h2>${area.code}: ${area.name}</h2>
-        </div>
-
-        <div class="param-grid">
-            <div class="param-card">
-                <small>🌡️ Condición Térmica</small>
-                <strong style="color:#fcd34d;">${area.temp}</strong>
-            </div>
-            <div class="param-card">
-                <small>🎯 Punto Crítico (PCC)</small>
-                <strong style="color:#38bdf8;">Control en Línea</strong>
-            </div>
-        </div>
-
-        <div class="info-section" style="border-left-color:#38bdf8;">
-            <h4>⚙️ Equipos Principales</h4>
-            ${area.equip}
-        </div>
-
-        <div class="info-section" style="border-left-color:#f59e0b;">
-            <h4>🔬 Operación Tecnológica (Semana 15)</h4>
-            ${area.process}
-        </div>
-
-        <div class="info-section" style="border-left-color:#10b981;">
-            <h4>📋 Variable de Control y Normatividad</h4>
-            <strong>Variable clave:</strong> ${area.pcc}<br>
-            <strong>Criterio:</strong> ${area.norm}
-        </div>
-    `;
+/* ===================== leyenda y controles ===================== */
+function renderLegend(){
+  const Lg=$('#legend');
+  if(S.mode==='audit'||S.zones){Lg.innerHTML=Object.values(ZONE).map(z=>`<span><i class="sw" style="background:${z.fill};border:1px solid ${z.c}"></i>${z.name}</span>`).join('')+(S.mode==='audit'?'<span>🔍 Haz clic donde veas un problema</span>':'');return;}
+  if(S.temps){Lg.innerHTML=[['#ddd6fe','≤ −10 °C congelación'],['#e0e7ff','−10 a 0 °C'],['#dbeafe','0–8 °C refrigeración'],['#f1f5f9','ambiente'],['#fed7aa','25–55 °C'],['#fecaca','> 55 °C tratamiento térmico']].map(([c,l])=>`<span><i class="sw" style="background:${c};border:1px solid #94a3b8"></i>${l}</span>`).join('');return;}
+  Lg.innerHTML='<span>Haz clic en un área para ver su información</span>'+[...activeLayers].map(k=>`<span><i class="sw" style="background:${FLOWS[k].c}"></i>${FLOWS[k].n}</span>`).join('')+'<span style="color:#64748b">Las líneas de producto representan tuberías cerradas</span>';
 }
-
-canvas.addEventListener('click', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const mx = (e.clientX - rect.left) * scaleX;
-    const my = (e.clientY - rect.top) * scaleY;
-
-    for (const area of PLANT_AREAS) {
-        if (mx >= area.x && mx <= area.x + area.w && my >= area.y && my <= area.y + area.h) {
-            selectArea(area.id);
-            break;
-        }
-    }
-});
-
-function getCenter(areaId) {
-    const a = PLANT_AREAS.find(x => x.id === areaId);
-    return { x: a.x + a.w / 2, y: a.y + a.h / 2 };
-}
-
-function drawPlant() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    animTick += 0.025;
-
-    // Cuadrícula arquitectónica de fondo
-    ctx.strokeStyle = 'rgba(51, 65, 85, 0.32)';
-    ctx.lineWidth = 1;
-    for (let x = 0; x < canvas.width; x += 25) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-    }
-    for (let y = 0; y < canvas.height; y += 25) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-    }
-
-    // 1. Dibujar Tuberías de Proceso entre Áreas
-    PIPELINES.forEach((pipe, idx) => {
-        if (activeRoute !== 'all' && pipe.route !== activeRoute) return;
-
-        const p1 = getCenter(pipe.from);
-        const p2 = getCenter(pipe.to);
-
-        ctx.save();
-        ctx.strokeStyle = pipe.color;
-        ctx.lineWidth = 4;
-        ctx.globalAlpha = 0.65;
-        ctx.beginPath();
-        ctx.moveTo(p1.x, p1.y);
-        ctx.lineTo(p2.x, p2.y);
-        ctx.stroke();
-
-        // Partículas animadas de flujo en la tubería
-        let t = (animTick + idx * 0.25) % 1;
-        let fx = p1.x + (p2.x - p1.x) * t;
-        let fy = p1.y + (p2.y - p1.y) * t;
-
-        ctx.globalAlpha = 1.0;
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(fx, fy, 4.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-    });
-
-    // 2. Dibujar las Salas / Áreas Operativas con recorte de seguridad (clip)
-    PLANT_AREAS.forEach(area => {
-        const isSelected = area.id === selectedAreaId;
-        const isRouteActive = activeRoute === 'all' || area.routes.includes(activeRoute) || area.id === 9;
-
-        ctx.save();
-        ctx.globalAlpha = isRouteActive ? 1.0 : 0.28;
-
-        // Fondo de la sala y región de recorte para impedir desbordes de texto
-        ctx.beginPath();
-        ctx.roundRect(area.x, area.y, area.w, area.h, 10);
-        ctx.fillStyle = isSelected ? '#1e293b' : '#0f172a';
-        ctx.fill();
-        ctx.clip();
-
-        // Franja superior de color de zona
-        ctx.fillStyle = area.zoneColor;
-        ctx.fillRect(area.x, area.y, area.w, 24);
-
-        ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 11.5px sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText(area.code + ' • ' + area.short, area.x + 10, area.y + 16);
-
-        // Nombre compacto y Temperatura concisa dentro de la sala
-        ctx.fillStyle = '#f8fafc';
-        ctx.font = 'bold 12px sans-serif';
-        ctx.fillText(area.name.substring(0, 27) + (area.name.length > 27 ? '...' : ''), area.x + 10, area.y + 46);
-
-        ctx.fillStyle = '#fcd34d';
-        ctx.font = '11.5px sans-serif';
-        ctx.fillText('🌡️ ' + area.tempCanvas, area.x + 10, area.y + 67);
-
-        // Iconos de las líneas que pasan por esa sala
-        let badgeX = area.x + 10;
-        if (area.routes.includes('cream')) {
-            drawMiniTag(badgeX, area.y + area.h - 26, 'Crema', '#d97706');
-            badgeX += 52;
-        }
-        if (area.routes.includes('butter')) {
-            drawMiniTag(badgeX, area.y + area.h - 26, 'Mantequilla', '#ca8a04');
-            badgeX += 76;
-        }
-        if (area.routes.includes('ice')) {
-            drawMiniTag(badgeX, area.y + area.h - 26, 'Helado', '#7e22ce');
-        }
-
-        ctx.restore();
-
-        // Dibujar el borde de la tarjeta encima del clip para que se vea nítido
-        ctx.save();
-        ctx.globalAlpha = isRouteActive ? 1.0 : 0.28;
-        ctx.strokeStyle = isSelected ? '#fcd34d' : area.zoneColor;
-        ctx.lineWidth = isSelected ? 3.5 : 2;
-        ctx.beginPath();
-        ctx.roundRect(area.x, area.y, area.w, area.h, 10);
-        ctx.stroke();
-        ctx.restore();
-    });
-
-    requestAnimationFrame(drawPlant);
-}
-
-function drawMiniTag(x, y, text, bg) {
-    ctx.fillStyle = bg;
-    ctx.beginPath();
-    ctx.roundRect(x, y, text.length * 6.2 + 10, 18, 4);
-    ctx.fill();
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 10px sans-serif';
-    ctx.fillText(text, x + 5, y + 12.5);
-}
-
-renderInspector();
-drawPlant();
+$('#routes').innerHTML=`<button class="rt on" data-r="all" style="background:#12306b">Las tres</button>`+Object.entries(RT).map(([k,v])=>`<button class="rt" data-r="${k}">${v.n}</button>`).join('');
+$$('.rt').forEach(b=>b.addEventListener('click',()=>{S.route=b.dataset.r;$$('.rt').forEach(x=>{const on=x===b;x.classList.toggle('on',on);x.style.background=on?(x.dataset.r==='all'?'#12306b':RT[x.dataset.r].c):'#fff';});
+  if(S.route!=='all'){const first=ROOMS.find(r=>r.r.includes(S.route)&&r.r.length===1)||ROOMS.find(r=>r.r.includes(S.route));S.sel=first.id;}paint();drawFlows();renderSide();}));
+$('#layers').innerHTML=Object.entries(FLOWS).filter(([k])=>!['cre','man','hel'].includes(k)).map(([k,F])=>`<button class="lay ${activeLayers.has(k)?'on':''}" data-l="${k}"><i style="background:${F.c}"></i>${F.n}</button>`).join('');
+$$('#layers .lay').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.l;activeLayers.has(k)?activeLayers.delete(k):activeLayers.add(k);b.classList.toggle('on');drawFlows();renderLegend();}));
+$('#zoneBtn').addEventListener('click',()=>{S.zones=!S.zones;if(S.zones){S.temps=false;$('#tempBtn').classList.remove('on');}$('#zoneBtn').classList.toggle('on',S.zones);paint();});
+$('#tempBtn').addEventListener('click',()=>{S.temps=!S.temps;if(S.temps){S.zones=false;$('#zoneBtn').classList.remove('on');}$('#tempBtn').classList.toggle('on',S.temps);paint();});
+$$('.mode').forEach(b=>b.addEventListener('click',()=>{S.mode=b.dataset.m;$$('.mode').forEach(x=>x.classList.toggle('on',x===b));
+  $('#tbExplore').style.display=S.mode==='explore'?'':'none';$('#balBox').style.display=S.mode==='explore'?'':'none';
+  $('#planBox').classList.toggle('audit',S.mode==='audit');
+  if(S.mode==='audit'){S.zones=false;S.temps=false;$('#zoneBtn').classList.remove('on');$('#tempBtn').classList.remove('on');startAudit();}else gMarks.innerHTML='';
+  paint();drawFlows();renderSide();}));
+build();renderSide();renderKPIs();requestAnimationFrame(loop);
 </script>
-
 </body>
 </html>
